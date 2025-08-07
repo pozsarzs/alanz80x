@@ -17,7 +17,8 @@ This state machine differs from Turing's original model in several ways: it has 
 
 ### How it works?
 
-The framework is command-line controlled. When the t36 file is loaded, the machine is initialized, the basic program is loaded, and - if specified - the commands are executed. After the machine starts, it starts reading the program tape (p36) and, if necessary, the data tape (d36). The program and data tape are read-only by default, but this can be overridden. During operations, the stack tape (s36), which acts as a traditional stack, the temporary tape (t36) and the accumulator register (ACC) can also be used. The result tape (r36) is used to print the result, which is by default read/write only. It is also possible to write to the console, but this is write-only. The result tape can be used in the same way as the single tape of a traditional Turing machine. The machine works only by reading and writing symbols and using state transitions.
+The framework is command-line controlled. When the t36 file is loaded, the machine is initialized, the basic program is loaded, and - if specified - the commands are executed. After the machine starts, it starts reading the program tape (p36) and, if necessary, the data tape (d36). The program and data tape are read-only by default, but this can be overridden. During operations, the stack tape (s36), which acts as a traditional stack, the temporary tape (t36) and the accumulator register (ACC) can also be used. The result tape (r36) is used to print the result, which is by default read/write only. It is also possible to write to the console, but this is write-only. The result tape can be used in the same way as the single tape of a traditional Turing machine. The machine works only by reading and writing symbols and using state transitions.  
+
 When an interrupt request is detected, the basic program jumps to the appropriate state and then acts accordingly. On a multitasking system, the signal file can be created by another program, but on CP/M and DOS we have to make do with the options provided by the framework system. A hot-key creates the file, which is handled by the running machine. (The machine does not handle the keystrokes.)
 
 Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>  
@@ -50,10 +51,10 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 ## Screenshots
 
 Startup screen  
-![CLI](startup.png)
+![CLI-1](startup.png)
 
 Example #1  
-![CLI](example1.png)
+![CLI-2](example1.png)
 
 
 ## Structure of files used by programs
@@ -120,20 +121,6 @@ EOF: — input device that produced end-of-file characters, ASCII 0x1A
 INP: — custom input device, by default the same as EOF:
 OUT: — custom output device, by default the same as NUL:
 
-Note:  
-*:
-**:
-
-|`     STnn *`              |base program                |qi SjSkDqm|qi TjSjTkSkDDqm|T: i|p|s|r       |
-
-|`     CNSL devicename`     |assign device to console    |   N/A    |mandatory      |WO                 |
-|`     CNSL WO CON:        `|assign device to console    |   N/A    |mandatory      |WO                 |
-|`     CNSL WO PRN:        `|assign device to console    |   N/A    |mandatory      |WO                 |
-|`     DATA RO filename.d36`|assign file to data tape    |   N/A    |mandatory      |RO/WO/RW           |
-|`     PROG RO filename.p36`|assign file to program tape |   N/A    |mandatory      |RO/WO/RW           |
-|`     STCK RW filename.s36`|assign file to stack tape   |   N/A    |mandatory      |RO/WO/RW           |
-|`     RSLT RW filename.r36`|assign file to result tape  |   N/A    |mandatory      |RO/WO/RW           |
-
 
 ### Data format on tapes
 
@@ -150,8 +137,7 @@ The tape stores data in human-readable form.
 ## Example programs
 
 ```
-; This example program also increments the input number by 1, but in a different
-; way. You can use this with AlanZ80X extended Turing machine implementation.
+; You can use this with AlanZ80X extended Turing machine implementation.
 ; The program turns on tracing after starting, then start machine. The machine
 ; reads the instructions from the program tape and the corresponding data from
 ; the data tape. It uses the stack tape and the result tape to perform the
@@ -161,19 +147,19 @@ The tape stores data in human-readable form.
 
 PROG BEGIN
 NAME PLUS1X
-DESC Increment the input number by 1
-SYMB 0123456789
-STAT 3
+DESC Conversion between Roman and Arabic numerals 
+SYMB 0123456789IVXLCDM
+STAT 33
 CARD BEGIN
      ST01 ... 
      ST02 ... 
      ... 
 CARD END
 TAPE BEGIN
-     DATA RO data.tap
-     PROG RO program.tap
-     STCK RW stack.tap
-     RSLT RW output.tap
+     DATA RO data.d36
+     PROG RO program.p36
+     STCK RW stack.s36
+     RSLT RW output.r36
 TAPE END
 COMM BEGIN
      TRACE ON
