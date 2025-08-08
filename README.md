@@ -38,6 +38,8 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |symbol set              |up to 40 characters                                  |
 |state set               |up to 100 states                                     |
 |example program         |? scripts                                            |
+
+irq number
 |source files            |base program and settings (*.t36)                    |
 |                        |user program code (*.p36)                            |
 |                        |user data (*.d36)                                    |
@@ -81,46 +83,25 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`     PROG RO filename.p36`|assign file to program tape|   N/A   |mandatory|RO/WO/RW       |
 |`     STCK RW filename.s36`|assign file to stack tape  |   N/A   |mandatory|RO/WO/RW       |
 |`     RSLT RW filename.r36`|assign file to result tape |   N/A   |mandatory|RO/WO/RW       |
-|`     TEMP RW filename.t36`|assign file to result tape |   N/A   |mandatory|RO/WO/RW       |
+|`     TEMP RW filename.t36`|assign file to tttttt tape |   N/A   |mandatory|RO/WO/RW       |
 |`TAPE END`                 |end of tape section        |optional |mandatory|               |
 |`COMM BEGIN`               |begin of command section   |optional |optional |               |
 |`     ...`                 |command line commands      |optional |optional |               |
 |`COMM END`                 |end of command section     |optional |optional |               |
 |`PROG END`                 |end of program             |mandatory|mandatory|               |
 
+
+
+
+ If the first symbol specified in the CONF section is not blank, then it
+will be inserted.
+
 #### Base program format
 
-AlanZ80:  
-  `STqi SjSkDqm SjSkDqm ... SjSkDqm`  
-For example: `ST01 56R02`, where qi = 01; Sj = '5'; Sk = '6'; D = R and qm = 02.
-  
-AlanZ80X:  
-  `STqi TjSjTkSkTjDTkDqm TjSjTkSkTjDTkDqm ... TjSjTkSkTjDTkDqm`
-For example: `ST01 ixryirrr02`, where  qi = 01; Sj = 'x' from tape Tj = i; Sk = 'y' to tape Tk = r; D = R relation to the tape Tj = i; D = R relation to the tape Tk = r; and qm = 02.
-
-See README.md for details.
 
 #### Console devices
 
-
-CON:' in CP/M, which could be written or read;
-
-the LIST device, usually referred to as 'LST:' in CP/M, which could only be written;
-
-the PUNCH device, usually referred to as 'PUN:' in CP/M, which could only be written;
-
-the READER device, usually referred to as 'RDR:
-
-
-CON: — console (input and output)
-AUX: — an auxiliary device. In CP/M 1 and 2, PIP used PUN: (paper tape punch) and RDR: (paper tape reader) instead of AUX:
-LST: — list output device, usually the printer
-PRN: — as LST:, but lines were numbered, tabs expanded and form feeds added every 60 lines
-NUL: — null device, akin to /dev/null
-EOF: — input device that produced end-of-file characters, ASCII 0x1A
-INP: — custom input device, by default the same as EOF:
-OUT: — custom output device, by default the same as NUL:
-
+(...)
 
 ### Data format on tapes
 
@@ -132,7 +113,6 @@ The tape stores data in human-readable form.
 |program tape|for user program|not empty, created by the user       |`P36_1##_4#`    |
 |stack tape  |for stack       |created or overwritten by the program|`S36_23_54_12`  |
 |result tape |for output data |created or overwritten by the program|`R36_123_511_1` |
-
 
 ## Example programs
 
@@ -168,3 +148,85 @@ COMM BEGIN
 COMM END
 PROG END
 ```
+
+## Registers
+
+(...)
+
+## Machine of sets - sets of the machine
+
+### Head movement direction set
+
+Finite set of head movement directions is as follows:
+
+D = {d0..d2}, where the
+
+- d0 = 'L' is the left direction,
+- d1 = 'S' is the stay here, and
+- d2 = 'R' is the right direction.
+
+### State set
+
+The state is called an m-configuration in Turing terminology. The finite set of states is as follows:
+
+Q = {q0..q255}, where the
+
+- q0 is the mandatory final state,
+- q1-253 free space,
+- q254 is command vectors,
+- q255 interrupt vectors.
+
+#### Tape symbol set
+
+Finite set of tape symbols is as follows:
+
+S = {s0..s39}, where the
+
+- s0 is the mandatory blank (_) character.
+- s1-s39 is are optional symbols.
+
+The set has cardinality at least one, and its first element is always the blank
+symbol.
+
+#### Tape set
+
+Finite set of tape is as follows:
+
+T = {tc, td, tp, tr, ts, tt}, where the
+- tc = consol or output device, for example CON:, PRN:.
+- td = filename.d36, it is the data tape,
+- tp = filename.p36, it is the user program tape,
+- tr = filename.r36, it is the result tape,
+- ts = filename.s36, it is the stack tape,
+- tt = filename.t36, it is the temporary tape,
+
+## Operation
+
+The operation of the machine is based on state transitions, which can be described by 8tuples, in the form below.
+
+|mode|initial state|from| to  |read|write|move|move|final state|          8-tuple                |
+|:--:|:-----------:|:--:|:---:|:--:|:---:|:--:|:--:|:---------:|:-------------------------------:|
+| M1 |      qi     | tj | tk  | sj | sk  | dj | dk |    qm     |(qi, tj, tk, sj, sk, dj, dk, qm) |	
+| M2 |      qi     | tj | rk  | sj | sk  | dj | d1 |    qm     |(qi, tj, tk, sj, sk, dj, 'S', qm)|	
+| M3 |      qi     | rj | tk  | sj | sk  | d1 | dk |    qm     |(qi, tj, tk, sj, sk, 'S', dk, qm)|	
+
+Notes:
+- qi is the actual state, qi ∈ Q.
+- tj is the tape from which the machine reads a symbol, tj ∈ T and tj <> tc.
+- tk is the the tape to which the machine writes a symbol, tk ∈ T.
+- sj is the actual symbol read from the tape, sj ∈ S.
+- sk is the symbol to be written to the tape, sk ∈ S.
+- dj is the head moving direction over tape tj, dj ∈ D.
+- dk is the head moving direction over tape tk, dj ∈ D. If tk = tc -> dj = d1 (stay).
+- qm is the next state, qm ∈ Q.
+- rj is the register from which the machine reads a symbol, rj ∈ R and rj = r0 (ACC), dj = d1.
+- rk is the register to which the machine writes a symbol, rk ∈ R and rk = r0 (ACC), dk = d1.
+
+In the CODE section of the program, the 8-tuples must be specified in the following form:
+ `001 irabRR001 ir__NN000 ...`, where the:
+- `001` is the initial state (qi),
+- `d` and `r` in the groups are data and result tape,
+- `a` and `_` in the groups are read symbols,
+- `b` and `_` in the groups are symbols to be written,
+- `R` and `N` in the groups are head moving directions,
+- `001` and `000` in the groups are final states.
