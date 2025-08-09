@@ -9,7 +9,7 @@
 
 ## About this implementation
 
-_The AlanZ80X is an idea that tries to combine a microcontroller and a state machine. It might get made, but it's not certain. But I can say that it's great for fun. And to be challenging in the fun, it has to fit into 64kB._  
+_The AlanZ80X is an idea that takes the concept of a Turing machine to a new level. It may be possible, but it’s not certain that it will succeed. It might get made, but it's not certain. But I can say that it's great for fun. And to be challenging in the fun, it has to fit into 64kB._  
 
 ### In a nutshell 
 
@@ -37,9 +37,8 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |OS                      |CP/M and DOS (and others, see comments in the source.|
 |symbol set              |up to 40 characters                                  |
 |state set               |up to 100 states                                     |
-|example program         |? scripts                                            |
-
-irq number
+|interrupts              |4                                                    |
+|registers               |?                                                     |
 |source files            |base program and settings (*.t36)                    |
 |                        |user program code (*.p36)                            |
 |                        |user data (*.d36)                                    |
@@ -48,6 +47,7 @@ irq number
 |                        |stack tape - virtual memory (*.s36)                  |
 |target files            |result tape (*.r36)                                  |
 |built-in commands       |? (can also be used in a program file)               |
+|example program         |? scripts                                            |
 
 
 ## Screenshots
@@ -58,100 +58,6 @@ Startup screen
 Example #1  
 ![CLI-2](example1.png)
 
-
-## Structure of files used by programs
-
-### The t36 file
-
-This file type is used to load the Turing machine's (base) program, define initial settings, and automate execution. The following table follows the structure of the file and provides a brief description of the lines.  
-
-|Label                      |Description                |Alanz80  |AlanZ80X |Note           |
-|---------------------------|---------------------------|:-------:|:-------:|---------------|
-|`; comment`                |comment                    |         |         |               |
-|`PROG BEGIN`               |begin of program           |mandatory|mandatory|               |
-|`NAME progname`            |program name               |mandatory|mandatory|<= 8 chars.    |
-|`SYMB 0123456789PROG`      |set of symbols             |mandatory|mandatory|<= 40 chars.   |
-|`STAT 3`                   |number of states           |mandatory|mandatory|with q0        |
-|`CARD BEGIN`               |begin of the card section  |mandatory|mandatory|               |
-|`     STnn ...`            |base program               |mandatory|mandatory|See later!     |
-|`CARD END`                 |end of card section        |mandatory|mandatory|               |
-|`TAPE BEGIN`               |begin of tape section      |optional |mandatory|               |
-|`     SYMB 012345679`      |data tape content          |optional |optional |               |
-|`     SPOS 1`              |data tape start position   |optional |optional |               |
-|`     CNSL WO devicename`  |assign device to console   |   N/A   |mandatory|See later!     |
-|`     DATA RO filename.d36`|assign file to data tape   |   N/A   |mandatory|RO/WO/RW       |
-|`     PROG RO filename.p36`|assign file to program tape|   N/A   |mandatory|RO/WO/RW       |
-|`     STCK RW filename.s36`|assign file to stack tape  |   N/A   |mandatory|RO/WO/RW       |
-|`     RSLT RW filename.r36`|assign file to result tape |   N/A   |mandatory|RO/WO/RW       |
-|`     TEMP RW filename.t36`|assign file to tttttt tape |   N/A   |mandatory|RO/WO/RW       |
-|`TAPE END`                 |end of tape section        |optional |mandatory|               |
-|`COMM BEGIN`               |begin of command section   |optional |optional |               |
-|`     ...`                 |command line commands      |optional |optional |               |
-|`COMM END`                 |end of command section     |optional |optional |               |
-|`PROG END`                 |end of program             |mandatory|mandatory|               |
-
-
-
-
- If the first symbol specified in the CONF section is not blank, then it
-will be inserted.
-
-#### Base program format
-
-
-#### Console devices
-
-(...)
-
-### Data format on tapes
-
-The tape stores data in human-readable form.
-
-|Type of tape|Description     |Note                                 |Example content |
-|------------|----------------|-------------------------------------|----------------|
-|data tape   |for input data  |not empty, created by the user       |`D36_1_123_5643`|
-|program tape|for user program|not empty, created by the user       |`P36_1##_4#`    |
-|stack tape  |for stack       |created or overwritten by the program|`S36_23_54_12`  |
-|result tape |for output data |created or overwritten by the program|`R36_123_511_1` |
-
-## Example programs
-
-```
-; You can use this with AlanZ80X extended Turing machine implementation.
-; The program turns on tracing after starting, then start machine. The machine
-; reads the instructions from the program tape and the corresponding data from
-; the data tape. It uses the stack tape and the result tape to perform the
-; operations, the machine stops and the result is stored on the latter.
-; After stopping, it loads a machine with a different configuration (represented
-; by the next.t36 file and continues working with its result.
-
-PROG BEGIN
-NAME PLUS1X
-DESC Conversion between Roman and Arabic numerals 
-SYMB 0123456789IVXLCDM
-STAT 33
-CARD BEGIN
-     ST01 ... 
-     ST02 ... 
-     ... 
-CARD END
-TAPE BEGIN
-     DATA RO data.d36
-     PROG RO program.p36
-     STCK RW stack.s36
-     RSLT RW output.r36
-TAPE END
-COMM BEGIN
-     TRACE ON
-     RUN
-     LOAD next.t36
-COMM END
-PROG END
-```
-
-## Registers
-
-(...)
 
 ## Machine of sets - sets of the machine
 
@@ -193,7 +99,7 @@ symbol.
 Finite set of tape is as follows:
 
 T = {tc, td, tp, tr, ts, tt}, where the
-- tc = consol or output device, for example CON:, PRN:.
+- tc = consol or output device: CON:, LST:, PUN:.
 - td = filename.d36, it is the data tape,
 - tp = filename.p36, it is the user program tape,
 - tr = filename.r36, it is the result tape,
@@ -210,7 +116,7 @@ The operation of the machine is based on state transitions, which can be describ
 | M2 |      qi     | tj | rk  | sj | sk  | dj | d1 |    qm     |(qi, tj, tk, sj, sk, dj, 'S', qm)|	
 | M3 |      qi     | rj | tk  | sj | sk  | d1 | dk |    qm     |(qi, tj, tk, sj, sk, 'S', dk, qm)|	
 
-Notes:
+Notes:  
 - qi is the actual state, qi ∈ Q.
 - tj is the tape from which the machine reads a symbol, tj ∈ T and tj <> tc.
 - tk is the the tape to which the machine writes a symbol, tk ∈ T.
@@ -222,11 +128,100 @@ Notes:
 - rj is the register from which the machine reads a symbol, rj ∈ R and rj = r0 (ACC), dj = d1.
 - rk is the register to which the machine writes a symbol, rk ∈ R and rk = r0 (ACC), dk = d1.
 
-In the CODE section of the program, the 8-tuples must be specified in the following form:
- `001 irabRR001 ir__NN000 ...`, where the:
-- `001` is the initial state (qi),
-- `d` and `r` in the groups are data and result tape,
-- `a` and `_` in the groups are read symbols,
-- `b` and `_` in the groups are symbols to be written,
-- `R` and `N` in the groups are head moving directions,
-- `001` and `000` in the groups are final states.
+In the CODE section of the program, the 8-tuples must be specified in the following form: `001 irabRL002 ...`, where the:  
+
+- qi = 001, it is the initial state,
+- tj = d (= td), it is the data tape,
+- tk = r (= tr), it is the result tape,
+- sj = 'a', it is the read symbol from data tape,
+- sk = 'b', it is the symbol to be written to result tape,
+- dj = 'R' (=d2), it is the head moving direction over data tape,
+- dk = 'L' (=d0), it is the head moving direction over result tape,
+- qm = 002, it is the final state.
+
+
+## Registers
+
+(...)
+
+
+## Structure of files used by programs
+
+### The t36 file
+
+This file type is used to load the Turing machine's (base) program, define initial settings, and automate execution. The following table follows the structure of the file and provides a brief description of the lines.  
+
+|Label                      |Description                |Alanz80  |AlanZ80X |Note           |
+|---------------------------|---------------------------|:-------:|:-------:|---------------|
+|`; comment`                |comment                    |         |         |               |
+|`PROG BEGIN`               |begin of program           |mandatory|mandatory|               |
+|`NAME progname`            |program name               |mandatory|mandatory|<= 8 chars.    |
+|`SYMB 0123456789PROG`      |set of symbols             |mandatory|mandatory|<= 40 chars.   |
+|`STAT 3`                   |number of states           |mandatory|mandatory|with q0        |
+|`CARD BEGIN`               |begin of the card section  |mandatory|mandatory|               |
+|`     STnn ...`            |base program               |mandatory|mandatory|See later!     |
+|`CARD END`                 |end of card section        |mandatory|mandatory|               |
+|`TAPE BEGIN`               |begin of tape section      |optional |mandatory|               |
+|`     SYMB 012345679`      |data tape content          |optional |optional |               |
+|`     SPOS 1`              |data tape start position   |optional |optional |               |
+|`     CNSL WO devicename`  |assign device to console   |   N/A   |mandatory|See later!     |
+|`     DATA RO filename.d36`|assign file to data tape   |   N/A   |mandatory|RO/WO/RW       |
+|`     PROG RO filename.p36`|assign file to program tape|   N/A   |mandatory|RO/WO/RW       |
+|`     STCK RW filename.s36`|assign file to stack tape  |   N/A   |mandatory|RO/WO/RW       |
+|`     RSLT RW filename.r36`|assign file to result tape |   N/A   |mandatory|RO/WO/RW       |
+|`     TEMP RW filename.t36`|assign file to tttttt tape |   N/A   |mandatory|RO/WO/RW       |
+|`TAPE END`                 |end of tape section        |optional |mandatory|               |
+|`COMM BEGIN`               |begin of command section   |optional |optional |               |
+|`     ...`                 |command line commands      |optional |optional |               |
+|`COMM END`                 |end of command section     |optional |optional |               |
+|`PROG END`                 |end of program             |mandatory|mandatory|               |
+
+Note:  
+- If the first symbol specified in the CONF section is not blank, then it will be inserted.
+
+### Data format on tapes
+
+The tape stores data in human-readable form.
+
+|Type of tape|Description     |Note                                 |Example content |
+|------------|----------------|-------------------------------------|----------------|
+|data tape   |for input data  |not empty, created by the user       |`D36_1_123_5643`|
+|program tape|for user program|not empty, created by the user       |`P36_1##_4#`    |
+|stack tape  |for stack       |created or overwritten by the program|`S36_23_54_12`  |
+|result tape |for output data |created or overwritten by the program|`R36_123_511_1` |
+
+
+## Example program
+
+```
+; You can use this with AlanZ80X extended Turing machine implementation.
+; The program turns on tracing after starting, then start machine. The machine
+; reads the instructions from the program tape and the corresponding data from
+; the data tape. It uses the stack tape and the result tape to perform the
+; operations, the machine stops and the result is stored on the latter.
+; After stopping, it loads a machine with a different configuration (represented
+; by the next.t36 file and continues working with its result.
+
+PROG BEGIN
+NAME PLUS1X
+DESC Conversion between Roman and Arabic numerals 
+SYMB 0123456789IVXLCDM
+STAT 33
+CARD BEGIN
+     ST01 ... 
+     ST02 ... 
+     ... 
+CARD END
+TAPE BEGIN
+     DATA RO data.d36
+     PROG RO program.p36
+     STCK RW stack.s36
+     RSLT RW output.r36
+TAPE END
+COMM BEGIN
+     TRACE ON
+     RUN
+     LOAD next.t36
+COMM END
+PROG END
+```
