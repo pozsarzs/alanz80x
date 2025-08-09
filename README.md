@@ -38,7 +38,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |symbol set              |up to 40 characters                                  |
 |state set               |up to 100 states                                     |
 |interrupts              |4                                                    |
-|registers               |?                                                     |
+|registers               |9                                                     |
 |source files            |base program and settings (*.t36)                    |
 |                        |user program code (*.p36)                            |
 |                        |user data (*.d36)                                    |
@@ -46,7 +46,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |work files              |temporary tape (*.t36)                               |
 |                        |stack tape - virtual memory (*.s36)                  |
 |target files            |result tape (*.r36)                                  |
-|built-in commands       |? (can also be used in a program file)               |
+|built-in commands       |16 (can also be used in a program file)               |
 |example program         |? scripts                                            |
 
 
@@ -70,6 +70,26 @@ D = {d0..d2}, where the
 - d0 = 'L' is the left direction,
 - d1 = 'S' is the stay here, and
 - d2 = 'R' is the right direction.
+
+### Register set
+
+Finite set of registers is as follows:
+
+R = {r0..r8}, where the
+
+- r0: Machine State Register (MSR) - more boolean flag.
+- r1: Accumulator (ACC) - char type.
+- r2: Data Tape Position (DTP) - integer type.
+- r3: Program Tape Position (PTP) - integer type.
+- r4: Result Tape Position (RTP) - integer type.
+- r5: Stack Tape Position (STP) - integer type.
+- r6: Temporary Tape Position (STP) - integer type.
+- r7: Program Step Counter (PSC) - integer type.
+- r8: Instruction Register (IR) - byte type.
+
+All register contents are stored as strings.
+The meaning of the MSR flags will be defined later.
+
 
 ### State set
 
@@ -113,8 +133,8 @@ The operation of the machine is based on state transitions, which can be describ
 |mode|initial state|from| to  |read|write|move|move|final state|          8-tuple                |
 |:--:|:-----------:|:--:|:---:|:--:|:---:|:--:|:--:|:---------:|:-------------------------------:|
 | M1 |      qi     | tj | tk  | sj | sk  | dj | dk |    qm     |(qi, tj, tk, sj, sk, dj, dk, qm) |	
-| M2 |      qi     | tj | rk  | sj | sk  | dj | d1 |    qm     |(qi, tj, tk, sj, sk, dj, 'S', qm)|	
-| M3 |      qi     | rj | tk  | sj | sk  | d1 | dk |    qm     |(qi, tj, tk, sj, sk, 'S', dk, qm)|	
+| M2 |      qi     | tj | rk  | sj | sk  | dj | dk |    qm     |(qi, tj, rk, sj, sk, dj, dk, qm)|	
+| M3 |      qi     | rj | tk  | sj | sk  | dj | dk |    qm     |(qi, rj, tk, sj, sk, dj, dk, qm)|	
 
 Notes:  
 - qi is the actual state, qi ∈ Q.
@@ -125,8 +145,8 @@ Notes:
 - dj is the head moving direction over tape tj, dj ∈ D.
 - dk is the head moving direction over tape tk, dj ∈ D. If tk = tc -> dj = d1 (stay).
 - qm is the next state, qm ∈ Q.
-- rj is the register from which the machine reads a symbol, rj ∈ R and rj = r0 (ACC), dj = d1.
-- rk is the register to which the machine writes a symbol, rk ∈ R and rk = r0 (ACC), dk = d1.
+- rj is the register from which the machine reads a symbol, rj ∈ R.
+- rk is the register to which the machine writes a symbol, rk ∈ R.
 
 In the CODE section of the program, the 8-tuples must be specified in the following form: `001 irabRL002 ...`, where the:  
 
@@ -138,11 +158,6 @@ In the CODE section of the program, the 8-tuples must be specified in the follow
 - dj = 'R' (=d2), it is the head moving direction over data tape,
 - dk = 'L' (=d0), it is the head moving direction over result tape,
 - qm = 002, it is the final state.
-
-
-## Registers
-
-(...)
 
 
 ## Structure of files used by programs
@@ -227,3 +242,27 @@ COMM BEGIN
 COMM END
 PROG END
 ```
+
+
+## Command line commands
+
+The program can be controlled with the following command line commands.
+
+|   |command                       |description                                 |
+|--:|------------------------------|--------------------------------------------|
+|  1|`break [state\|-]`            |set, get and reset breakpoint state (qb)    |
+|  2|`help [command]`              |help with using the program                 |
+|  3|`info`                        |show all information about this machine     |
+|  4|`limit [10..32767\|-]`        |set, get and reset number of steps          |
+|  5|`load filename.t36`           |load program file                           |
+|  6|`prog`                        |show program data                           |
+|  7|`quit`                        |exit the AlanZ80 program                    |
+|  8|`reset`                       |reset program                               |
+|  9|`register [NAME] [content\|-]`|set, get and reset register content         |
+| 10|`restore`                     |restore Turing-machine to original state    |
+| 11|`run`                         |run program from head position              |
+| 12|`state`                       |get number of state (\|Q\|)                 |
+| 13|`step`                        |run program step-by-step from head position |
+| 14|`symbol [symbols\|-]`         |set, get and reset symbol set (S)           |
+| 15|`tape [NAME]`                 |assign a file to tape                       |
+| 16|`trace [on\|off]`             |turn tracking on and off                    |
