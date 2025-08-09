@@ -151,44 +151,46 @@ In the CODE section of the program, the 8-tuples must be specified in the follow
 
 This file type is used to load the Turing machine's (base) program, define initial settings, and automate execution. The following table follows the structure of the file and provides a brief description of the lines.  
 
-|Label                      |Description                |Alanz80  |AlanZ80X |Note           |
-|---------------------------|---------------------------|:-------:|:-------:|---------------|
-|`; comment`                |comment                    |         |         |               |
-|`PROG BEGIN`               |begin of program           |mandatory|mandatory|               |
-|`NAME progname`            |program name               |mandatory|mandatory|<= 8 chars.    |
-|`SYMB 0123456789PROG`      |set of symbols             |mandatory|mandatory|<= 40 chars.   |
-|`STAT 3`                   |number of states           |mandatory|mandatory|with q0        |
-|`CARD BEGIN`               |begin of the card section  |mandatory|mandatory|               |
-|`     STnn ...`            |base program               |mandatory|mandatory|See later!     |
-|`CARD END`                 |end of card section        |mandatory|mandatory|               |
-|`TAPE BEGIN`               |begin of tape section      |optional |mandatory|               |
-|`     SYMB 012345679`      |data tape content          |optional |optional |               |
-|`     SPOS 1`              |data tape start position   |optional |optional |               |
-|`     CNSL WO devicename`  |assign device to console   |   N/A   |mandatory|See later!     |
-|`     DATA RO filename.d36`|assign file to data tape   |   N/A   |mandatory|RO/WO/RW       |
-|`     PROG RO filename.p36`|assign file to program tape|   N/A   |mandatory|RO/WO/RW       |
-|`     STCK RW filename.s36`|assign file to stack tape  |   N/A   |mandatory|RO/WO/RW       |
-|`     RSLT RW filename.r36`|assign file to result tape |   N/A   |mandatory|RO/WO/RW       |
-|`     TEMP RW filename.t36`|assign file to tttttt tape |   N/A   |mandatory|RO/WO/RW       |
-|`TAPE END`                 |end of tape section        |optional |mandatory|               |
-|`COMM BEGIN`               |begin of command section   |optional |optional |               |
-|`     ...`                 |command line commands      |optional |optional |               |
-|`COMM END`                 |end of command section     |optional |optional |               |
-|`PROG END`                 |end of program             |mandatory|mandatory|               |
+|Label                      |Description                   |Alanz80  |AlanZ80X |Note           |
+|---------------------------|------------------------------|:-------:|:-------:|---------------|
+|`; comment`                |comment                       |         |         |               |
+|`PROG BEGIN`               |begin of program              |mandatory|mandatory|               |
+|`NAME progname`            |program name                  |mandatory|mandatory|<= 8 chars.    |
+|`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|<= 40 chars.   |
+|`STAT 3`                   |number of states              |mandatory|mandatory|with q0        |
+|`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|               |
+|`     STnn ...`            |base program                  |mandatory|mandatory|See later!     |
+|`CARD END`                 |end of card section           |mandatory|mandatory|               |
+|`TAPE BEGIN`               |begin of tape section         |optional |mandatory|               |
+|`     SYMB 012345679`      |data tape content             |optional |optional |               |
+|`     SPOS 1`              |data tape start position      |optional |optional |               |
+|`     CNSL WO devicename:` |assign device to console      |   N/A   |mandatory|See later!     |
+|`     DATA RO filename.d36`|assign file to data tape      |   N/A   |mandatory|RO/WO/RW       |
+|`     PROG RO filename.p36`|assign file to program tape   |   N/A   |mandatory|RO/WO/RW       |
+|`     STCK RW filename.s36`|assign file to stack tape     |   N/A   |mandatory|RO/WO/RW       |
+|`     RSLT RW filename.r36`|assign file to result tape    |   N/A   |mandatory|RO/WO/RW       |
+|`     TEMP RW filename.t36`|assign file to temporary tape |   N/A   |mandatory|RO/WO/RW       |
+|`TAPE END`                 |end of tape section           |optional |mandatory|               |
+|`COMM BEGIN`               |begin of command section      |optional |optional |               |
+|`     ...`                 |command line commands         |optional |optional |               |
+|`COMM END`                 |end of command section        |optional |optional |               |
+|`PROG END`                 |end of program                |mandatory|mandatory|               |
 
 Note:  
+- This file type has limited use with the previous version of the Turing machine, the table provides guidance.
 - If the first symbol specified in the CONF section is not blank, then it will be inserted.
 
 ### Data format on tapes
 
 The tape stores data in human-readable form.
 
-|Type of tape|Description     |Note                                 |Example content |
-|------------|----------------|-------------------------------------|----------------|
-|data tape   |for input data  |not empty, created by the user       |`D36_1_123_5643`|
-|program tape|for user program|not empty, created by the user       |`P36_1##_4#`    |
-|stack tape  |for stack       |created or overwritten by the program|`S36_23_54_12`  |
-|result tape |for output data |created or overwritten by the program|`R36_123_511_1` |
+|Type of tape  |Description       |Note                                 |Example content |
+|--------------|------------------|-------------------------------------|----------------|
+|data tape     |for input data    |not empty, created by the user       |`D36_1_123_5643`|
+|program tape  |for user program  |not empty, created by the user       |`P36_1##_4#`    |
+|result tape   |for output data   |created or overwritten by the program|`R36_123_511_1` |
+|stack tape    |for stack         |created or overwritten by the program|`S36_23_54_12`  |
+|temporary tape|for temporary data|created or overwritten by the program|`T36_23_54_12`  |
 
 
 ## Example program
