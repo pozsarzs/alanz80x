@@ -130,9 +130,9 @@ The state is called an m-configuration in Turing terminology. The finite set of 
 
 Q = {q0, ..., q255}, where the
 
-- q0 is the mandatory final state,
-- q1 is the default initial state,
-- q1-253 free space,
+- q0 is the default initial state,
+- q1-252 free space,
+- q253 is the mandatory final state,
 - q254 is command vectors,
 - q255 interrupt vectors.
 
