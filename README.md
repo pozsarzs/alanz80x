@@ -79,7 +79,7 @@ Example #1
  delta: (Q x (T union R) x S) -> Q x (T union R) x S x D
 
 Input:  current state, a selected data carrier (tape or register), and the symbol read from it.  
-Output: new state, target data carrier (tape or register), symbol to be written, and head movement
+Output: new state, target data carrier (tape or register), symbol to be written, and head movement.
 
 
 ## Machine of sets - sets of the machine
@@ -104,6 +104,7 @@ D = {d0, d1, d2}, where the
 - d1 = S, it is the stay here, 
 - d2 = R, it is the right direction.
 
+L/R movements applied to the ACC register are allowed but ineffective (they do not change the head position).
 
 ### Register set
 
@@ -264,7 +265,7 @@ The tape stores data in human-readable form.
 ; by the next.t36 file and continues working with its result.
 
 PROG BEGIN
-NAME PLUS1X
+NAME R2A
 DESC Conversion between Roman and Arabic numerals 
 SYMB 0123456789IVXLCDM
 STAT 33
