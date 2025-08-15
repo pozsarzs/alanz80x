@@ -1,0 +1,178 @@
+{ +--------------------------------------------------------------------------+ }
+{ | AlanZ80X v0.1 * Extended Turing machine                                  | }
+{ | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
+{ | alanz80x.pas                                                             | }
+{ | Main program (Turbo Pascal 3.0 CP/M and DOS)                             | }
+{ +--------------------------------------------------------------------------+ }
+
+{ This program is free software: you can redistribute it and/or modify it
+  under the terms of the European Union Public License 1.2 version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE. }
+
+program alanz80x;
+
+{ TYPES, VARIABLES AND CONSTANTS }
+{$I declare.pas }
+
+{ WRITE A MESSAGE TO SCREEN }
+procedure writemsg(count: byte);
+var
+  isn: byte;                                           { initial signal number }
+  p:   integer;                                            { position in array }
+label
+  linefeed;
+begin
+  bi := 0;
+  for p := 0 to sizeof(MESSAGES) - 1 do
+  begin
+    if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
+    if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
+    if (bi > count) or (bi = 255) then goto linefeed;
+  end;
+ linefeed:
+  writeln;
+end;
+
+{ OS INDEPENDENT FUNCTION }
+{$I _dos.pas}
+
+{ LOAD MESSAGES FROM FILE }
+function loadmsg(filename: TFilename): boolean;
+var
+  c: char;
+  f: file of char;                                              { message file }
+  i: integer;
+begin
+  for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
+  i := 0;
+  assign(f, filename);
+  {$I-}
+  reset(f);
+  {$I+}
+  if ioresult <> 0 then loadmsg := false else
+  begin
+    repeat
+      read(f, c);
+      if (c <> #10) and (c <> #13) then
+      begin
+        messages[i] := c;
+        i := i + 1;
+        messages[i] := messages[0];
+      end;
+    until eof(f) or (i = sizeof(messages) - 1);
+    close(f);
+    loadmsg := true;
+  end;
+end;
+
+{ PARSING COMMANDS }
+function parsingcommand(command: TCommand): boolean;
+var
+  bi, bj: byte;
+  s:      string[255];
+  o:      boolean;
+label
+  break1, break2, break3, break4;
+
+{$i cmd_help.pas}
+
+begin
+  parsingcommand := false;
+  if (length(command) > 0) then
+  begin
+    { - remove space and tab from start of line }
+    while (command[1] = #32) or (command[1] = #9) do
+      delete(command, 1, 1);
+    { - remove space and tab from end of line }
+    while (command[length(command)] = #32) or (command[length(command)] = #9) do
+      delete(command, length(command), 1);
+    { - remove extra space and tab from line }
+    for bi := 1 to 255 do
+    begin
+      if bi = length(command) then goto break1;
+      if command[bi] <> #32 then o := false;
+      if (command[bi] = #32) and o then command[bi] :='@';
+      if command[bi] = #32 then o := true;
+    end;
+  break1:
+    s := '';
+    for bi := 1 to length(command) do
+      if command[bi] <> '@' then s := s + command[bi];
+    command := s;
+    { - split command to 8 slices }
+    for bi := 0 to 7 do
+      splitted[bi] := '';
+    for bj := 1 to length(command) do
+      if (command[bj] = #32) and (command[bj - 1] <> #92)
+        then goto break2
+        else splitted[0] := splitted[0] + command[bj];
+  break2:
+    for bi:= 1 to 7 do
+    begin
+      for bj := bj + 1 to length(command) do
+        if (command[bj] = #32) and (command[bj - 1] <> #92)
+          then goto break3
+          else splitted[bi] := splitted[bi] + command[bj];
+    break3:
+    end;
+    { parse command }
+    o := false;
+    if splitted[0][1] <> COMMENT then
+    begin
+      for bi := 0 to COMMARRSIZE do
+        if splitted[0] = COMMANDS[bi] then
+        begin
+          o := true;
+          goto break4;
+        end;
+    break4:
+      if o then
+      begin
+        case bi of
+{           0: cmd_break(splitted[1]);}
+           1: cmd_help(splitted[1]);
+{           2: cmd_info;
+            3: cmd_limit(splitted[1]);
+            4: cmd_load(splitted[1]);
+            5: cmd_prog;}
+           6: parsingcommand := true;
+{           7: cmd_reset(true);
+           9: cmd_run(false, splitted[1]);
+          10: cmd_restore(true);
+          12: cmd_state(splitted[1]);
+          11: cmd_run(true, splitted[1]);
+          13: cmd_symbol(splitted[1]);
+          14: cmd_tape(splitted[1]);
+          15: cmd_trace(splitted[1]);}
+        end;
+      end else writemsg(1);
+    end;
+  end;
+end;
+
+begin
+  { show program information }
+  writeln(HEADER1);
+  writeln(HEADER2);
+  for bi := 1 to length(HEADER2) do write('-');
+  writeln;
+  { load messages }
+  if not loadmsg(MSGFILE) then
+  begin
+    writeln(MSGERR, MSGFILE);
+    quit(1, 0);
+  end;
+  { initialize program memory, program tape, program status and breakpoint }
+
+  {...}
+
+  { main operation }
+  repeat
+    write(PROMPT); readln(command);
+    q := parsingcommand(command);
+  until q = true;
+  quit(0, 0);
+end.

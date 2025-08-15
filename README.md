@@ -209,7 +209,7 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`     STnn ...`            |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
 |`TAPE BEGIN`               |begin of tape section         |optional |mandatory|
-|`     SYMB 012345679`      |data tape content             |optional |optional |
+|`     SYMB 012345679`      |data tape content             |optional |   N/A   |
 |`     SPOS 1`              |data tape start position      |optional |optional |
 |`     CNSL WO devicename:` |assign device to console      |   N/A   |mandatory|
 |`     DATA RO filename.d36`|assign file to data tape      |   N/A   |mandatory|

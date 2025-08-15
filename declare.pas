@@ -1,0 +1,36 @@
+{ +--------------------------------------------------------------------------+ }
+{ | AlanZ80X v0.1 * Extended Turing machine                                  | }
+{ | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
+{ | declare.pas                                                              | }
+{ | Global declarations                                                      | }
+{ +--------------------------------------------------------------------------+ }
+
+{ This program is free software: you can redistribute it and/or modify it
+  under the terms of the European Union Public License 1.2 version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE. }
+
+type
+  TCommand =    string[255];
+  TFilename=    string[12];
+  TSplitted =   string[64];
+var
+  bi: byte;
+  command:      TCommand;                               { command line content }
+  messages:     array[0..4095] of char;      { messages from alanz80x.msg file }
+  q:            boolean;                                          { allow exit }
+  splitted:     array[0..7] of TSplitted;                   { splitted command }
+const
+  COMMARRSIZE = 14;
+  COMMENT =     #59;
+  COMMANDS:     array[0..COMMARRSIZE] of string[7] = ('break', 'help', 'info',
+                'limit', 'load', 'prog', 'quit', 'reset', 'restore', 'run',
+                'state', 'step', 'symbol', 'tape', 'trace');
+  HEADER1 =     'AlanZ80X v0.1';
+  HEADER2 =     '(C) 2025 Pozsar Zsolt <pozsarzs@gmail.com> EUPL v1.2';
+  HINT =        'Type ''help [command]'' for more information.';
+  MSGERR =      'Cannot load message file: ';
+  MSGFILE =     'alanz80x.msg';
+  PROMPT =      'TM>';
