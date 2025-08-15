@@ -15,7 +15,7 @@
 { quit procedure with message }
 procedure quit(message, exitcode: byte);
 begin
-  writemsg(message);
+  writemsg(message, true);
   halt(exitcode);
 end;
 

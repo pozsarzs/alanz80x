@@ -24,8 +24,7 @@ begin
     if (length(p1) = 0) or (COMMANDS[bi] = p1) then
     begin 
       ec := true; 
-      writemsg(bi + 2);
+      writemsg(bi + 2, true);
     end;    
-  if not ec then writemsg(1);
+  if not ec then writemsg(1, true);
 end;
-

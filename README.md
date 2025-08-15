@@ -132,9 +132,9 @@ Q = {q0, ..., q255}, where the
 
 - q0 is the default initial state,
 - q1-252 free space,
-- q253 is the mandatory final state,
-- q254 is command vectors,
-- q255 interrupt vectors.
+- q253 is command vectors,
+- q254 interrupt vectors.
+- q255 is the mandatory final state,
 
 
 #### Tape symbol set

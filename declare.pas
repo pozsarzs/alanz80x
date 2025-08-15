@@ -16,12 +16,17 @@ type
   TCommand =    string[255];
   TFilename=    string[12];
   TSplitted =   string[64];
+  TThreeDigit = string[3];
 var
   bi: byte;
   command:      TCommand;                               { command line content }
   messages:     array[0..4095] of char;      { messages from alanz80x.msg file }
+  tuples:       array[0..15240] of byte;                      { chained tuples }
   q:            boolean;                                          { allow exit }
+  qb:           byte;                                     { breakpoint address }
+  sl:           integer;                                  { program step limit }
   splitted:     array[0..7] of TSplitted;                   { splitted command }
+  trace:        boolean;                                       { turn tracking }
 const
   COMMARRSIZE = 14;
   COMMENT =     #59;
@@ -34,3 +39,13 @@ const
   MSGERR =      'Cannot load message file: ';
   MSGFILE =     'alanz80x.msg';
   PROMPT =      'TM>';
+
+{
+szalagazonosító: tk: 4 bit (0-13)
+kiírandó szimbólum sk: 6 bit (0-39)
+fejmozgás dj+dk: 3 bit (0-7) - SS nélkül
+következő be szalag tm: 4 bit (0-13)
+következő állapot: qm:  7 bit (0-127)
+Csak q=0..126-ig tárolunk tuple-t, a végsőhöz már nem, mert ott megáll.
+Helyfoglalás: 24 b * 127 * 40 = 15240 byte
+}

@@ -17,23 +17,34 @@ program alanz80x;
 { TYPES, VARIABLES AND CONSTANTS }
 {$I declare.pas }
 
+{ INSERT ZERO BEFORE [0-99] }
+function addzero(value: integer): TThreeDigit;
+var
+  result: TThreeDigit;
+begin
+  str(value:0, result);
+  if length(result) = 1 then result := '0' + result;
+  if length(result) = 2 then result := '0' + result;
+    addzero := result;
+end;
+
 { WRITE A MESSAGE TO SCREEN }
-procedure writemsg(count: byte);
+procedure writemsg(count: byte; linefeed: boolean);
 var
   isn: byte;                                           { initial signal number }
   p:   integer;                                            { position in array }
 label
-  linefeed;
+  lf;
 begin
   bi := 0;
   for p := 0 to sizeof(MESSAGES) - 1 do
   begin
     if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
     if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
-    if (bi > count) or (bi = 255) then goto linefeed;
+    if (bi > count) or (bi = 255) then goto lf;
   end;
- linefeed:
-  writeln;
+ lf:
+  if linefeed then writeln;
 end;
 
 { OS INDEPENDENT FUNCTION }
@@ -68,6 +79,8 @@ begin
   end;
 end;
 
+{$i cmd_rese.pas}
+
 { PARSING COMMANDS }
 function parsingcommand(command: TCommand): boolean;
 var
@@ -77,7 +90,10 @@ var
 label
   break1, break2, break3, break4;
 
+{$i cmd_brea.pas}
 {$i cmd_help.pas}
+{$i cmd_limi.pas}
+{$i cmd_trac.pas}
 
 begin
   parsingcommand := false;
@@ -132,23 +148,22 @@ begin
       if o then
       begin
         case bi of
-{           0: cmd_break(splitted[1]);}
+           0: cmd_break(splitted[1]);
            1: cmd_help(splitted[1]);
-{           2: cmd_info;
-            3: cmd_limit(splitted[1]);
-            4: cmd_load(splitted[1]);
+{           2: cmd_info;}
+           3: cmd_limit(splitted[1]);
+          { 4: cmd_load(splitted[1]);
             5: cmd_prog;}
            6: parsingcommand := true;
-{           7: cmd_reset(true);
-           9: cmd_run(false, splitted[1]);
+           7: cmd_reset(true);
+{           9: cmd_run(false, splitted[1]);
           10: cmd_restore(true);
-          12: cmd_state(splitted[1]);
           11: cmd_run(true, splitted[1]);
-          13: cmd_symbol(splitted[1]);
-          14: cmd_tape(splitted[1]);
-          15: cmd_trace(splitted[1]);}
+          12: cmd_symbol(splitted[1]);
+          13: cmd_tape(splitted[1]);}
+          14: cmd_trace(splitted[1]);
         end;
-      end else writemsg(1);
+      end else writemsg(1, true);
     end;
   end;
 end;
@@ -166,6 +181,8 @@ begin
     quit(1, 0);
   end;
   { initialize program memory, program tape, program status and breakpoint }
+  cmd_reset(false);
+  trace := false;
 
   {...}
 
