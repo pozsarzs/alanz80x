@@ -28,6 +28,13 @@ begin
     addzero := result;
 end;
 
+{ CALCULATE POINTER ADDRESS }
+function tpaddress(count, part: integer): PByte;
+begin
+  tpaddress := ptr(seg(machine.tuples^),
+                   ofs(machine.tuples^) + count * TPBLSIZE + part);
+end;
+
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);
 var
@@ -93,6 +100,7 @@ label
 {$i cmd_brea.pas}
 {$i cmd_help.pas}
 {$i cmd_limi.pas}
+{$i cmd_prog.pas}
 {$i cmd_trac.pas}
 
 begin
@@ -150,23 +158,25 @@ begin
         case bi of
            0: cmd_break(splitted[1]);
            1: cmd_help(splitted[1]);
-{           2: cmd_info;}
+{           2: cmd_info; }
            3: cmd_limit(splitted[1]);
-          { 4: cmd_load(splitted[1]);
-            5: cmd_prog;}
+{           4: cmd_load(splitted[1]); }
+           5: cmd_prog;
            6: parsingcommand := true;
-           7: cmd_reset(true);
-{           9: cmd_run(false, splitted[1]);
-          10: cmd_restore(true);
-          11: cmd_run(true, splitted[1]);
-          12: cmd_symbol(splitted[1]);
-          13: cmd_tape(splitted[1]);}
+{           7: cmd_reg(splitted[1]); }
+           8: cmd_reset(true);
+{           9: cmd_restore(true); }
+{          10: cmd_run(false, splitted[1]); }
+{          11: cmd_run(true, splitted[1]); }
+{          12: cmd_symbol(splitted[1]); }
+{          13: cmd_tape(splitted[1]); }
           14: cmd_trace(splitted[1]);
         end;
       end else writemsg(1, true);
     end;
   end;
 end;
+
 
 begin
   { show program information }
@@ -180,16 +190,18 @@ begin
     writeln(MSGERR, MSGFILE);
     quit(1, 0);
   end;
-  { initialize program memory, program tape, program status and breakpoint }
+  { reset machine }
   cmd_reset(false);
   trace := false;
-
-  {...}
-
+  { allocate memory for tuples }
+  getmem(machine.tuples, TPBLCOUNT * TPBLSIZE);
+  if machine.tuples = nil then quit(2, 83);
+  fillchar(machine.tuples^, TPBLCOUNT * TPBLSIZE, 0);
   { main operation }
   repeat
     write(PROMPT); readln(command);
     q := parsingcommand(command);
   until q = true;
+  freemem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   quit(0, 0);
 end.

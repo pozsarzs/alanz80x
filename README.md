@@ -36,7 +36,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |architecture            |ix86, Z80                                            |
 |OS                      |CP/M and DOS                                         |
 |symbol set              |up to 40 characters                                  |
-|state set               |up to 256 states                                     |
+|state set               |up to 128 states                                     |
 |interrupts              |4                                                    |
 |registers               |9                                                    |
 |source files            |base program and settings (*.t36)                    |
@@ -46,7 +46,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |work files              |temporary tape (*.t36)                               |
 |                        |stack tape - virtual memory (*.s36)                  |
 |target files            |result tape (*.r36)                                  |
-|built-in commands       |16 (can also be used in a program file)              |
+|built-in commands       |15 (can also be used in a program file)              |
 |example program         |? scripts                                            |
 
 
@@ -117,7 +117,7 @@ R = {r0, ..., r7}, where the
 - r2: Program Tape Position (PTP) - integer type,
 - r3: Result Tape Position (RTP) - integer type,
 - r4: Stack Tape Position (STP) - integer type,
-- r5: Temporary Tape Position (STP) - integer type,
+- r5: Temporary Tape Position (TTP) - integer type,
 - r6: Program Step Counter (PSC) - integer type,
 - r7: Instruction Register (IR) - byte type.
 
@@ -128,13 +128,13 @@ All register value are stored as string. This is denoted by w and w in S*. Readi
 
 The state is called an m-configuration in Turing terminology. The finite set of states is as follows:
 
-Q = {q0, ..., q255}, where the
+Q = {q0, ..., q127}, where the
 
 - q0 is the default initial state,
-- q1-252 free space,
-- q253 is command vectors,
-- q254 interrupt vectors.
-- q255 is the mandatory final state,
+- q1-124 free space,
+- q125 is command vectors,
+- q126 interrupt vectors.
+- q127 is the mandatory final state,
 
 
 #### Tape symbol set
@@ -178,17 +178,18 @@ The operation of the machine is based on state transitions, which can be describ
 | M4 |  qi   | rj | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
 
 Notes:  
-- dj is the head moving direction over the input data carrier, dj in D.
-- dk is the head moving direction over the result data carrier, dk in D.
-- qi is the actual state, qi in Q.
-- qm is the next state, qm in Q.
-- rj is the register from which the machine reads a symbol, rj in C.
-- rk is the the register to which the machine writes a symbol, rj in C.
-- rm is the next register from which the machine reads a symbol, tm in C.
-- sj is the actual symbol read from the data carrier, sj in S.
-- sk is the symbol to be written to the data carrier, sk in S.
-- tj is the tape from which the machine reads a symbol, tj in C.
-- tk is the the tape to which the machine writes a symbol, tj in C.
+- dj is the head moving direction over the input data carrier, dj in D,
+- dk is the head moving direction over the result data carrier, dk in D,
+- dj and dk cannot be 'S' at the same time,
+- qi is the actual state, qi in Q,
+- qm is the next state, qm in Q,
+- rj is the register from which the machine reads a symbol, rj in C,
+- rk is the the register to which the machine writes a symbol, rj in C,
+- rm is the next register from which the machine reads a symbol, tm in C,
+- sj is the actual symbol read from the data carrier, sj in S,
+- sk is the symbol to be written to the data carrier, sk in S,
+- tj is the tape from which the machine reads a symbol, tj in C,
+- tk is the tape to which the machine writes a symbol, tj in C,
 - tm is the next tape from which the machine reads a symbol, tm in C.
 
 
@@ -204,7 +205,7 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
 |`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|
-|`STAT 3`                   |number of states              |mandatory|mandatory|
+|`STAT 3`                   |number of states              |mandatory|   N/A   |
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnn ...`            |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
@@ -293,21 +294,20 @@ PROG END
 
 The program can be controlled with the following command line commands.
 
-|   |command                       |description                                 |
-|--:|------------------------------|--------------------------------------------|
-|  1|`break [state\|-]`            |set, get and reset breakpoint state (qb)    |
-|  2|`help [command]`              |help with using the program                 |
-|  3|`info`                        |show all information about this machine     |
-|  4|`limit [10..32767\|-]`        |set, get and reset number of steps          |
-|  5|`load filename.t36`           |load program file                           |
-|  6|`prog`                        |show program data                           |
-|  7|`quit`                        |exit the AlanZ80 program                    |
-|  8|`reset`                       |reset program                               |
-|  9|`register [NAME] [content\|-]`|set, get and reset register content         |
-| 10|`restore`                     |restore Turing-machine to original state    |
-| 11|`run`                         |run program from head position              |
-| 12|`state`                       |get number of state (\|Q\|)                 |
-| 13|`step`                        |run program step-by-step from head position |
-| 14|`symbol [symbols\|-]`         |set, get and reset symbol set (S)           |
-| 15|`tape [NAME]`                 |assign a file to tape                       |
-| 16|`trace [on\|off]`             |turn tracking on and off                    |
+|   |command               |description                                  |
+|--:|----------------------|---------------------------------------------|
+|  1|`break [0..127\|-]`   |set, get and reset breakpoint state (qb)     |
+|  2|`help [command]`      |help with using the program                  |
+|  3|`info`                |show all information about this machine      |
+|  4|`limit [10..32767\|-]`|set, get and reset number of steps           |
+|  5|`load filename.t36`   |load t36 file                                |
+|  6|`prog`                |show program                                 |
+|  7|`quit`                |exit the program                             |
+|  8|`reg [0..7]`          |show register content                        |
+|  9|`reset`               |reset program                                |
+| 10|`restore`             |restore machine to original state            |
+| 11|`run [0..255]`        |run from data tape head position             |
+| 12|`step [0..255]`       |run step-by-step from data tape head position|
+| 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
+| 14|`tape [1..5]`         |show tape content                            |
+| 15|`trace [on\|off]`     |turn tracking on and off                     |
