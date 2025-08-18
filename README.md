@@ -186,12 +186,12 @@ $$
 
 The operation of the machine is based on state transitions, which can be described by tuples, in the form below.
 
-|mode|initial|from| to  |read|write|move|move| next  |final|                9-tuple               |
-|:--:|:-----:|:--:|:---:|:--:|:---:|:--:|:--:|:-----:|:---:|:------------------------------------:|
-| M1 |  q<sub>i</sub>   | t<sub>j</sub> | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M2 |  q<sub>i</sub>   | t<sub>j</sub> | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M3 |  q<sub>i</sub>   | r<sub>j</sub> | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M4 |  q<sub>i</sub>   | r<sub>j</sub> | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
+|mode|   initial   |     from    |      to     |    read     |    write    |    move     |     move    |            next           |    final    |                                                                              9-tuple                                                                |
+|:--:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-------------------------:|:-----------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| M1 |q<sub>i</sub>|t<sub>j</sub>|t<sub>k</sub>|s<sub>j</sub>|s<sub>k</sub>|d<sub>j</sub>|d<sub>k</sub>|t<sub>m</sub>/r<sub>m</sub>|q<sub>m</sub>|(q<sub>i</sub>, t<sub>j</sub>, t<sub>k</sub>, s<sub>j</sub>, s<sub>k</sub>, d<sub>j</sub>, d<sub>k</sub>, t<sub>m</sub>/r<sub>m</sub>, q<sub>m</sub>)|
+| M2 |q<sub>i</sub>|t<sub>j</sub>|r<sub>k</sub>|s<sub>j</sub>|s<sub>k</sub>|d<sub>j</sub>|d<sub>k</sub>|t<sub>m</sub>/r<sub>m</sub>|q<sub>m</sub>|(q<sub>i</sub>, t<sub>j</sub>, r<sub>k</sub>, s<sub>j</sub>, s<sub>k</sub>, d<sub>j</sub>, d<sub>k</sub>, t<sub>m</sub>/r<sub>m</sub>, q<sub>m</sub>)|
+| M3 |q<sub>i</sub>|r<sub>j</sub>|t<sub>k</sub>|s<sub>j</sub>|s<sub>k</sub>|d<sub>j</sub>|d<sub>k</sub>|t<sub>m</sub>/r<sub>m</sub>|q<sub>m</sub>|(q<sub>i</sub>, r<sub>j</sub>, t<sub>k</sub>, s<sub>j</sub>, s<sub>k</sub>, d<sub>j</sub>, d<sub>k</sub>, t<sub>m</sub>/r<sub>m</sub>, q<sub>m</sub>)|
+| M4 |q<sub>i</sub>|r<sub>j</sub>|r<sub>k</sub>|s<sub>j</sub>|s<sub>k</sub>|d<sub>j</sub>|d<sub>k</sub>|t<sub>m</sub>/r<sub>m</sub>|q<sub>m</sub>|(q<sub>i</sub>, r<sub>j</sub>, r<sub>k</sub>, s<sub>j</sub>, s<sub>k</sub>, d<sub>j</sub>, d<sub>k</sub>, t<sub>m</sub>/r<sub>m</sub>, q<sub>m</sub>)|
 
 Notes:  
 - d<sub>j</sub> is the head moving direction over the input data carrier, d<sub>j</sub> $\in$ D,
