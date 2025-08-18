@@ -63,20 +63,24 @@ Example #1
 
 ### Formal description
 
- M = (Q, T, R, S, D, q0, delta), where the
+$$
+M = (Q, T, R, S, D, q_0, \delta), \text{ where the: }
+$$
 
  - Q: finite state set,
  - T: finite tape set,
  - R: finite register set,
  - S: finite symbol set,
  - D: finite head moving direction set,
- - q0: initial state and
- - delta: transition function.
+ - q<sub>0</sub>: initial state and
+ - $\delta$: transition function.
 
 
 ### Transition function
 
- delta: (Q x (T union R) x S) -> Q x (T union R) x S x D
+$$
+\delta: (Q \times (T \cup R) \times S) \rightarrow Q \times (T \cup R) \times S \times D
+$$
 
 Input:  current state, a selected data carrier (tape or register), and the symbol read from it.  
 Output: new state, target data carrier (tape or register), symbol to be written, and head movement.
@@ -91,60 +95,71 @@ These are the machine's sets in alphabetical order, with indexed elements. Most 
 
 This set is the union of the set of registers and the set of tapes. A register is not a true data carrier, but both are used for the same purpose, they only differ in their capacity.
 
- C = R union T, |C| = 14.
+$$
+C = R /cup T, |C| = 14.
+$$
 
 
 ### Head movement direction set
 
 Finite set of head movement directions is as follows:
 
- D = {d0, d1, d2}, where the
+$$
+D = \\{ d_0, d_1, d_2 \\}, \text{ where the: }
+$$
 
-- d0 = L, it is the left direction,
-- d1 = S, it is the stay here, 
-- d2 = R, it is the right direction.
+- d<sub>0</sub> = L, it is the left direction,
+- d<sub>1</sub> = S, it is the stay here, 
+- d<sub>2</sub> = R, it is the right direction.
 
 L/R movements applied to the ACC register are allowed but ineffective (they do not change the head position).
 
 ### Register set
 
-Finite set of registers is as follows:
+The finite set of registers and the symbol chains on them are as follows:
 
- R = {r0, ..., r7}, where the
+$$
+R = \\{ r_0, \dots, r_7 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
+$$
 
-- r0: Accumulator (ACC) - char type,
-- r1: Data Tape Position (DTP) - integer type,
-- r2: Program Tape Position (PTP) - integer type,
-- r3: Result Tape Position (RTP) - integer type,
-- r4: Stack Tape Position (STP) - integer type,
-- r5: Temporary Tape Position (TTP) - integer type,
-- r6: Program Step Counter (PSC) - integer type,
-- r7: Instruction Register (IR) - byte type.
+- r<sub>0</sub>: Accumulator (ACC) - char type,
+- r<sub>1</sub>: Data Tape Position (DTP) - integer type,
+- r<sub>2</sub>: Program Tape Position (PTP) - integer type,
+- r<sub>3</sub>: Result Tape Position (RTP) - integer type,
+- r<sub>4</sub>: Stack Tape Position (STP) - integer type,
+- r<sub>5</sub>: Temporary Tape Position (TTP) - integer type,
+- r<sub>6</sub>: Program Step Counter (PSC) - integer type,
+- r<sub>7</sub>: Instruction Register (IR) - byte type,
+- w: Symbol chain in the register.
 
-All register value are stored as string. This is denoted by w and w in S*. Reading and writing is done in the same way as with tape.
+All register value are stored as string. Reading and writing is done in the same way as with tape.
 
 
 ### State set
 
 The state is called an m-configuration in Turing terminology. The finite set of states is as follows:
 
- Q = {q0, ..., q127}, where the
+$$
+Q = \\{ q_0, \dots, q_{127} \\}, \text{ where the: }
+$$
 
-- q0 is the default initial state,
-- q1-124 free space,
-- q125 is command vectors,
-- q126 interrupt vectors.
-- q127 is the mandatory final state,
+- q<sub>0</sub>, is the default initial state,
+- q<sub>1</sub>-q<sub>124</sub> are the free space,
+- q<sub>125</sub> is command vectors,
+- q<sub>126</sub> interrupt vectors,
+- q<sub>127</sub> is the mandatory final state.
 
 
 ### Tape symbol set
 
 Finite set of tape symbols is as follows:
 
- S = {s0..s39}, where the
+$$
+S = \\{ s_0, \dots, s_{39} \\}, \text{ where the: }
+$$
 
-- s0 = _ This is the mandatory blank character.
-- s1-s39 is are optional symbols.
+- s<sub>0</sub> is the mandatory blank character (_),
+- s<sub>1</sub>-s<sub>39</sub> is are optional symbols.
 
 The set has cardinality at least one, and its first element is always the blank
 symbol.
@@ -152,18 +167,19 @@ symbol.
 
 ### Tape set
 
-Finite set of tape is as follows:
+The finite set of tapes and the symbol chains on them are as follows:
 
- T = {t0, ..., t5}, where the
+$$
+T = \\{ t_0, \dots, t_5 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
+$$
 
-- t0: consol or output device: CON:, LST:, PUN:.
-- t1: filename.d36, it is the data tape,
-- t2: filename.p36, it is the user program tape,
-- t3: filename.r36, it is the result tape,
-- t4: filename.s36, it is the stack tape,
-- t5: filename.t36, it is the temporary tape,
-
-Each tape stores a string. This is denoted by w and w in S*.
+- t<sub>0</sub>: consol or output device: CON:, LST:, PUN:,
+- t<sub>1</sub>: filename.d36, it is the data tape,
+- t<sub>2</sub>: filename.p36, it is the user program tape,
+- t<sub>3</sub>: filename.r36, it is the result tape,
+- t<sub>4</sub>: filename.s36, it is the stack tape,
+- t<sub>5</sub>: filename.t36, it is the temporary tape,
+- w: Symbol chain on the tape.
 
 
 ## Operation
@@ -311,3 +327,4 @@ The program can be controlled with the following command line commands.
 | 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
 | 14|`tape [1..5]`         |show tape content                            |
 | 15|`trace [on\|off]`     |turn tracking on and off                     |
+
