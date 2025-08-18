@@ -188,25 +188,25 @@ The operation of the machine is based on state transitions, which can be describ
 
 |mode|initial|from| to  |read|write|move|move| next  |final|                9-tuple               |
 |:--:|:-----:|:--:|:---:|:--:|:---:|:--:|:--:|:-----:|:---:|:------------------------------------:|
-| M1 |  qi   | tj | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M2 |  qi   | tj | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M3 |  qi   | rj | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
-| M4 |  qi   | rj | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
+| M1 |  q<sub>i</sub>   | t<sub>j</sub> | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
+| M2 |  q<sub>i</sub>   | t<sub>j</sub> | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
+| M3 |  q<sub>i</sub>   | r<sub>j</sub> | tk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
+| M4 |  q<sub>i</sub>   | r<sub>j</sub> | rk  | sj | sk  | dj | dk | tm/rm | qm  |(qi, tj, tk, sj, sk, dj, dk, tm/rm, qm)|	
 
 Notes:  
-- dj is the head moving direction over the input data carrier, dj in D,
-- dk is the head moving direction over the result data carrier, dk in D,
-- dj and dk cannot be 'S' at the same time,
-- qi is the actual state, qi in Q,
-- qm is the next state, qm in Q,
-- rj is the register from which the machine reads a symbol, rj in C,
-- rk is the the register to which the machine writes a symbol, rj in C,
-- rm is the next register from which the machine reads a symbol, tm in C,
-- sj is the actual symbol read from the data carrier, sj in S,
-- sk is the symbol to be written to the data carrier, sk in S,
-- tj is the tape from which the machine reads a symbol, tj in C,
-- tk is the tape to which the machine writes a symbol, tj in C,
-- tm is the next tape from which the machine reads a symbol, tm in C.
+- d<sub>j</sub> is the head moving direction over the input data carrier, d<sub>j</sub> $\in$ D,
+- d<sub>k</sub> is the head moving direction over the result data carrier, d<sub>k</sub> $\in$ D,
+- d<sub>j</sub> and d<sub>k</sub> cannot be 'S' at the same time,
+- q<sub>i</sub> is the actual state, q<sub>i</sub> $\in$ Q,
+- q<sub>m</sub> is the next state, q<sub>m</sub> $\in$ Q,
+- r<sub>j</sub> is the register from which the machine reads a symbol, r<sub>j</sub> $\in$ C,
+- r<sub>k</sub> is the the register to which the machine writes a symbol, r<sub>j</sub> $\in$ C,
+- r<sub>m</sub> is the next register from which the machine reads a symbol, t<sub>m</sub> $\in$ C,
+- s<sub>j</sub> is the actual symbol read from the data carrier, s<sub>j</sub> $\in$ S,
+- s<sub>k</sub> is the symbol to be written to the data carrier, s<sub>k</sub> $\in$ S,
+- t<sub>j</sub> is the tape from which the machine reads a symbol, t<sub>j</sub> $\in$ C,
+- t<sub>k</sub> is the tape to which the machine writes a symbol, t<sub>j</sub> $\in$ C,
+- t<sub>m</sub> is the next tape from which the machine reads a symbol, t<sub>m</sub> $\in$ C.
 
 
 ## Structure of files used by programs
@@ -245,17 +245,17 @@ Note:
 - If the first symbol specified in the CONF section is not blank, then it will be inserted.
 - The 9-tuples must be specified in the following form:
 
- `ST001 t01t03abrlr02002 ...`, where the:  
+ `ST001 t1t3abrlr2002 ...`, where the:  
 
-- qi = 001, it is the initial state,
-- tj = t01, it is the data tape,
-- tk = t03, it is the result tape,
-- sj = 'a', it is the read symbol from data tape,
-- sk = 'b', it is the symbol to be written to result tape,
-- dj = R, it is the head moving direction over data tape,
-- dk = L, it is the head moving direction over result tape,
-- rm = r02, it is the PTP register,
-- qm = 002, it is the final state.
+- q<sub>i</sub> = 001, it is the initial state,
+- t<sub>j</sub> = t1, it is the data tape,
+- t<sub>k</sub> = t3, it is the result tape,
+- s<sub>j</sub> = 'a', it is the read symbol from data tape,
+- s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
+- d<sub>j</sub> = R, it is the head moving direction over data tape,
+- d<sub>k</sub> = L, it is the head moving direction over result tape,
+- r<sub>m</sub> = r2, it is the PTP register,
+- q<sub>m</sub> = 002, it is the final state.
 
 ### Data format on tapes
 
@@ -327,4 +327,5 @@ The program can be controlled with the following command line commands.
 | 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
 | 14|`tape [1..5]`         |show tape content                            |
 | 15|`trace [on\|off]`     |turn tracking on and off                     |
+
 
