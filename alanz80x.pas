@@ -28,11 +28,48 @@ begin
     addzero := result;
 end;
 
-{ CALCULATE POINTER ADDRESS }
-function tpaddress(count, part: integer): PByte;
+{ CALCULATE TUPLE BLOCK ADDRESS }
+function tpaddress(physical_index: integer): PByte;
 begin
   tpaddress := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) + count * TPBLSIZE + part);
+                   ofs(machine.tuples^) + physical_index);
+end;
+
+{ READ, DECODE, AND PLACE A TUPLE BLOCK INTO A RECORD TYPE VARIABLE }
+function tpblread(state, symnum: byte): boolean;
+var
+  logical_index: integer;
+  part: byte;
+  tpblock: array[0..2] of byte;
+  tpmem: PByte;
+begin
+  if (state > 126) or (symnum > 39) then tpdecode := false else
+  begin
+    for part := 0 to 2 do
+    begin
+    end;
+    with tprec do
+    begin
+      trk := (tpblock[1] and $f0) div 16;
+    
+      {...}
+
+      qm := tpblock[3] and $7f;
+    end;
+    tpdecode := true;
+  end;
+end;
+
+{ ENCODE AND WRITE THE TUPLE BLOCK IN A RECORD TYPE VARIABLE }
+function tpblwrite(state, symnum: byte): boolean;
+begin
+  if (state > 126) or (symnum > 39) then tpdecode := false else
+  begin
+
+    {...}
+
+    tpdecode := true;
+  end;
 end;
 
 { WRITE A MESSAGE TO SCREEN }

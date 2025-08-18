@@ -137,7 +137,7 @@ Q = {q0, ..., q127}, where the
 - q127 is the mandatory final state,
 
 
-#### Tape symbol set
+### Tape symbol set
 
 Finite set of tape symbols is as follows:
 
@@ -150,7 +150,7 @@ The set has cardinality at least one, and its first element is always the blank
 symbol.
 
 
-#### Tape set
+### Tape set
 
 Finite set of tape is as follows:
 
@@ -205,7 +205,7 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
 |`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|
-|`STAT 3`                   |number of states              |mandatory|   N/A   |
+|`STAT 3`                   |number of states              |mandatory|mandatory|
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnn ...`            |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
