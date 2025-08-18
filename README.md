@@ -91,14 +91,14 @@ These are the machine's sets in alphabetical order, with indexed elements. Most 
 
 This set is the union of the set of registers and the set of tapes. A register is not a true data carrier, but both are used for the same purpose, they only differ in their capacity.
 
-C = R union T, |C| = 14.
+ C = R union T, |C| = 14.
 
 
 ### Head movement direction set
 
 Finite set of head movement directions is as follows:
 
-D = {d0, d1, d2}, where the
+ D = {d0, d1, d2}, where the
 
 - d0 = L, it is the left direction,
 - d1 = S, it is the stay here, 
@@ -110,7 +110,7 @@ L/R movements applied to the ACC register are allowed but ineffective (they do n
 
 Finite set of registers is as follows:
 
-R = {r0, ..., r7}, where the
+ R = {r0, ..., r7}, where the
 
 - r0: Accumulator (ACC) - char type,
 - r1: Data Tape Position (DTP) - integer type,
@@ -128,7 +128,7 @@ All register value are stored as string. This is denoted by w and w in S*. Readi
 
 The state is called an m-configuration in Turing terminology. The finite set of states is as follows:
 
-Q = {q0, ..., q127}, where the
+ Q = {q0, ..., q127}, where the
 
 - q0 is the default initial state,
 - q1-124 free space,
@@ -141,7 +141,7 @@ Q = {q0, ..., q127}, where the
 
 Finite set of tape symbols is as follows:
 
-S = {s0..s39}, where the
+ S = {s0..s39}, where the
 
 - s0 = _ This is the mandatory blank character.
 - s1-s39 is are optional symbols.
@@ -154,7 +154,7 @@ symbol.
 
 Finite set of tape is as follows:
 
-T = {t0, ..., t5}, where the
+ T = {t0, ..., t5}, where the
 
 - t0: consol or output device: CON:, LST:, PUN:.
 - t1: filename.d36, it is the data tape,
