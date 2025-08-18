@@ -28,8 +28,15 @@ begin
     addzero := result;
 end;
 
-{ CALCULATE TUPLE BLOCK ADDRESS }
-function tpaddress(physical_index: integer): PByte;
+{ CALCULATE TUPLE BLOCK ADDRESS FROM LOGICAL INDEX AND BYTE COUNT }
+function li2tpaddr(logical_index, byte_count: integer): PByte;
+begin
+  tpaddress := ptr(seg(machine.tuples^),
+                   ofs(machine.tuples^) + logical_index * TPBLSIZE + byte_count);
+end;
+
+{ CALCULATE TUPLE BLOCK ADDRESS FROM PHYSICAL INDEX}
+function pi2tpaddr(physical_index: integer): PByte;
 begin
   tpaddress := ptr(seg(machine.tuples^),
                    ofs(machine.tuples^) + physical_index);
@@ -38,15 +45,17 @@ end;
 { READ, DECODE, AND PLACE A TUPLE BLOCK INTO A RECORD TYPE VARIABLE }
 function tpblread(state, symnum: byte): boolean;
 var
-  logical_index: integer;
-  part: byte;
+  bi: byte;
   tpblock: array[0..2] of byte;
   tpmem: PByte;
 begin
   if (state > 126) or (symnum > 39) then tpdecode := false else
   begin
-    for part := 0 to 2 do
+    for bi := 0 to 2 do
     begin
+
+      {...}
+    
     end;
     with tprec do
     begin
