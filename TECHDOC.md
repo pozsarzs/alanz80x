@@ -18,7 +18,7 @@ The basic program is stored in the t36 file as follows:
 
 ```
 CARD BEGIN
-     ST001 t01t03abrlr02001 t01t03abrlr02002 ...
+     ST001 t1t3brlr2001 t1t3crlr2002 ...
      ST002 ... 
      ... 
 CARD END
@@ -59,7 +59,7 @@ Each state has as many tuples as the cardinality of the symbol set. The exceptio
 
   |tuples| = (|Q| - 1) * |S| = 127 * 40 = 5080
 
-In the program, the set S is represented by the variable `machine.symbol` and the number of tuples is by the constant `TPBLCOUNT`.
+In the program the number of symbol is represented by the constant `SYMCOUNT`, and the number of tuples is by the constant `TPBLCOUNT`.
 
 The tuples are logically organized into an array, one array index of which is the state and the other is the symbol number. The element number is the logical index of the tuple. The logical index can have values from 0..5079.
 
@@ -73,22 +73,22 @@ The tuples are logically organized into an array, one array index of which is th
 
   logical_index(qn,sn) = idx(qn) * |S| + idx(sn)
 
-In the program functions, the qn is represented by the variable `state` and the number of symbol is by the constant `symnum`.
+In the program functions, the qn is represented by the constant `STCOUNT` and the number of symbol is by the constant `SYMCOUNT`.
 
 Due to the economical use of available small memory space (Z80 - 64 kB), tuples are not stored in a record array, but in an area allocated at runtime in the heap. A tuple uses three bytes, which is called a tuple block. The order of the bytes is the same as the read/write order.
 
 The bit encoding in the touple block is as follows:
 
 |bit|0|variable|bit|1|variable|bit|2|variable|bit|
-|---|-|--------|---|-|--------|---|-|--------|---|
-| 7 | |trk     | 3 | |sk      | 1 | |trm     | 0 |
-| 6 | |trk     | 2 | |sk      | 0 | |qm      | 6 |
-| 5 | |trk     | 1 | |dj/dk   | 2 | |qm      | 5 |
-| 4 | |trk     | 0 | |dj/dk   | 1 | |qm      | 4 |
-| 3 | |sk      | 5 | |dj/dk   | 0 | |qm      | 3 |
-| 2 | |sk      | 4 | |trm     | 3 | |qm      | 2 |
-| 1 | |sk      | 3 | |trm     | 2 | |qm      | 1 |
-| 0 | |sk      | 2 | |trm     | 1 | |qm      | 0 |
+|:-:|-|:------:|:-:|-|:------:|:-:|-|:------:|:-:|
+| 7 | |  trk   | 3 | |   sk   | 1 | |  trm   | 0 |
+| 6 | |  trk   | 2 | |   sk   | 0 | |   qm   | 6 |
+| 5 | |  trk   | 1 | | dj/dk  | 2 | |   qm   | 5 |
+| 4 | |  trk   | 0 | | dj/dk  | 1 | |   qm   | 4 |
+| 3 | |   sk   | 5 | | dj/dk  | 0 | |   qm   | 3 |
+| 2 | |   sk   | 4 | |  trm   | 3 | |   qm   | 2 |
+| 1 | |   sk   | 3 | |  trm   | 2 | |   qm   | 1 |
+| 0 | |   sk   | 2 | |  trm   | 1 | |   qm   | 0 |
 
 The physical index determines the number of the tuple block within the memory area, which can be calculated like this:
 
@@ -99,7 +99,6 @@ The physical index determines the number of the tuple block within the memory ar
 The physical index can have values from (0,1,2)..(15237, 15238, 15239).
 
 The calculation of the memory address of a tuple is as follows:
-
 
  address(qn,sn) = address(tuples_area) + physical_index(qn,sn).
 
