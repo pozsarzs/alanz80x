@@ -96,7 +96,7 @@ These are the machine's sets in alphabetical order, with indexed elements. Most 
 This set is the union of the set of registers and the set of tapes. A register is not a true data carrier, but both are used for the same purpose, they only differ in their capacity.
 
 $$
-C = R /cup T, |C| = 14.
+C = R \cup T, |C| = 14.
 $$
 
 
@@ -327,5 +327,6 @@ The program can be controlled with the following command line commands.
 | 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
 | 14|`tape [1..5]`         |show tape content                            |
 | 15|`trace [on\|off]`     |turn tracking on and off                     |
+
 
 
