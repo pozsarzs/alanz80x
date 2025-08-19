@@ -27,7 +27,7 @@ begin
     if qb = 0 then writemsg(25, true) else
     begin
       writemsg(26, false);
-      writeln(addzero(qb), '.');
+      writeln(addzero(qb, true), '.');
     end;
   end else
   begin
@@ -49,7 +49,7 @@ begin
       begin
         qb := ip1;
         writemsg(28, false);
-        writeln(addzero(qb), '.');
+        writeln(addzero(qb, true), '.');
       end;
     end;
   end;

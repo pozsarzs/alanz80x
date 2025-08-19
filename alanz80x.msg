@@ -81,3 +81,4 @@
 ~The specified head position is out of range ignored.
 ~Temporary starting head position set:  
 ~Memory allocation failed!
+~Bad tuple!

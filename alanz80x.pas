@@ -17,32 +17,75 @@ program alanz80x;
 { TYPES, VARIABLES AND CONSTANTS }
 {$I declare.pas }
 
-{ INSERT ZERO BEFORE [0-99] }
-function addzero(value: integer): TThreeDigit;
+{ INSERT ZERO BEFORE NUMBER }
+function addzero(value: integer; threedigit: boolean): TThreeDigit;
 var
   result: TThreeDigit;
 begin
   str(value:0, result);
   if length(result) = 1 then result := '0' + result;
-  if length(result) = 2 then result := '0' + result;
-    addzero := result;
+  if threedigit then
+    if length(result) = 2 then result := '0' + result;
+  addzero := result;
 end;
 
-{ CALCULATE TUPLE BLOCK ADDRESS FROM LOGICAL INDEX AND BYTE COUNT }
-function li2tpaddr(logical_index, byte_count: integer): PByte;
+{ CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
+function ai2tpaddr(qn, sn, byte_count: integer): PByte;
 begin
-  tpaddress := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) + logical_index * TPBLSIZE + byte_count);
+  ai2tpaddr := ptr(seg(machine.tuples^),
+                   ofs(machine.tuples^) +
+                   (qn * SYMCOUNT + qn) * TPBLSIZE + byte_count);
 end;
 
-{ CALCULATE TUPLE BLOCK ADDRESS FROM PHYSICAL INDEX}
-function pi2tpaddr(physical_index: integer): PByte;
+{ CALCULATE TUPLE BLOCK ADDRESS FROM TUPLE NUMBER AND BYTE COUNT }
+function tn2tpaddr(tuple_number, byte_count: integer): PByte;
 begin
-  tpaddress := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) + physical_index);
+  tn2tpaddr := ptr(seg(machine.tuples^),
+                   ofs(machine.tuples^) + tuple_number * TPBLSIZE + byte_count);
 end;
 
-{ READ, DECODE, AND PLACE A TUPLE BLOCK INTO A RECORD TYPE VARIABLE }
+{ CALCULATE TUPLE BLOCK ADDRESS FROM BYTE NUMBER}
+function bn2tpaddr(byte_number: integer): PByte;
+begin
+  bn2tpaddr := ptr(seg(machine.tuples^),
+                   ofs(machine.tuples^) + byte_number);
+end;
+
+{ DECODE TUPLE BLOCK AND UNPACK TO A RECORD TYPE VARIABLE }
+function tpblunpack(b0, b1, b2: byte): boolean;
+
+{
+|bit|0|variable|bit|1|variable|bit|2|variable|bit|
+|---|-|--------|---|-|--------|---|-|--------|---|
+| 7 | |trk     | 3 | |sk      | 1 | |trm     | 0 |
+| 6 | |trk     | 2 | |sk      | 0 | |qm      | 6 |
+| 5 | |trk     | 1 | |dj/dk   | 2 | |qm      | 5 |
+| 4 | |trk     | 0 | |dj/dk   | 1 | |qm      | 4 |
+| 3 | |sk      | 5 | |dj/dk   | 0 | |qm      | 3 |
+| 2 | |sk      | 4 | |trm     | 3 | |qm      | 2 |
+| 1 | |sk      | 3 | |trm     | 2 | |qm      | 1 |
+| 0 | |sk      | 2 | |trm     | 1 | |qm      | 0 |
+}
+
+begin
+    with tprec do
+    begin
+      qi:=0;
+      trj:=0;
+      trk:=0;
+      sj:=0;
+      sk:=0;
+      dj:=0;
+      dk:=0;
+      trm:=0;
+      qm:=0;
+    end;
+    tpblunpack := true;
+end;
+
+{ ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
+{function tpblpack(b0, b1, b2: byte): boolean;
+
 function tpblread(state, symnum: byte): boolean;
 var
   bi: byte;
@@ -54,32 +97,19 @@ begin
     for bi := 0 to 2 do
     begin
 
-      {...}
     
     end;
     with tprec do
     begin
       trk := (tpblock[1] and $f0) div 16;
     
-      {...}
-
+ 
       qm := tpblock[3] and $7f;
     end;
     tpdecode := true;
   end;
 end;
-
-{ ENCODE AND WRITE THE TUPLE BLOCK IN A RECORD TYPE VARIABLE }
-function tpblwrite(state, symnum: byte): boolean;
-begin
-  if (state > 126) or (symnum > 39) then tpdecode := false else
-  begin
-
-    {...}
-
-    tpdecode := true;
-  end;
-end;
+}
 
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);

@@ -31,8 +31,8 @@ type
     qi:          byte;                                          { actual state }
     trj:         byte;{ tape or register from which the machine reads a symbol }
     trk:         byte; { tape or register to which the machine writes a symbol }
-    sj:          char;              { actual symbol read from the data carrier }
-    sk:          char;              { symbol to be written to the data carrier }
+    sj:          byte;              { actual symbol read from the data carrier }
+    sk:          byte;              { symbol to be written to the data carrier }
     dj:          byte;     { head moving direction over the input data carrier }
     dk:          byte;    { head moving direction over the result data carrier }
     trm:         byte;    { next tape or register from which the machine reads }
@@ -58,7 +58,7 @@ var
   qb:            byte;                                    { breakpoint address }
   sl:            integer;                                 { program step limit }
   splitted:      array[0..7] of TSplitted;                  { splitted command }
-  tprec:         TPRecently;                             { recently read tuple }
+  tprec:         TTPRecently;                            { recently read tuple }
   trace:         boolean;                                      { turn tracking }
 const
   COMMARRSIZE =  14;
@@ -73,5 +73,8 @@ const
   MSGERR =       'Cannot load message file: ';
   MSGFILE =      'ALANZ80X.MSG';
   PROMPT =       'TM>';
-  TPBLCOUNT =    5080;       { number of tuples = |(q0-q126)| * |S| = 127 * 40 }
+  STCOUNT =      127;                               { maximal number of states }
+  SYMCOUNT =     40;                             { maximal number of symbolums }
+  TPBLCOUNT =    5080;                         { maximal number of tuple block }
   TPBLSIZE  =    3;                                { byte allocated by a tuple }
+  

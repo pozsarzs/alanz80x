@@ -45,5 +45,6 @@ begin
   { reset program others }
   qb := 0;
   sl := 32767;
+  machine.symbols:='_                                       ';
   if verbose then writemsg(42, true);
 end;

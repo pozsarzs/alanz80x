@@ -15,59 +15,47 @@
 { COMMAND 'prog' }
 overlay procedure cmd_prog;
 var
- qi, r: byte;
+  bi, bj:     byte;
+  p0, p1, p2: PByte;
+const
+  directions: array[0..2] of char= ('L','S','R');
 begin
-{  if length(machine.progname) = 0 then writeln(36, true) else
+  if length(machine.progname) <> 0 then writemsg(36, true) else
   begin
     writemsg(66, true);
-    for qi := 0 to 126 do
+    for bi := 0 to STCOUNT - 1 do
     begin
-      for r := 0 to 39 do
-        if machine.rules[qi, r].sj <> #0
-        then
-          write(addzero(qi), machine.rules[qi, r].sj, machine.rules[qi, r].sk,
-                machine.rules[qi, r].d, addzero(machine.rules[qi, r].qm), ' ');
-        if machine.rules[qi, 0].sj <> #0 then writeln;
+      for bj := 0 to SYMCOUNT - 1 do
+      begin
+        { read from memory }
+        p0 := ai2tpaddr(bi, bj, 0);
+        p1 := ai2tpaddr(bi, bj, 1);
+        p2 := ai2tpaddr(bi, bj, 2);
+        { decode }
+        if tpblunpack(p0^, p1^, p2^) then 
+        begin
+          { write to screen}
+            with tprec do
+            begin
+              write(addzero(bi, true));
+              if trj <= 5
+                then write('T', addzero(trj, false))
+                else write('R', addzero(trj - 6, false));
+              if trk <= 5
+                then write('T', addzero(trk, false))
+                else write('R', addzero(trk - 6, false));
+              write(machine.symbols[bj + 1]);
+              write(machine.symbols[sk + 1]);
+              write(directions[dj]);
+              write(directions[dk]);
+              if trm <= 5
+                then write('T', addzero(trm, false))
+                else write('R', addzero(trm - 6, false));
+              write(addzero(qm, true),' ');
+            end;
+        end else writemsg(84, false);
+      end;
+      writeln;
     end;
-  end;}
+  end;
 end;
-
-{
-  p0 := addrcalc(5, 0);
-  p1 := addrcalc(5, 1);
-  p2 := addrcalc(5, 2);
-
-  p0^ := 44;
-  p1^ := 55;
-  p2^ := 66;
-
- writeln(p0^, ' ', p1^, ' ', p2^);
-
-
-  byte  bit  function  bit
-  ------------------------
-  1     7    tk/rk     3
-  1     6    tk/rk     2
-  1     5    tk/rk     1
-  1     4    tk/rk     0
-  1     3    sk        5
-  1     2    sk        4
-  1     1    sk        3
-  1     0    sk        2
-  2     7    sk        1
-  2     6    tk        0
-  2     5    dj/dk     2
-  2     4    dj/dk     1
-  2     3    dj/dk     0
-  2     2    tm/rm     3
-  2     1    tm/rm     2
-  2     0    tm/rm     1
-  3     7    tm/rm     0
-  3     6    qm        6
-  3     5    qm        5
-  3     4    qm        4
-  3     3    qm        3
-  3     2    qm        2
-  3     1    qm        1
-  3     0    qm        0
- }
