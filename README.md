@@ -312,18 +312,18 @@ The program can be controlled with the following command line commands.
 
 |   |command               |description                                  |
 |--:|----------------------|---------------------------------------------|
-|  1|`break [0..127\|-]`   |set, get and reset breakpoint state (qb)     |
+|  1|`break [state\|-]`    |set, get and reset breakpoint state (qb)     |
 |  2|`help [command]`      |help with using the program                  |
 |  3|`info`                |show all information about this machine      |
-|  4|`limit [10..32767\|-]`|set, get and reset number of steps           |
+|  4|`limit [steps\|-]`    |set, get and reset number of steps           |
 |  5|`load filename.t36`   |load t36 file                                |
-|  6|`prog`                |show program                                 |
+|  6|`prog [from][to]`     |show program                                 |
 |  7|`quit`                |exit the program                             |
 |  8|`reg [0..7]`          |show register content                        |
 |  9|`reset`               |reset program                                |
 | 10|`restore`             |restore machine to original state            |
-| 11|`run [0..255]`        |run from data tape head position             |
-| 12|`step [0..255]`       |run step-by-step from data tape head position|
+| 11|`run [head position]` |run from data tape head position             |
+| 12|`step [head position]`|run step-by-step from data tape head position|
 | 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
 | 14|`tape [1..5]`         |show tape content                            |
 | 15|`trace [on\|off]`     |turn tracking on and off                     |

@@ -13,49 +13,80 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'prog' }
-overlay procedure cmd_prog;
+overlay procedure cmd_prog(p1, p2: TSplitted);
 var
-  bi, bj:     byte;
-  p0, p1, p2: PByte;
+  bi, bj:        byte;
+  ip1, ip2:      integer;                                { function parameters }
+  ec:            integer;
+  po0, po1, po2: PByte;
+  err: byte;                                                      { error code }
 const
-  directions: array[0..2] of char= ('L','S','R');
+  datacarriers:  string[3] = 'TR';
+  directions:    string[3] = 'LSR';
 begin
-  if length(machine.progname) <> 0 then writemsg(36, true) else
+  err := 0;
+  { check parameters }
+  if length(p2) > 0 then
   begin
-    writemsg(66, true);
-    for bi := 0 to STCOUNT - 1 do
+    val(p2, ip2, ec);
+    if ec <> 0 then err := 24;
+  end else ip2 := STCOUNT - 1;
+  if (ip2 < 0) or (ip2 > 126) then err := 24;
+  if length(p1) > 0 then
+  begin
+    val(p1, ip1, ec);
+    if ec <> 0 then err := 24;
+  end else ip1 := 0;
+  if (ip1 < 0) or (ip1 > 126) then err := 24;
+  if err = 0 then
+  begin
+    if length(machine.progname) <> 0 then err := 36 else
+{    if length(machine.progname) = 0 then err := 36 else }
     begin
-      for bj := 0 to SYMCOUNT - 1 do
+      if ip1 > ip2 then
       begin
-        { read from memory }
-        p0 := ai2tpaddr(bi, bj, 0);
-        p1 := ai2tpaddr(bi, bj, 1);
-        p2 := ai2tpaddr(bi, bj, 2);
-        { decode }
-        if tpblunpack(p0^, p1^, p2^) then 
-        begin
-          { write to screen}
-            with tprec do
-            begin
-              write(addzero(bi, true));
-              if trj <= 5
-                then write('T', addzero(trj, false))
-                else write('R', addzero(trj - 6, false));
-              if trk <= 5
-                then write('T', addzero(trk, false))
-                else write('R', addzero(trk - 6, false));
-              write(machine.symbols[bj + 1]);
-              write(machine.symbols[sk + 1]);
-              write(directions[dj]);
-              write(directions[dk]);
-              if trm <= 5
-                then write('T', addzero(trm, false))
-                else write('R', addzero(trm - 6, false));
-              write(addzero(qm, true),' ');
-            end;
-        end else writemsg(84, false);
+        ec := ip2;
+        ip2 := ip1;
+        ip1 := ec;
       end;
-      writeln;
+      writemsg(66, true);
+      for bi := ip1 to ip2 do
+      begin
+        for bj := 0 to SYMCOUNT - 1 do
+        begin
+          { read from memory }
+          po0 := ai2tpaddr(bi, bj, 0);
+          po1 := ai2tpaddr(bi, bj, 1);
+          po2 := ai2tpaddr(bi, bj, 2);
+          { decode }
+          if tpblunpack(po0^, po1^, po2^) then
+          begin
+            { write to screen}
+{            if machine.symbols[tprec.sj + 1] <> #0 then }
+              with tprec do
+              begin
+                write(addzero(bi, true));
+                if trj <= 5
+                  then write(datacarriers[1], addzero(trj, false))
+                  else write(datacarriers[2], addzero(trj - 6, false));
+                if trk <= 5
+                  then write(datacarriers[1], addzero(trk, false))
+                  else write(datacarriers[2], addzero(trk - 6, false));
+                write(machine.symbols[sj + 1]);
+                write(machine.symbols[sk + 1]);
+                write(directions[dj + 1]);
+                write(directions[dk + 1]);
+                if trm <= 5
+                  then write(datacarriers[1], addzero(trm, false))
+                  else write(datacarriers[2], addzero(trm - 6, false));
+                write(addzero(qm, true),' ');
+              end;
+          end else writemsg(84, false);
+        end;
+        writeln;
+      end;
     end;
-  end;
+  end else
+    { error message }
+    writemsg(err, true);
 end;

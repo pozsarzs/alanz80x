@@ -55,9 +55,10 @@ var
   messages:      array[0..4095] of char;     { messages from alanz80x.msg file }
   p0, p1, p2:    PByte;
   q:             boolean;                                         { allow exit }
-  qb:            byte;                                    { breakpoint address }
+  qb:            byte;                                      { breakpoint state }
   sl:            integer;                                 { program step limit }
   splitted:      array[0..7] of TSplitted;                  { splitted command }
+  t36com:        array[0..15] of TCommand;           { t36 file command buffer }
   tprec:         TTPRecently;                            { recently read tuple }
   trace:         boolean;                                      { turn tracking }
 const

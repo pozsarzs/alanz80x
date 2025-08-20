@@ -24,7 +24,7 @@ begin
       if upcase(p1[1]) + upcase(p1[2]) + upcase(p1[3]) = 'OFF'
         then trace := false
         else err := 24;
-  { error message or primary operation }
+  { messages }
   if err > 0 then writemsg(err, true) else
     if trace then writemsg(46, true) else writemsg(47, true);
 end;

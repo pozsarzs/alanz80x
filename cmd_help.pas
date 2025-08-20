@@ -16,15 +16,16 @@
 overlay procedure cmd_help(p1: TSplitted);
 var
   bi: byte;
-  ec: boolean;                                              { existing command }
+  err: byte;                                                      { error code }
 begin
-  ec := false;
+  err := 1;
   { show description about all or selected command(s) }
   for bi := 0 to COMMARRSIZE do
     if (length(p1) = 0) or (COMMANDS[bi] = p1) then
     begin 
-      ec := true; 
+      err := 0; 
       writemsg(bi + 2, true);
     end;    
-  if not ec then writemsg(1, true);
+  { error message }
+  if err > 0 then writemsg(err, true);
 end;

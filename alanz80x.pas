@@ -237,7 +237,7 @@ begin
 {           2: cmd_info; }
            3: cmd_limit(splitted[1]);
 {           4: cmd_load(splitted[1]); }
-           5: cmd_prog;
+           5: cmd_prog(splitted[1], splitted[2]);
            6: parsingcommand := true;
 {           7: cmd_reg(splitted[1]); }
            8: cmd_reset(true);
@@ -266,13 +266,12 @@ begin
     writeln(MSGERR, MSGFILE);
     quit(1, 0);
   end;
-  { reset machine }
-  cmd_reset(false);
-  trace := false;
   { allocate memory for tuples }
   getmem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   if machine.tuples = nil then quit(2, 83);
-  fillchar(machine.tuples^, TPBLCOUNT * TPBLSIZE, 0);
+  { reset machine }
+  cmd_reset(false);
+  trace := false;
   { main operation }
   repeat
     write(PROMPT); readln(command);

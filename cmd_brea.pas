@@ -17,7 +17,7 @@ overlay procedure cmd_break(p1: TSplitted);
 var
   err: byte;                                                      { error code }
   ec:  integer;
-  ip1: integer;
+  ip1: integer;                                           { function parameter }
 begin
   err := 0;
   { check parameters }
@@ -40,17 +40,15 @@ begin
     begin
       { set breakpoint address }
       val(p1, ip1, ec);
-      if ec = 0
-      then
-        if (ip1 >= 0) and (ip1 <= 255) then err := 0 else err := 23
-      else err := 24;
-      { - error messages or primary operation }
-      if err > 0 then writemsg(err, true) else
-      begin
-        qb := ip1;
-        writemsg(28, false);
-        writeln(addzero(qb, true), '.');
-      end;
+      if ec <> 0 then err := 24 else
+        if (ip1 < 0) or (ip1 > 255) then err := 23 else
+        begin
+          qb := ip1;
+          writemsg(28, false);
+          writeln(addzero(qb, true), '.');
+        end;
     end;
   end;
+  { error message }
+  if err > 0 then writemsg(err, true);
 end;

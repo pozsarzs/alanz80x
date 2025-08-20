@@ -17,34 +17,19 @@ procedure cmd_reset(verbose: boolean);
 var
   bi, bj: byte;
 begin
-  { reset machine configuration }
-  {with machine do
+  { reset Turing machine base configuration }
+  with machine do
   begin
+    fillchar(tuples^, TPBLCOUNT * TPBLSIZE, 0);
+    symbols:='_';
+    for bi := 1 to 39 do symbols := symbols + #0;
     progdesc := '';
     progname := '';
-    progcount := 0;
-    aqi := 1;
-    for bi := 0 to 49 do
-      for bj := 0 to 39 do
-      begin
-        rules[bi, bj].D := 'R';
-        rules[bi, bj].qm := 1; 
-        rules[bi, bj].Sj := #0; 
-        rules[bi, bj].Sk := #0;
-      end;
-    states := 2;
-    symbols := SPACE;
-    tapepos := 1;
-    tape := '';
-    tapeposbak := tapepos;
-    tapebak := tape;
-    for bi := 1 to 255 do tape := tape + SPACE;
-  end;}
-  { reset t36 command buffer } 
-  {for bi := 0 to 15 do t36com[bi] := '';}
-  { reset program others }
+  end;
+  { reset variables related to turing machines }
   qb := 0;
   sl := 32767;
-  machine.symbols:='_                                       ';
+  for bi := 0 to 15 do t36com[bi] := '';
+  { message }
   if verbose then writemsg(42, true);
 end;
