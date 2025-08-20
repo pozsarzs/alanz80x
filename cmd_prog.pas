@@ -20,9 +20,6 @@ var
   ec:            integer;
   po0, po1, po2: PByte;
   err: byte;                                                      { error code }
-const
-  datacarriers:  string[3] = 'TR';
-  directions:    string[3] = 'LSR';
 begin
   err := 0;
   { check parameters }
@@ -67,18 +64,18 @@ begin
               begin
                 write(addzero(bi, true));
                 if trj <= 5
-                  then write(datacarriers[1], addzero(trj, false))
-                  else write(datacarriers[2], addzero(trj - 6, false));
+                  then write(DC[1], addzero(trj, false))
+                  else write(DC[2], addzero(trj - 6, false));
                 if trk <= 5
-                  then write(datacarriers[1], addzero(trk, false))
-                  else write(datacarriers[2], addzero(trk - 6, false));
+                  then write(DC[1], addzero(trk, false))
+                  else write(DC[2], addzero(trk - 6, false));
                 write(machine.symbols[sj + 1]);
                 write(machine.symbols[sk + 1]);
-                write(directions[dj + 1]);
-                write(directions[dk + 1]);
+                write(HMD[dj + 1]);
+                write(HMD[dk + 1]);
                 if trm <= 5
-                  then write(datacarriers[1], addzero(trm, false))
-                  else write(datacarriers[2], addzero(trm - 6, false));
+                  then write(DC[1], addzero(trm, false))
+                  else write(DC[2], addzero(trm - 6, false));
                 write(addzero(qm, true),' ');
               end;
           end else writemsg(84, false);

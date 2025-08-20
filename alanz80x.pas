@@ -177,6 +177,7 @@ label
 {$i cmd_help.pas}
 {$i cmd_limi.pas}
 {$i cmd_prog.pas}
+{$i cmd_symb.pas}
 {$i cmd_trac.pas}
 
 begin
@@ -244,7 +245,7 @@ begin
 {           9: cmd_restore(true); }
 {          10: cmd_run(false, splitted[1]); }
 {          11: cmd_run(true, splitted[1]); }
-{          12: cmd_symbol(splitted[1]); }
+          12: cmd_symbol(splitted[1]);
 {          13: cmd_tape(splitted[1]); }
           14: cmd_trace(splitted[1]);
         end;

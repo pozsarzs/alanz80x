@@ -29,8 +29,8 @@
 ~Number of states: 
 ~The number of states is set to 
 ~Set of symbols:   
-~The tape symbols are deleted.
-~The tape symbols are set to 
+~The symbols are deleted.
+~The symbols are set to 
 ~Duplicate symbols have been deleted!
 ~The symbol list is too long and has been truncated!
 ~No loaded program!

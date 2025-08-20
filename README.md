@@ -327,6 +327,3 @@ The program can be controlled with the following command line commands.
 | 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
 | 14|`tape [1..5]`         |show tape content                            |
 | 15|`trace [on\|off]`     |turn tracking on and off                     |
-
-
-
