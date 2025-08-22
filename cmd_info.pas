@@ -33,7 +33,7 @@ begin
     { - register contents }
     cmd_reg('');
     { - assigned files and devices }
-    cmd_tape('');
+    cmd_tape('','');
     { - optional commands from t36 file }
     if length(machine.t36com[0]) <> 0 then
     begin

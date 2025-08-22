@@ -37,8 +37,8 @@
 ~Cannot read 
 ~Program name:     
 ~The tape is empty.
-~Assigned tape files:
-~The tape content is deleted.
+~The tape is assigned to: 
+~File assign to tape: 
 ~The program has been reset.
 ~The tape data is too long and has been truncated!
 ~Run program from head position 

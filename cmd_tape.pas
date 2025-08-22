@@ -13,18 +13,20 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'tape' }
-procedure cmd_tape(p1: TSplitted);
+procedure cmd_tape(p1, p2: TSplitted);
 var
   bi:  byte;
   ec:  integer;
   err: byte;                                                      { error code }
   ip1: integer;                                           { function parameter }
+  fn:  string[8];
+  dn:  string[3];
 
   { write selected register content }
   procedure writetaperec(n: byte);
   begin
     writemsg(n + 94, false);
-    write(machine.tapes[n].filename:13, ' (');
+    write(machine.tapes[n].filename:14, ' (');
     case machine.tapes[n].permission of
       0: write(PRM[1]+PRM[3]);
       1: write(PRM[1]+PRM[2]);
@@ -43,13 +45,32 @@ begin
     for bi := 0 to 5 do writetaperec(bi);
   end else
   begin
-    { show selected }
+    { check parameter p1 }
     val(p1, ip1, ec);
     if ec <> 0 then err := 23 else
       if (ip1 < 0) or (ip1 > 5) then err := 24 else
       begin
-        writemsg(85, true);
-        writetaperec(ip1);
+        if length(p2) = 0 then
+        begin
+          { show selected }
+            writemsg(85, true);
+            writetaperec(ip1);
+        end else
+        begin
+          { assign file to selected tape }
+          fn := p2;
+          for bi := 1 to length(fn) do fn[bi] := upcase(fn[bi]);
+          if ip1 = 0 then
+          begin
+            dn := fn;
+            machine.tapes[ip1].filename := dn + ':';
+          end else
+          begin
+            machine.tapes[ip1].filename := fn + '.' + EXT[ip1] + '36';
+          end;
+          writemsg(41, false);
+          writeln(machine.tapes[ip1].filename + '.');
+        end;
       end;
   end;
   { error message }
