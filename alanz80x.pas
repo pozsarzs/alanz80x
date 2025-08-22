@@ -181,6 +181,7 @@ label
 {$i cmd_reg.pas}
 {$i cmd_rest.pas}
 {$i cmd_symb.pas}
+{$i cmd_tape.pas}
 {$i cmd_trac.pas}
 
 {$i cmd_info.pas}
@@ -251,7 +252,7 @@ begin
 {          10: cmd_run(false, splitted[1]); }
 {          11: cmd_run(true, splitted[1]); }
           12: cmd_symbol(splitted[1]);
-{          13: cmd_tape(splitted[1]); }
+          13: cmd_tape(splitted[1]);
           14: cmd_trace(splitted[1]);
         end;
       end else writemsg(1, true);

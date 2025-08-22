@@ -17,7 +17,6 @@ procedure cmd_info;
 var
   bi: byte;
 begin
-  { if length(machine.progname) = 0 then writemsg(36, true) else }
   if length(machine.progname) <> 0 then writemsg(36, true) else
   begin
     { - name }
@@ -34,7 +33,7 @@ begin
     { - register contents }
     cmd_reg('');
     { - assigned files and devices }
-    {cmd_tape('');}
+    cmd_tape('');
     { - optional commands from t36 file }
     if length(machine.t36com[0]) <> 0 then
     begin

@@ -24,19 +24,21 @@ begin
     progname := '';
     for bi := 0 to 5 do
     begin
-      files[bi].filename := '';
+      if bi = 0
+        then tapes[bi].filename := 'CON:'
+        else tapes[bi].filename := 'DEFAULT.' + EXT[bi] + '36';
       case bi of
-        0: files[bi].permission:= 2; { console - write only }
-        1: files[bi].permission:= 0; { data - read only }
-        2: files[bi].permission:= 0; { program - read only }
+        0: tapes[bi].permission:= 2; { console - write only }
+        1: tapes[bi].permission:= 0; { data - read only }
+        2: tapes[bi].permission:= 0; { program - read only }
       else
-        files[bi].permission:= 1;    { others - read/write }
+        tapes[bi].permission:= 1;    { others - read/write }
       end;
     end;
     for bi := 0 to 7 do
     begin
       if bi = 0
-        then registers[bi].data := '_    '
+        then registers[bi].data := '_'
         else registers[bi].data := '00000';
       if bi = 0
         then registers[bi].permission:= 1     { ACC - read/write }

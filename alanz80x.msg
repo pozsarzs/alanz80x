@@ -37,7 +37,7 @@
 ~Cannot read 
 ~Program name:     
 ~The tape is empty.
-~Tape content:     
+~Assigned tape files:
 ~The tape content is deleted.
 ~The program has been reset.
 ~The tape data is too long and has been truncated!
@@ -83,11 +83,17 @@
 ~Memory allocation failed!
 ~Bad tuple!
 ~Register content:
-~  r0 (ACC): 
-~  r1 (DTP): 
-~  r2 (PTP): 
-~  r3 (RTP): 
-~  r4 (STP): 
-~  r5 (TTP): 
-~  r6 (PSC): 
-~  r7 (IR):  
+~  r0 (ACC):
+~  r1 (DTP):
+~  r2 (PTP):
+~  r3 (RTP):
+~  r4 (STP):
+~  r5 (TTP):
+~  r6 (PSC):
+~  r7 (IR): 
+~  t0 (output device):    
+~  t1 (data tape):        
+~  t2 (user program tape):
+~  t3 (result tape):      
+~  t4 (stack tape):       
+~  t5 (temporary tape):   

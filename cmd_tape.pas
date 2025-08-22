@@ -1,8 +1,8 @@
 { +--------------------------------------------------------------------------+ }
 { | AlanZ80X v0.1 * Extended Turing machine                                  | }
 { | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
-{ | cmd_reg.pas                                                              | }
-{ | Command 'reg'                                                            | }
+{ | cmd_tape.pas                                                             | }
+{ | Command 'tape'                                                           | }
 { +--------------------------------------------------------------------------+ }
 
 { This program is free software: you can redistribute it and/or modify it
@@ -12,8 +12,8 @@
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. }
 
-{ COMMAND 'reg' }
-procedure cmd_reg(p1: TSplitted);
+{ COMMAND 'tape' }
+procedure cmd_tape(p1: TSplitted);
 var
   bi:  byte;
   ec:  integer;
@@ -21,11 +21,11 @@ var
   ip1: integer;                                           { function parameter }
 
   { write selected register content }
-  procedure writeregrec(n: byte);
+  procedure writetaperec(n: byte);
   begin
-    writemsg(n + 86, false);
-    write(machine.registers[n].data: 7, ' (');
-    case machine.registers[n].permission of
+    writemsg(n + 94, false);
+    write(machine.tapes[n].filename:13, ' (');
+    case machine.tapes[n].permission of
       0: write(PRM[1]+PRM[3]);
       1: write(PRM[1]+PRM[2]);
       2: write(PRM[2]+PRM[3]);
@@ -39,17 +39,17 @@ begin
   if length(p1) = 0 then
   begin
     { show all }
-    writemsg(85, true);
-    for bi := 0 to 7 do writeregrec(bi);
+    writemsg(40, true);
+    for bi := 0 to 5 do writetaperec(bi);
   end else
   begin
     { show selected }
     val(p1, ip1, ec);
     if ec <> 0 then err := 23 else
-      if (ip1 < 0) or (ip1 > 7) then err := 24 else
+      if (ip1 < 0) or (ip1 > 5) then err := 24 else
       begin
         writemsg(85, true);
-        writeregrec(ip1);
+        writetaperec(ip1);
       end;
   end;
   { error message }
