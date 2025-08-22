@@ -42,12 +42,12 @@ type
   end;
   { TURING MACHINE BASE CONFIGURATION TYPE }
   TTuring =      record                         { Turing machine configuration }
-    tapes:       array[0..5] of TTapes;                        { file settings }
     progdesc:    string[64];                          { description of program }
     progname:    string[8];                                  { name of program }
     registers:   array[0..7] of TRegisters;                { register settings }
     states:      byte;                                      { number of states }
     symbols:     string[40];                                    { symbolum set }
+    tapes:       array[0..5] of TTapes;                        { file settings }
     t36com:      array[0..15] of TCommand;           { t36 file command buffer }
     tuples:      PByte;                              { pointer to tuple memory }
   end;
@@ -71,7 +71,7 @@ const
                  'prog',  'quit', 'reg',    'reset', 'restore',
                  'run',   'step', 'symbol', 'tape',  'trace');
   DC:            string[2] = 'TR';
-  EXT:           string[5] = 'DPRTS';
+  EXT:           string[5] = 'DPRST';
   HEADER1 =      'AlanZ80X v0.1';
   HEADER2 =      '(C) 2025 Pozsar Zsolt <pozsarzs@gmail.com> EUPL v1.2';
   HINT =         'Type ''help [command]'' for more information.';

@@ -16,11 +16,11 @@
 procedure cmd_tape(p1, p2: TSplitted);
 var
   bi:  byte;
+  dn:  string[3];
   ec:  integer;
   err: byte;                                                      { error code }
-  ip1: integer;                                           { function parameter }
   fn:  string[8];
-  dn:  string[3];
+  ip1: integer;                                           { function parameter }
 
   { write selected register content }
   procedure writetaperec(n: byte);
@@ -68,7 +68,7 @@ begin
           begin
             machine.tapes[ip1].filename := fn + '.' + EXT[ip1] + '36';
           end;
-          writemsg(41, false);
+          writemsg(40, false);
           writeln(machine.tapes[ip1].filename + '.');
         end;
       end;

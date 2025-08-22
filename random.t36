@@ -1,6 +1,6 @@
 ; This is a non-working test program with random tuples.
 
-MVER X
+;MVER X
 PROG BEGIN
 NAME Random
 DESC Non-working test program

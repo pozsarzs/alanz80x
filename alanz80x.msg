@@ -38,7 +38,7 @@
 ~Program name:     
 ~The tape is empty.
 ~The tape is assigned to: 
-~File assign to tape: 
+~  
 ~The program has been reset.
 ~The tape data is too long and has been truncated!
 ~Run program from head position 

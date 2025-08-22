@@ -17,7 +17,7 @@ procedure cmd_info;
 var
   bi: byte;
 begin
-  if length(machine.progname) <> 0 then writemsg(36, true) else
+  if length(machine.progname) = 0 then writemsg(36, true) else
   begin
     { - name }
     writemsg(38, false);
