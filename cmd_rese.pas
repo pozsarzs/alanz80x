@@ -36,11 +36,11 @@ begin
     for bi := 0 to 7 do
     begin
       if bi = 0
-        then registers[bi].data := '_'
+        then registers[bi].data := '_    '
         else registers[bi].data := '00000';
       if bi = 0
-        then registers[bi].permission:= 0     { ACC - read/write }
-        else registers[bi].permission:= 1;    { others - read only }
+        then registers[bi].permission:= 1     { ACC - read/write }
+        else registers[bi].permission:= 0;    { others - read only }
     end;
     states := 0;
     symbols:= '_';

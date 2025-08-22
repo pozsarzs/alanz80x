@@ -77,10 +77,10 @@ const
   HMD:           string[3] = 'LSR';                   { head moving directions }
   MSGERR =       'Cannot load message file: ';
   MSGFILE =      'ALANZ80X.MSG';
+  PRM:           string[3]= 'RWO';
   PROMPT =       'TM>';
   SPACE =        #95;
   STCOUNT =      127;                               { maximal number of states }
   SYMCOUNT =     40;                             { maximal number of symbolums }
   TPBLCOUNT =    5080;                         { maximal number of tuple block }
   TPBLSIZE  =    3;                                { byte allocated by a tuple }
-  

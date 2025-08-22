@@ -178,9 +178,12 @@ label
 {$i cmd_help.pas}
 {$i cmd_limi.pas}
 {$i cmd_prog.pas}
+{$i cmd_reg.pas}
 {$i cmd_rest.pas}
 {$i cmd_symb.pas}
 {$i cmd_trac.pas}
+
+{$i cmd_info.pas}
 
 begin
   parsingcommand := false;
@@ -237,12 +240,12 @@ begin
         case bi of
            0: cmd_break(splitted[1]);
            1: cmd_help(splitted[1]);
-{           2: cmd_info; }
+           2: cmd_info;
            3: cmd_limit(splitted[1]);
            4: cmd_load(splitted[1]);
            5: cmd_prog(splitted[1], splitted[2]);
            6: parsingcommand := true;
-{           7: cmd_reg(splitted[1]); }
+           7: cmd_reg(splitted[1]);
            8: cmd_reset(true);
            9: cmd_restore(true);
 {          10: cmd_run(false, splitted[1]); }
@@ -255,7 +258,6 @@ begin
     end;
   end;
 end;
-
 
 begin
   { show program information }

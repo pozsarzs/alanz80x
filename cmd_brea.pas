@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'break' }
-overlay procedure cmd_break(p1: TSplitted);
+procedure cmd_break(p1: TSplitted);
 var
   err: byte;                                                      { error code }
   ec:  integer;
@@ -40,8 +40,8 @@ begin
     begin
       { set breakpoint address }
       val(p1, ip1, ec);
-      if ec <> 0 then err := 24 else
-        if (ip1 < 0) or (ip1 > 255) then err := 23 else
+      if ec <> 0 then err := 23 else
+        if (ip1 < 0) or (ip1 > 255) then err := 24 else
         begin
           qb := ip1;
           writemsg(28, false);

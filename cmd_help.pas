@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'help' }
-overlay procedure cmd_help(p1: TSplitted);
+procedure cmd_help(p1: TSplitted);
 var
   bi: byte;
   err: byte;                                                      { error code }

@@ -1,8 +1,8 @@
 { +--------------------------------------------------------------------------+ }
 { | AlanZ80X v0.1 * Extended Turing machine                                  | }
 { | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
-{ | cmd_limi.pas                                                             | }
-{ | Command 'limit'                                                          | }
+{ | cmd_reg.pas                                                              | }
+{ | Command 'reg'                                                            | }
 { +--------------------------------------------------------------------------+ }
 
 { This program is free software: you can redistribute it and/or modify it
@@ -12,44 +12,45 @@
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. }
 
-{ COMMAND 'limit' }
-procedure cmd_limit(p1: TSplitted);
+{ COMMAND 'reg' }
+procedure cmd_reg(p1: TSplitted);
 var
+  bi:  byte;
   ec:  integer;
   err: byte;                                                      { error code }
   ip1: integer;                                           { function parameter }
-const
-  max= 32767;
+
+  { write selected register content }
+  procedure writeregcontent(n: byte);
+  begin
+    writemsg(n + 86, false);
+    write(machine.registers[n].data, '  (');
+    case machine.registers[n].permission of
+      0: write(PRM[1]+PRM[3]);
+      1: write(PRM[1]+PRM[2]);
+      2: write(PRM[2]+PRM[3]);
+    end;
+    writeln(')');
+  end;
+
 begin
   err := 0;
   { check parameters }
   if length(p1) = 0 then
   begin
-    { get step limit }
-    if sl = max then writemsg(74, true) else
-    begin
-      writemsg(75, false);
-      writeln(sl, '.');
-    end;
+    { show all }
+    writemsg(85, true);
+    for bi := 0 to 7 do writeregcontent(bi);
   end else
   begin
-    if p1 = '-' then
-    begin
-      { reset step limit }
-      sl := max;
-      writemsg(76, true)
-    end else
-    begin
-      { set step limit }
-      val(p1, ip1, ec);
-      if ec <> 0 then err := 23 else
-        if ((ip1 < 0) or (ip1 > max)) then err := 24 else
-        begin
-          sl := ip1;
-          writemsg(77, false);
-          writeln(sl, '.');
-        end
-    end;
+    { show selected }
+    val(p1, ip1, ec);
+    if ec <> 0 then err := 23 else
+      if (ip1 < 0) or (ip1 > 7) then err := 24 else
+      begin
+        writemsg(85, true);
+        writeregcontent(ip1);
+      end;
   end;
   { error message }
   if err > 0 then writemsg(err, true);

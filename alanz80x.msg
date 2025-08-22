@@ -82,3 +82,12 @@
 ~Temporary starting head position set:  
 ~Memory allocation failed!
 ~Bad tuple!
+~Register content:
+~  r0 (ACC): 
+~  r1 (DTP): 
+~  r2 (PTP): 
+~  r3 (RTP): 
+~  r4 (STP): 
+~  r5 (TTP): 
+~  r6 (PSC): 
+~  r7 (IR):  

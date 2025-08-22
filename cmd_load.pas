@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'load' }
-overlay procedure cmd_load(p1: TSplitted);
+procedure cmd_load(p1: TSplitted);
 var
   bi, bj:         byte;
   comline:        byte;

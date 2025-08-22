@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'prog' }
-overlay procedure cmd_prog(p1, p2: TSplitted);
+procedure cmd_prog(p1, p2: TSplitted);
 var
   bi, bj:        byte;
   ip1, ip2:      integer;                                { function parameters }
@@ -26,13 +26,13 @@ begin
   if length(p2) > 0 then
   begin
     val(p2, ip2, ec);
-    if ec <> 0 then err := 24;
+    if ec <> 0 then err := 23;
   end else ip2 := STCOUNT - 1;
   if (ip2 < 0) or (ip2 > 126) then err := 24;
   if length(p1) > 0 then
   begin
     val(p1, ip1, ec);
-    if ec <> 0 then err := 24;
+    if ec <> 0 then err := 23;
   end else ip1 := 0;
   if (ip1 < 0) or (ip1 > 126) then err := 24;
   if err = 0 then
