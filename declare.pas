@@ -59,6 +59,7 @@ var
   p0, p1, p2:    PByte;
   q:             boolean;                                         { allow exit }
   qb:            byte;                                      { breakpoint state }
+  runt36com:     boolean;
   sl:            integer;                                 { program step limit }
   splitted:      array[0..7] of TSplitted;                  { splitted command }
   tprec:         TTPRecently;                            { recently read tuple }

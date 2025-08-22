@@ -44,6 +44,7 @@ begin
         then registers[bi].permission:= 1     { ACC - read/write }
         else registers[bi].permission:= 0;    { others - read only }
     end;
+    runt36com := false;
     states := 0;
     symbols:= '_';
     for bi := 1 to 39 do symbols := symbols + #0;

@@ -49,17 +49,32 @@ label
     D7    'COMM END' found      'STCK' found
 }
 
-{ SET ERROR CODE AND WRITE ERROR MESSAGE }
-procedure errmsg(b: byte);
-begin
-  err := b;
-  writemsg(b, true);
-end;
+  { SET ERROR CODE AND WRITE ERROR MESSAGE }
+  procedure errmsg(b: byte);
+  begin
+    err := b;
+    writemsg(b, true);
+  end;
+
+  { STORE TAPE DATA }
+  procedure storetapedata(l: byte; s: TSplitted);
+  var
+    bi : byte;
+  begin
+    if s[5] + s[6] = PRM[1] + PRM[3] then machine.tapes[l - 4].permission := 0;
+    if s[5] + s[6] = PRM[1] + PRM[2] then machine.tapes[l - 4].permission := 1;
+    if s[5] + s[6] = PRM[2] + PRM[3] then machine.tapes[l - 4].permission := 2;
+    machine.tapes[l - 4].filename := '';
+    for bi := 7 to length(s) do
+      if (s[bi] <> #32) and (s[bi] <> #9) then
+        machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+  end;
 
 begin
   err := 0;
   stat_mandatory := 0;
   stat_segment := 0;
+  runt36com := false;
   { check parameters }
   if length(p1) = 0 then err := 23 else
   begin
@@ -188,53 +203,41 @@ begin
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
               5: { DATA found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $10;
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
               5: { PROG found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $20;
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
               7: { RSLT found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $40;
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
               8: { STCK found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $80;
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
               9: { TEMP found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
-                   machine.tapes[lab - 4].filename := '';
-                   for bi := 8 to length(s) do
-                     machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+                   storetapedata(lab, s);
                  end;
             end;
           end;
@@ -249,6 +252,8 @@ begin
             begin
               machine.t36com[comline] := s;
               comline := comline + 1;
+              { set flag }
+              runt36com := true;
             end;
         end;
       until (eof(t36file)) or (line = 255);
@@ -280,10 +285,6 @@ begin
     37: begin writemsg(err, false); writeln(p1 + '.'); end;
   else
     begin
-{       create backup
-      tapeposbak := machine.tapepos;
-      tapebak := machine.tape;
-      machine.aqi := 1;}
       writemsg(21, true);
       { convert commands to lowercase }
       for bi := 0 to 15 do
@@ -291,10 +292,6 @@ begin
           for bj := 1 to length(machine.t36com[bi]) do
             if (ord(machine.t36com[bi][bj]) >= 65) and (ord(machine.t36com[bi][bj]) <= 90) then
             machine.t36com[bi][bj] := chr(ord(machine.t36com[bi][bj]) + 32);
-      { run commands }
-      for bi := 0 to 15 do
-        if (length(machine.t36com[bi]) > 0) and (machine.t36com[bi][1] <> #0) then
-          if parsingcommand(machine.t36com[bi]) then halt;
     end;
   end;
 end;

@@ -221,7 +221,6 @@ This file type is used to load the Turing machine's (base) program, define initi
 |Label                      |Description                   |Alanz80  |AlanZ80X |
 |---------------------------|------------------------------|:-------:|:-------:|
 |`; comment`                |comment                       |         |         |
-|`MVER X`                   |compatible machine version    |   N/A   |mandatory|
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
 |`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|

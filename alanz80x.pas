@@ -17,6 +17,9 @@ program alanz80x;
 { TYPES, VARIABLES AND CONSTANTS }
 {$I declare.pas }
 
+label
+  quitprog;
+  
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; threedigit: boolean): TThreeDigit;
 var
@@ -180,6 +183,7 @@ label
 {$i cmd_prog.pas}
 {$i cmd_reg.pas}
 {$i cmd_rest.pas}
+{$i cmd_run.pas}
 {$i cmd_symb.pas}
 {$i cmd_tape.pas}
 {$i cmd_trac.pas}
@@ -249,8 +253,8 @@ begin
            7: cmd_reg(splitted[1]);
            8: cmd_reset(true);
            9: cmd_restore(true);
-{          10: cmd_run(false, splitted[1]); }
-{          11: cmd_run(true, splitted[1]); }
+          10: cmd_run(false, splitted[1]);
+          11: cmd_run(true, splitted[1]);
           12: cmd_symbol(splitted[1]);
           13: cmd_tape(splitted[1], splitted[2]);
           14: cmd_trace(splitted[1]);
@@ -282,7 +286,16 @@ begin
   repeat
     write(PROMPT); readln(command);
     q := parsingcommand(command);
+    { run commands from t36 file }
+    if runt36com then
+    begin
+      for bi := 0 to 15 do
+        if (length(machine.t36com[bi]) > 0) and (machine.t36com[bi][1] <> #0) then
+          if parsingcommand(machine.t36com[bi]) then goto quitprog;
+      runt36com := false;
+    end;
   until q = true;
+ quitprog:
   freemem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   quit(0, 0);
 end.
