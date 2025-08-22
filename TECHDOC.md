@@ -20,23 +20,24 @@ The basic program is stored in the t36 file as follows:
 
 ```
 CARD BEGIN
-     ST001 t1t3ablr2001 t1t3bclr2002 ...
-     ST002 ... 
+     ST000 t3ablr2001 t1t3bclr2002 ...
+     ST001 ... 
      ... 
 CARD END
 ```
 
 'STnnn' is the state, where nnn is the state number. The following groups are tuples for state nnn. Meaning of the characters in the first tuple:
 
-- q<sub>i</sub> = '001', it is the initial state,
-- t<sub>j</sub>/r<sub>j</sub> = 't1', it is the data tape,
-- t<sub>k</sub>/r<sub>k</sub> = 't3', it is the result tape,
+- q<sub>i</sub> = 000, it is the initial state,
+- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
+- t<sub>k</sub> = t3, it is the result tape,
 - s<sub>j</sub> = 'a', it is the read symbol from data tape,
 - s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
-- d<sub>j</sub> = 'R', it is the head moving direction over data tape,
-- d<sub>k</sub> = 'L', it is the head moving direction over result tape,
-- t<sub>m</sub>/r<sub>m</sub> = 'r2', it is the PTP register,
-- q<sub>m</sub> = '002', it is the final state.
+- d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
+- d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,
+- r<sub>m</sub> = r2, it is the PTP register,
+- q<sub>m</sub> = 001, it is the final state.
+
 
 #### In the variable
 
@@ -70,6 +71,7 @@ Possible values of variables:
 - `trm`: t<sub>0</sub>..t<sub>5</sub>: 0..5 and r<sub>0</sub>..r<sub>7</sub>: 6..13,
 - `qm`: 0..127.
 
+
 #### The tuple number
 
 Each state has as many tuples as the cardinality of the symbol set. The exception is the final state, which causes the machine to stop. The number of tuples is 5080 based on the formula below:
@@ -98,6 +100,7 @@ $$
 
 In the program, the q<sub>n</sub> is represented by the constant `STCOUNT` and the number of symbol is by the constant `SYMCOUNT`.
 
+
 #### Bit encoding
 
 Due to the economical use of available small memory space (Z80 - 64 kB), tuples are not stored in a record array, but in an area allocated at runtime in the heap. A tuple uses three bytes, which is called a tuple block. The order of the bytes is the same as the read/write order.
@@ -115,6 +118,7 @@ The bit encoding in the touple block is as follows:
 | 1 | |   sk   | 3 | |  trm   | 2 | |   qm   | 1 |
 | 0 | |   sk   | 2 | |  trm   | 1 | |   qm   | 0 |
 
+
 #### The byte index
 
 The byte number is the position of a byte within a tuple in the memory area, which can be calculated like this:
@@ -125,6 +129,7 @@ $$
 
 In the program, the block_size is represented by the constant `TPBLSIZE` with value 3, and the byte_count is by variable `byte_count`, with the number of the examined byte of the block (0..2). 
 
+
 #### The memory address
 
 The calculation of the memory address of a tuple is as follows:
@@ -133,8 +138,8 @@ $$
 address(q_n,s_n,byte\\_count) = address(tuples\\_area) + byte\\_number(q_n,s_n,byte\\_count)
 $$
 
-In the program, the address is reprezented by `tpaddress` variable, the tupless_area is by `machine.tuples^` pointer and the byte_count is by variable `byte_count`:
+In the program, the address is reprezented by `bn2tpaddr` variable, the tupless_area is by `machine.tuples^` pointer and the byte_count is by variable `byte_count`:
   
 ```
-  tpaddress := ptr(seg(machine.tuples^), ofs(machine.tuples^) + byte_number);
+  bn2tpaddr := ptr(seg(machine.tuples^), ofs(machine.tuples^) + byte_number);
 ```

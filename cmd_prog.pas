@@ -1,5 +1,5 @@
 { +--------------------------------------------------------------------------+ }
-{ | AlanZ80 v0.1 * Turing machine                                            | }
+{ | AlanZ80X v0.1 * Extended Turing machine                                  | }
 { | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
 { | cmd_prog.pas                                                             | }
 { | 'PROG' command                                                           | }

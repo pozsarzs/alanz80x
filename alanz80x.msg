@@ -12,7 +12,7 @@
 ~run [head position]   run from data tape head position
 ~step [head position]  run step-by-step from data tape head position
 ~symbol [symbols|-]    set get and reset symbol set (S)
-~tape [1..5]           show tape content
+~tape [0..5][filename]`show content or assign file or device to tape
 ~trace [on|off]        turn tracking on and off
 ~The STAT value is bad or missing.
 ~The STAT value is out of range.

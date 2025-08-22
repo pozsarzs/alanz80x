@@ -68,19 +68,19 @@ function tpblunpack(b0, b1, b2: byte): boolean;
 }
 
 begin
-    with tprec do
-    begin
-      qi:=0;
-      trj:=0;
-      trk:=0;
-      sj:=0;
-      sk:=0;
-      dj:=0;
-      dk:=0;
-      trm:=0;
-      qm:=0;
-    end;
-    tpblunpack := true;
+  with tprec do
+  begin
+    qi := 0;
+    trj := 0;
+    trk := (b0 and $f0) div 16;
+    sj := 0;
+    sk := (b0 and $0f) * 2 + (b1 and $c0) div 64;
+    dj := 0;
+    dk := 0;
+    trm := (b1 and $17) * 2 + (b2 and $40) div 128;
+    qm := b2 and $7f;
+  end;
+  tpblunpack := true;
 end;
 
 { ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
@@ -174,9 +174,11 @@ label
   break1, break2, break3, break4;
 
 {$i cmd_brea.pas}
+{$i cmd_load.pas}
 {$i cmd_help.pas}
 {$i cmd_limi.pas}
 {$i cmd_prog.pas}
+{$i cmd_rest.pas}
 {$i cmd_symb.pas}
 {$i cmd_trac.pas}
 
@@ -237,12 +239,12 @@ begin
            1: cmd_help(splitted[1]);
 {           2: cmd_info; }
            3: cmd_limit(splitted[1]);
-{           4: cmd_load(splitted[1]); }
+           4: cmd_load(splitted[1]);
            5: cmd_prog(splitted[1], splitted[2]);
            6: parsingcommand := true;
 {           7: cmd_reg(splitted[1]); }
            8: cmd_reset(true);
-{           9: cmd_restore(true); }
+           9: cmd_restore(true);
 {          10: cmd_run(false, splitted[1]); }
 {          11: cmd_run(true, splitted[1]); }
           12: cmd_symbol(splitted[1]);

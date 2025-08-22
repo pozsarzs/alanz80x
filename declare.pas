@@ -19,14 +19,16 @@ type
   TFilename =    string[12];
   TSplitted =    string[64];
   TThreeDigit =  string[3];
-  { TURING MACHINE BASE CONFIGURATION TYPE }
-  TTuring =      record                         { Turing machine configuration }
-    progdesc:    string[64];                          { description of program }
-    progname:    string[8];                                  { name of program }
-    symbols:     string[40];                                    { symbolum set }
-    tuples:      PByte;                              { pointer to tuple memory }
-  end;
+  TRegStr =      string[5];
   { TYPES RELATED TO TURING MACHINES }
+  TTapes =       record
+    filename:    TFilename;
+    permission:  byte;
+  end;
+  TRegisters =   record                                            { registers }
+    data:        TRegStr;
+    permission:  byte;
+  end;
   TTPRecently =  record                                  { recently read tuple }
     qi:          byte;                                          { actual state }
     trj:         byte;{ tape or register from which the machine reads a symbol }
@@ -38,27 +40,27 @@ type
     trm:         byte;    { next tape or register from which the machine reads }
     qm:          byte;                                            { next state }
   end;
-  TRegisters =   record
-    r0_acc:      char;                                     { Accumulator (ACC) }
-    r1_dtp:      integer;                           { Data Tape Position (DTP) }
-    r2_ptp:      integer;                        { Program Tape Position (PTP) }
-    r3_rtp:      integer;                         { Result Tape Position (RTP) }
-    r4_stp:      integer;                          { Stack Tape Position (STP) }
-    r5_ttp:      integer;                      { Temporary Tape Position (STP) }
-    r6_psc:      integer;                         { Program Step Counter (PSC) }
-    r7_ir:       byte;                             { Instruction Register (IR) }
+  { TURING MACHINE BASE CONFIGURATION TYPE }
+  TTuring =      record                         { Turing machine configuration }
+    files:       array[0..5] of TTapes;                        { file settings }
+    progdesc:    string[64];                          { description of program }
+    progname:    string[8];                                  { name of program }
+    registers:   array[0..7] of TRegisters;                { register settings }
+    states:      byte;                                      { number of states }
+    symbols:     string[40];                                    { symbolum set }
+    t36com:      array[0..15] of TCommand;           { t36 file command buffer }
+    tuples:      PByte;                              { pointer to tuple memory }
   end;
 var
   bi: byte;
   command:       TCommand;                              { command line content }
-  machine:       TTuring;                       { Turing machine configuration }
+  machine:       TTuring;                  { Turing machine base configuration }
   messages:      array[0..4095] of char;     { messages from alanz80x.msg file }
   p0, p1, p2:    PByte;
   q:             boolean;                                         { allow exit }
   qb:            byte;                                      { breakpoint state }
   sl:            integer;                                 { program step limit }
   splitted:      array[0..7] of TSplitted;                  { splitted command }
-  t36com:        array[0..15] of TCommand;           { t36 file command buffer }
   tprec:         TTPRecently;                            { recently read tuple }
   trace:         boolean;                                      { turn tracking }
 const

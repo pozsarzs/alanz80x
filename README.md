@@ -11,9 +11,11 @@
 
 _The AlanZ80X is an idea that takes the concept of a Turing machine to a new level. It may be possible, but it’s not certain that it will succeed. It might get made, but it's not certain. But I can say that it's great for fun. And to be challenging in the fun, it has to fit into 64kB._  
 
+
 ### In a nutshell 
 
 This state machine differs from Turing's original model in several ways: it has four general I/O tapes, a stack tape and some registers. Can write to standard output device (CON:, PRN:, LST:) instead of tape. The tapes are represented by typed files. One register can be used arbitrarily and the others provide information about the current state of the machine. The machine also has a simple interrupt handling. The interrupt request is initiated by flag files. The machine's basic program, settings, and commands required for automated execution contained in t36 file. In the state change table, the basic program is divided into parts according to the number of instruction codes and interrupts on the program tape.
+
 
 ### How it works?
 
@@ -114,6 +116,7 @@ $$
 
 L/R movements applied to the ACC register are allowed but ineffective (they do not change the head position).
 
+
 ### Register set
 
 The finite set of registers and the symbol chains on them are as follows:
@@ -184,7 +187,7 @@ $$
 
 ## Operation
 
-The operation of the machine is based on state transitions, which can be described by tuples, in the form below.
+The operation of the machine is based on state transitions, which can be described by tuples, in the form below. Operating modes determine the direction of read and write operations.
 
 |mode|   initial   |     from    |      to     |    read     |    write    |    move     |     move    |            next           |    final    |                                                                              9-tuple                                                                |
 |:--:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|:-------------------------:|:-----------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
@@ -218,16 +221,17 @@ This file type is used to load the Turing machine's (base) program, define initi
 |Label                      |Description                   |Alanz80  |AlanZ80X |
 |---------------------------|------------------------------|:-------:|:-------:|
 |`; comment`                |comment                       |         |         |
+|`MVER X`                   |compatible machine version    |   N/A   |mandatory|
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
 |`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|
 |`STAT 3`                   |number of states              |mandatory|mandatory|
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
-|`     STnn ...`            |base program                  |mandatory|mandatory|
+|`     STnnn ...`           |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
 |`TAPE BEGIN`               |begin of tape section         |optional |mandatory|
 |`     SYMB 012345679`      |data tape content             |optional |   N/A   |
-|`     SPOS 1`              |data tape start position      |optional |optional |
+|`     SPOS 1`              |data tape start position      |optional |   N/A   |
 |`     CNSL WO devicename:` |assign device to console      |   N/A   |mandatory|
 |`     DATA RO filename.d36`|assign file to data tape      |   N/A   |mandatory|
 |`     PROG RO filename.p36`|assign file to program tape   |   N/A   |mandatory|
@@ -245,17 +249,18 @@ Note:
 - If the first symbol specified in the CONF section is not blank, then it will be inserted.
 - The 9-tuples must be specified in the following form:
 
- `ST001 t1t3abrlr2002 ...`, where the:  
+ `ST000 t3abrlr2002 ...`, where the:  
 
-- q<sub>i</sub> = 001, it is the initial state,
-- t<sub>j</sub> = t1, it is the data tape,
+- q<sub>i</sub> = 000, it is the initial state,
+- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
 - t<sub>k</sub> = t3, it is the result tape,
 - s<sub>j</sub> = 'a', it is the read symbol from data tape,
 - s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
-- d<sub>j</sub> = R, it is the head moving direction over data tape,
-- d<sub>k</sub> = L, it is the head moving direction over result tape,
+- d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
+- d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,
 - r<sub>m</sub> = r2, it is the PTP register,
 - q<sub>m</sub> = 002, it is the final state.
+
 
 ### Data format on tapes
 
@@ -268,6 +273,12 @@ The tape stores data in human-readable form.
 |result tape   |for output data   |created or overwritten by the program|`R36_123_511_1` |
 |stack tape    |for stack         |created or overwritten by the program|`S36_23_54_12`  |
 |temporary tape|for temporary data|created or overwritten by the program|`T36_23_54_12`  |
+
+### IRQ flag file
+
+|Type of tape  |Description          |Note                      |Naming convention  |
+|--------------|---------------------|--------------------------|-------------------|
+|IRQ flag file |for request interrupt|empty, created by the user|`n.i36`, n = {1..4}|
 
 
 ## Example program
@@ -287,8 +298,8 @@ DESC Conversion between Roman and Arabic numerals
 SYMB 0123456789IVXLCDM
 STAT 33
 CARD BEGIN
+     ST000 ... 
      ST001 ... 
-     ST002 ... 
      ... 
 CARD END
 TAPE BEGIN
@@ -310,20 +321,20 @@ PROG END
 
 The program can be controlled with the following command line commands.
 
-|   |command               |description                                  |
-|--:|----------------------|---------------------------------------------|
-|  1|`break [state\|-]`    |set, get and reset breakpoint state (qb)     |
-|  2|`help [command]`      |help with using the program                  |
-|  3|`info`                |show all information about this machine      |
-|  4|`limit [steps\|-]`    |set, get and reset number of steps           |
-|  5|`load filename.t36`   |load t36 file                                |
-|  6|`prog [from][to]`     |show program                                 |
-|  7|`quit`                |exit the program                             |
-|  8|`reg [0..7]`          |show register content                        |
-|  9|`reset`               |reset program                                |
-| 10|`restore`             |restore machine to original state            |
-| 11|`run [head position]` |run from data tape head position             |
-| 12|`step [head position]`|run step-by-step from data tape head position|
-| 13|`symbol [symbols\|-]` |set, get and reset symbol set (S)            |
-| 14|`tape [1..5]`         |show tape content                            |
-| 15|`trace [on\|off]`     |turn tracking on and off                     |
+|   |command                |description                                       |
+|--:|-----------------------|--------------------------------------------------|
+|  1|`break [state\|-]`     |set, get and reset breakpoint state (qb)          |
+|  2|`help [command]`       |help with using the program                       |
+|  3|`info`                 |show all information about this machine           |
+|  4|`limit [steps\|-]`     |set, get and reset number of steps                |
+|  5|`load filename.t36`    |load t36 file                                     |
+|  6|`prog [from][to]`      |show program                                      |
+|  7|`quit`                 |exit the program                                  |
+|  8|`reg [0..7]`           |show register content                             |
+|  9|`reset`                |reset program                                     |
+| 10|`restore`              |restore machine to original state                 |
+| 11|`run [head position]`  |run from data tape head position                  |
+| 12|`step [head position]` |run step-by-step from data tape head position     |
+| 13|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
+| 14|`tape [0..5][filename]`|show tape content or assign file or device to tape|
+| 15|`trace [on\|off]`      |turn tracking on and off                          |
