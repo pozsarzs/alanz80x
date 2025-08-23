@@ -22,6 +22,12 @@ begin
   begin
     progdesc := '';
     progname := '';
+    runt36com := false;
+    states := 0;
+    symbols:= '_abcdefghijklmnopqrstuvwxyz0123456789.-#';
+    tprec.aqi := 0;
+    tprec.atrj := 0;
+    { tapes }
     for bi := 0 to 5 do
     begin
       if bi = 0
@@ -35,6 +41,7 @@ begin
         tapes[bi].permission:= 1;    { others - read/write }
       end;
     end;
+    { registers }
     for bi := 0 to 7 do
     begin
       if bi = 0
@@ -44,12 +51,10 @@ begin
         then registers[bi].permission:= 1     { ACC - read/write }
         else registers[bi].permission:= 0;    { others - read only }
     end;
-    runt36com := false;
-    states := 0;
-    symbols:= '_';
-    for bi := 1 to 39 do symbols := symbols + #0;
-    for bi := 0 to 15 do t36com[bi] := '';
+    { tuple memory }
     fillchar(tuples^, TPBLCOUNT * TPBLSIZE, 0);
+    { t36 command buffer }
+    for bi := 0 to 15 do t36com[bi] := '';
   end;
   { reset variables related to turing machines }
   qb := 0;

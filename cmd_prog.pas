@@ -18,7 +18,6 @@ var
   bi, bj:        byte;
   ip1, ip2:      integer;                                { function parameters }
   ec:            integer;
-  po0, po1, po2: PByte;
   err: byte;                                                      { error code }
 begin
   err := 0;
@@ -49,36 +48,27 @@ begin
       writemsg(66, true);
       for bi := ip1 to ip2 do
       begin
+        write(addzero(bi, true), ': ');                                   { qi }
         for bj := 0 to SYMCOUNT - 1 do
         begin
-          { read from memory }
-          po0 := ai2tpaddr(bi, bj, 0);
-          po1 := ai2tpaddr(bi, bj, 1);
-          po2 := ai2tpaddr(bi, bj, 2);
-          { decode }
-          if tpblunpack(po0^, po1^, po2^) then
-          begin
-            { write to screen}
+          { read from memory and decode }
+          tpblunpack(bi, bj);
+          { write to screen}
 {            if machine.symbols[tprec.sj + 1] <> #0 then }
-              with tprec do
-              begin
-                write(addzero(bi, true));
-                if trj <= 5
-                  then write(DC[1], addzero(trj, false))
-                  else write(DC[2], addzero(trj - 6, false));
-                if trk <= 5
-                  then write(DC[1], addzero(trk, false))
-                  else write(DC[2], addzero(trk - 6, false));
-                write(machine.symbols[sj + 1]);
-                write(machine.symbols[sk + 1]);
-                write(HMD[dj + 1]);
-                write(HMD[dk + 1]);
-                if trm <= 5
-                  then write(DC[1], addzero(trm, false))
-                  else write(DC[2], addzero(trm - 6, false));
-                write(addzero(qm, true),' ');
-              end;
-          end else writemsg(84, false);
+          with tprec do
+          begin
+            if trk <= 5                                                  { trk }
+              then write(DC[1], trk)
+              else write(DC[2], trk - 6);
+            write(machine.symbols[sj + 1]);                               { sj }
+            write(machine.symbols[sk + 1]);                               { sk }
+            write(HMD[dj + 1]);                                           { dj }
+            write(HMD[dk + 1]);                                           { dk }
+            if trm <= 5                                                  { trm }
+              then write(DC[1], trm)
+              else write(DC[2], trm - 6);
+            write(addzero(qm, true),' ');                                 { qm }
+          end;
         end;
         writeln;
       end;

@@ -30,8 +30,8 @@ type
     permission:  byte;
   end;
   TTPRecently =  record                                  { recently read tuple }
-    qi:          byte;                                          { actual state }
-    trj:         byte;{ tape or register from which the machine reads a symbol }
+    aqi:         byte;                                          { actual state }
+    atrj:        byte;                             { actual input data carrier }
     trk:         byte; { tape or register to which the machine writes a symbol }
     sj:          byte;              { actual symbol read from the data carrier }
     sk:          byte;              { symbol to be written to the data carrier }

@@ -41,78 +41,64 @@ begin
 end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM TUPLE NUMBER AND BYTE COUNT }
-function tn2tpaddr(tuple_number, byte_count: integer): PByte;
-begin
-  tn2tpaddr := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) + tuple_number * TPBLSIZE + byte_count);
-end;
+{ function tn2tpaddr(tuple_number, byte_count: integer): PByte;
+  begin
+    tn2tpaddr := ptr(seg(machine.tuples^),
+                     ofs(machine.tuples^) + tuple_number * TPBLSIZE + byte_count);
+  end; }
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM BYTE NUMBER}
-function bn2tpaddr(byte_number: integer): PByte;
-begin
-  bn2tpaddr := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) + byte_number);
-end;
+{ function bn2tpaddr(byte_number: integer): PByte;
+  begin
+    bn2tpaddr := ptr(seg(machine.tuples^),
+                     ofs(machine.tuples^) + byte_number);
+  end; }
 
 { DECODE TUPLE BLOCK AND UNPACK TO A RECORD TYPE VARIABLE }
-function tpblunpack(b0, b1, b2: byte): boolean;
+procedure tpblunpack(bi, bj: byte);
+var
+  po0, po1, po2: PByte;
 
-{
-|bit|0|variable|bit|1|variable|bit|2|variable|bit|
-|---|-|--------|---|-|--------|---|-|--------|---|
-| 7 | |trk     | 3 | |sk      | 1 | |trm     | 0 |
-| 6 | |trk     | 2 | |sk      | 0 | |qm      | 6 |
-| 5 | |trk     | 1 | |dj/dk   | 2 | |qm      | 5 |
-| 4 | |trk     | 0 | |dj/dk   | 1 | |qm      | 4 |
-| 3 | |sk      | 5 | |dj/dk   | 0 | |qm      | 3 |
-| 2 | |sk      | 4 | |trm     | 3 | |qm      | 2 |
-| 1 | |sk      | 3 | |trm     | 2 | |qm      | 1 |
-| 0 | |sk      | 2 | |trm     | 1 | |qm      | 0 |
-}
+  { decoce head moving }
+  function direction(dn, i: byte): byte;
+  begin
+    if dn = 0 then
+    begin
+      { dj }
+      if i < 3 then direction := 0 else
+        if i > 5 then direction := 1 else
+         direction := 2;
+    end else
+    begin
+      { dk }
+      if (i + 3) mod 3 = 0 then direction := 0 else
+        if (i + 2) mod 3 = 0 then direction := 2 else
+          if (i + 1) mod 3 = 0 then direction := 1 else
+    end
+  end;
 
 begin
+  { read from memory }
+  po0 := ai2tpaddr(bi, bj, 0);
+  po1 := ai2tpaddr(bi, bj, 1);
+  po2 := ai2tpaddr(bi, bj, 2);
+  { decode }
   with tprec do
   begin
-    qi := 0;
-    trj := 0;
-    trk := (b0 and $f0) div 16;
-    sj := 0;
-    sk := (b0 and $0f) * 2 + (b1 and $c0) div 64;
-    dj := 0;
-    dk := 0;
-    trm := (b1 and $17) * 2 + (b2 and $40) div 128;
-    qm := b2 and $7f;
+    trk := (po0^ and $f0) div 16;
+    sj := bj;
+    sk := (po0^ and $0f) * 2 + (po1^ and $c0) div 64;
+    dj := direction(0, (po1^ and $38) div 8);
+    dk := direction(1, (po1^ and $38) div 8);
+    trm := (po1^ and $17) * 2 + (po2^ and $40) div 128;
+    qm := po2^ and $7f;
   end;
-  tpblunpack := true;
 end;
 
 { ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
-{function tpblpack(b0, b1, b2: byte): boolean;
-
-function tpblread(state, symnum: byte): boolean;
-var
-  bi: byte;
-  tpblock: array[0..2] of byte;
-  tpmem: PByte;
-begin
-  if (state > 126) or (symnum > 39) then tpdecode := false else
+{ procedure tpblpack(b0, b1, b2: byte);
   begin
-    for bi := 0 to 2 do
-    begin
-
-    
-    end;
-    with tprec do
-    begin
-      trk := (tpblock[1] and $f0) div 16;
-    
- 
-      qm := tpblock[3] and $7f;
-    end;
-    tpdecode := true;
-  end;
-end;
-}
+  end; }
 
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);

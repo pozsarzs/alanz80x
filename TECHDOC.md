@@ -46,8 +46,8 @@ The _recently read_ tuple is stored in the variable tprec. This variable is of t
 ```
 type
   TTPRecently = record                                   { recently read tuple }
-    qi:         byte;                                           { actual state }
-    trj:        byte; { tape or register from which the machine reads a symbol }
+    aqi:        byte;                                           { actual state }
+    atrj:       byte;                              { actual input data carrier }
     trk:        byte;  { tape or register to which the machine writes a symbol }
     sj:         char;               { actual symbol read from the data carrier }
     sk:         char;               { symbol to be written to the data carrier }
@@ -117,6 +117,19 @@ The bit encoding in the touple block is as follows:
 | 2 | |   sk   | 4 | |  trm   | 3 | |   qm   | 2 |
 | 1 | |   sk   | 3 | |  trm   | 2 | |   qm   | 1 |
 | 0 | |   sk   | 2 | |  trm   | 1 | |   qm   | 0 |
+
+** Head moving directions **  
+
+|b2 b1 b0| tj  | tk  |
+|:------:|:---:|:---:|
+| 1  1  1|stay |left |
+| 1  1  0|stay |left |
+| 1  0  1|right|right|
+| 1  0  0|right|stay |
+| 0  1  1|right|left |
+| 0  1  0|left |right| 
+| 0  0  1|left |stay |
+| 0  0  0|left |left |
 
 
 #### The byte index
