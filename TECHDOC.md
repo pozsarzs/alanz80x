@@ -19,8 +19,10 @@ The notations used in mathematical formulas are included in the description. The
 The basic program is stored in the t36 file as follows:
 
 ```
+SYMB _ABCDEFG
+SYMB _ABCDEFG
 CARD BEGIN
-     ST000 t3ablr2001 t1t3bclr2002 ...
+     ST000 t3_lr2001 t3clr2002 ...
      ST001 ... 
      ... 
 CARD END
@@ -31,7 +33,7 @@ CARD END
 - q<sub>i</sub> = 000, it is the initial state,
 - t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
 - t<sub>k</sub> = t3, it is the result tape,
-- s<sub>j</sub> = 'a', it is the read symbol from data tape,
+- s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
 - s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
 - d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,

@@ -122,7 +122,7 @@ L/R movements applied to the ACC register are allowed but ineffective (they do n
 The finite set of registers and the symbol chains on them are as follows:
 
 $$
-R = \\{ r_0, \dots, r_7 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
+R = \\{ r_0, \dots, r_8 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
 $$
 
 - r<sub>0</sub>: Accumulator (ACC) - char type,
@@ -132,10 +132,11 @@ $$
 - r<sub>4</sub>: Stack Tape Position (STP) - integer type,
 - r<sub>5</sub>: Temporary Tape Position (TTP) - integer type,
 - r<sub>6</sub>: Program Step Counter (PSC) - integer type,
-- r<sub>7</sub>: Instruction Register (IR) - byte type,
+- r<sub>7</sub>: Instruction Register (IR) - char type,
+- r<sub>8</sub>: Bottomless register (BLS) - char type,
 - w: Symbol chain in the register.
 
-All register value are stored as string. Reading and writing is done in the same way as with tape.
+All register value are stored as string. Reading and writing is done in the same way as with tape. The bottomless register swallows the symbol written into it and always returns '_' when read.
 
 
 ### State set
@@ -223,8 +224,8 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`; comment`                |comment                       |         |         |
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
-|`SYMB 0123456789PROG`      |set of symbols                |mandatory|mandatory|
-|`STAT 3`                   |number of states              |mandatory|mandatory|
+|`SYMB _0123456789`         |set of symbols                |mandatory|mandatory|
+|`STAT 3`                   |number of states              |mandatory|   N/A   |
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnnn ...`           |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
@@ -248,12 +249,12 @@ Note:
 - If the first symbol specified in the CONF section is not blank, then it will be inserted.
 - The 9-tuples must be specified in the following form:
 
- `ST000 t3abrlr2002 ...`, where the:  
+ `ST012 ... t3brlr2002 ...`, where the:  
 
-- q<sub>i</sub> = 000, it is the initial state,
-- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
+- q<sub>i</sub> = 012, it is the initial state,
+- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>2</sub> (program tape), in the following it is the same as the t<sub>m</sub> of the previous tuple,
 - t<sub>k</sub> = t3, it is the result tape,
-- s<sub>j</sub> = 'a', it is the read symbol from data tape,
+- s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
 - s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
 - d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,
@@ -261,56 +262,67 @@ Note:
 - q<sub>m</sub> = 002, it is the final state.
 
 
-### Data format on tapes
+### Tapes
 
 The tape stores data in human-readable form.
 
-|Type of tape  |Description       |Note                                 |Example content |
-|--------------|------------------|-------------------------------------|----------------|
-|data tape     |for input data    |not empty, created by the user       |`D36_1_123_5643`|
-|program tape  |for user program  |not empty, created by the user       |`P36_1##_4#`    |
-|result tape   |for output data   |created or overwritten by the program|`R36_123_511_1` |
-|stack tape    |for stack         |created or overwritten by the program|`S36_23_54_12`  |
-|temporary tape|for temporary data|created or overwritten by the program|`T36_23_54_12`  |
+|Type of tape  |Note                                 |Head on tape |
+|--------------|-------------------------------------|-------------|
+|data tape     |not empty, created by the user       |`D36_...`    |
+|program tape  |not empty, created by the user       |`P36_...`    |
+|result tape   |created or overwritten by the program|`R36_...`    |
+|stack tape    |created or overwritten by the program|`S36_...`    |
+|temporary tape|created or overwritten by the program|`T36_...`    |
+
 
 ### IRQ flag file
 
-|Type of tape  |Description          |Note                      |Naming convention  |
-|--------------|---------------------|--------------------------|-------------------|
-|IRQ flag file |for request interrupt|empty, created by the user|`n.i36`, n = {1..4}|
+|Type of tape  |Note                      |Naming convention  |
+|--------------|--------------------------|-------------------|
+|IRQ flag file |empty, created by the user|`n.i36`, n = {1..4}|
 
 
 ## Example program
+
+### Program tape
+
+`P36_@1_@1_#`
+
+### Data tape
+
+`D36_12_54_#`
+
+### Base program card
 
 ```
 ; You can use this with AlanZ80X extended Turing machine implementation.
 ; The program turns on tracing after starting, then start machine. The machine
 ; reads the instructions from the program tape and the corresponding data from
-; the data tape. It uses the stack tape and the result tape to perform the
-; operations, the machine stops and the result is stored on the latter.
-; After stopping, it loads a machine with a different configuration (represented
-; by the next.t36 file and continues working with its result.
+; the data tape. The machine write result to the result tape.
 
 PROG BEGIN
-NAME R2A
-DESC Conversion between Roman and Arabic numerals 
-SYMB 0123456789IVXLCDM
-STAT 33
+NAME INC1
+DESC Increment the input number by 1 
+SYMB _@#0123456789
 CARD BEGIN
-     ST000 ... 
-     ST001 ... 
-     ... 
+;    ----- s0-------- s1-------- s2-------- s3-------- s4-------- s5-------- s6-------- s7-------- s8-------- s9-------- s10------- s11------- s12-------
+     ST000 R8_RST2000 T3_RRT1001 R8#RST2000 R80RST2000 R81RST2000 R82RST2000 R83RST2000 R84RST2000 R85RST2000 R86RST2000 R87RST2000 R88RST2000 R89RST2000
+     ST001 T3_SLT3002 R8@RST1001 R8@RST1001 T30RRT1001 T31RRT1001 T32RRT1001 T33RRT1001 T34RRT1001 T35RRT1001 T36RRT1001 T37RRT1001 T38RRT1001 T39RRT1001
+     ST002 T3_RST3010 T3@L5T3002 T3@L5T3002 T30L5T3002 T31L5T3002 T32L5T3002 T33L5T3002 T34L5T3002 T35L5T3002 T36L5T3002 T37L5T3002 T38L5T3002 T39L5T3002
+     ST010 T3_LST3011 R8@RST3010 R8#RST3010 T30RST3010 T31RST3011 T32RST3010 T33RST3010 T34RST3010 T35RST3010 T36RST3010 T37RST3010 T38RST3010 T39RST3010 
+     ST011 T3_LST2000 R8@RST3011 R8#RST3011 T31LST2000 T32LST2000 T33LST2000 T34LST2000 T35LST2000 T36LST2000 T37LST2000 T38LST2000 T39LST2000 T30LST2000
+     ST012 T31LST2000 R8@RST3012 R8#RST3012 T31LST3011 T32LST3011 T33LST3011 T34LST3011 T35LST3011 T36LST3011 T37LST3011 T38LST3011 T39LST3011 T30LST3011 
+     ST125 R8_RST2125 R8_RST2125 R70RST2127 R71RST1010 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125
 CARD END
 TAPE BEGIN
-     DATA RO data.d36
-     PROG RO program.p36
-     STCK RW stack.s36
-     RSLT RW output.r36
+     DATA R0 inc1.d36
+     PROG RO inc1.p36
+     RSLT RW inc1.r36
+
 TAPE END
 COMM BEGIN
      TRACE ON
      RUN
-     LOAD next.t36
 COMM END
 PROG END
 ```
