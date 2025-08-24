@@ -53,19 +53,23 @@ begin
           { read from memory and decode }
           tpblunpack(bi, bj);
           { write to screen}
-{            if machine.symbols[tprec.sj + 1] <> #0 then }
+          if length(machine.symbols) > bj then
           with tprec do
           begin
-            if trk <= 5                                                  { trk }
-              then write(DC[1], trk)
-              else write(DC[2], trk - 6);
-            write(machine.symbols[sj + 1]);                               { sj }
-            write(machine.symbols[sk + 1]);                               { sk }
+            if trk > 5                                                   { trk }
+              then write(DC[2], trk - 6)
+              else write(DC[1], trk);
+            if sj > 0                                                     { sj }
+              then write(machine.symbols[sj])
+              else write(' ');
+            if sk > 0                                                     { sk }
+              then write(machine.symbols[sk])
+              else write(' ');
             write(HMD[dj + 1]);                                           { dj }
             write(HMD[dk + 1]);                                           { dk }
-            if trm <= 5                                                  { trm }
-              then write(DC[1], trm)
-              else write(DC[2], trm - 6);
+            if trm > 5                                                   { trm }
+              then write(DC[2], trm - 6)
+              else write(DC[1], trm);
             write(addzero(qm, true),' ');                                 { qm }
           end;
         end;
@@ -76,3 +80,4 @@ begin
     { error message }
     writemsg(err, true);
 end;
+

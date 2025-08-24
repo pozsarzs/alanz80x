@@ -70,7 +70,6 @@ const
                  'prog',  'quit', 'reg',    'reset', 'restore',
                  'run',   'step', 'symbol', 'tape',  'trace');
   DC:            string[2] = 'TR';
-  DIR:           string[3] = 'LSR';
   EXT:           string[5] = 'DPRST';
   HEADER1 =      'AlanZ80X v0.1';
   HEADER2 =      '(C) 2025 Pozsar Zsolt <pozsarzs@gmail.com> EUPL v1.2';

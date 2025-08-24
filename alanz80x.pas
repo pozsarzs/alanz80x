@@ -86,13 +86,17 @@ begin
   with tprec do
   begin
     trk := (po0^ and $f0) div 16;
-    sj := bj;
-    sk := (po0^ and $0f) * 2 + (po1^ and $c0) div 64;
+    sj := bj + 1;
+    sk := (po0^ and $0f) * 4 + (po1^ and $c0) div 64;
     dj := decdir(0, (po1^ and $38) div 8);
     dk := decdir(1, (po1^ and $38) div 8);
-    trm := (po1^ and $17) * 2 + (po2^ and $40) div 128;
+    trm := (po1^ and $07) * 2 + (po2^ and $80) div 128;
     qm := po2^ and $7f;
   end;
+  { if bj < 4 then 
+    with tprec do
+      writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
+              po0^, ' ', po1^, ' ', po2^); }
 end;
 
 { ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
@@ -124,6 +128,10 @@ begin
     po1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
     po2^ := (qm and $7f) + ((trm and $01) * 128);
   end;
+  { if bj < 4 then 
+    with tprec do
+      writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
+              po0^, ' ', po1^, ' ', po2^); }
 end;
 
 { WRITE A MESSAGE TO SCREEN }

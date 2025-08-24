@@ -63,8 +63,8 @@ var
 
 Possible values of variables:
 - `qi`: 0..127,
-- `trj`: t<sub>0</sub>..t<sub>5</sub>: 0..5 and r<sub>0</sub>..r<sub>7</sub>: 6..13,
-- `trk`: t<sub>0</sub>..t<sub>5</sub>: 0..5 and r<sub>0</sub>..r<sub>7</sub>: 6..13,
+- `trj`: t<sub>0</sub>..t<sub>5</sub>: 0..5 and r<sub>0</sub>..r<sub>8</sub>: 6..14,
+- `trk`: t<sub>0</sub>..t<sub>5</sub>: 0..5 and r<sub>0</sub>..r<sub>8</sub>: 6..14,
 - `sj`: 0..39, it is one less than the symbol's position in the variable `machines.symbols`,
 - `sk`: 0..39, it is one less than the symbol's position in the variable `machines.symbols`,
 - `dj`: left = 0; stay = 1 and right = 2,

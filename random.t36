@@ -4,7 +4,6 @@ PROG BEGIN
 NAME Random
 DESC Non-working test program
 SYMB _ABCDEFG
-STAT 32
 CARD BEGIN
 ;    ---qi s0-------- s1-------- s2-------- s3-------- s4-------- s5-------- s6-------- s7-------- 
      ST000 R5BLST1015 T1ARLT0013 R1FRRR5001 R6GSLR6002 R1ESLT0010 R7FRRR4006 T1GLLR1003 R4GSSR6003

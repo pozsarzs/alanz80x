@@ -97,3 +97,5 @@
 ~  t3 (result tape):      
 ~  t4 (stack tape):       
 ~  t5 (temporary tape):   
+~The target tape/register (trk) is bad or missing.
+~The target tape/register (trk) is not included in the set T or R.

@@ -161,6 +161,7 @@ begin
                  begin
                    { - in the opened segment PROG }
                    stat_mandatory := stat_mandatory or $01;
+                   machine.progname := '';
                    for bi := 5 to length(s) do
                        machine.progname := machine.progname + s[bi];
                  end;
@@ -169,6 +170,7 @@ begin
                  begin
                    { - in the opened segment PROG }
                    stat_mandatory := stat_mandatory or $02;
+                    machine.progdesc := '';
                    for bi := 5 to length(s) do
                      machine.progdesc := machine.progdesc + s[bi];
                  end;
@@ -177,6 +179,7 @@ begin
                  begin
                    { - in the opened segment PROG }
                    stat_mandatory := stat_mandatory or $04;
+                   machine.symbols := '';
                    for bi := 5 to length(s) do
                     machine.symbols := machine.symbols + s[bi];
                  end;
@@ -222,8 +225,6 @@ begin
                  end;
             end;
           end;
-
-
           { load program }
           if (s[1] + s[2] = 'ST') and (stat_segment = $05) then
           begin
@@ -235,43 +236,51 @@ begin
             { qi }
             val(ss[3] + ss[4]+ ss[5], qi, ec);
             { - check value }
-            if ec > 0 then err := 32+16 else
-              if qi > 126 then err := 33+16;
+            if ec > 0 then err := 48 else
+              if qi > 126 then err := 49;
             if err > 0 then goto error;
             delete(ss, 1, 5);
-            writeln(ss);
             bi := 0;
             while (length(ss) >= (bi * 10 + 10)) and (bi < 127) do
             begin
+              { trk }
+              err := 0;
+              val(ss[bi * 10 + 2], i, ec);
+              if ec > 0 then err := 101 else
+                if ss[bi * 10 + 1] = DC[1] then tprec.trk := i else
+                  if ss[bi * 10 + 1] = DC[2] then tprec.trk := i + 6 else err := 100;
               { sj }
-{              machine.rules[qi, bi].sj := ss[bi * 5 + 1];}
-              { - check value }
-{              ec := 1;
-              for bj := 1 to length(machine.symbols) do
-                if machine.rules[qi, bi].sj = machine.symbols[bj] then ec := 0;
-              if ec > 0 then err := 37;
-              if err > 0 then goto error;}
+              tprec.sj := bi + 1;
               { sk }
-{              machine.rules[qi, bi].sk := ss[bi * 5 + 2];}
-              { - check value }
-{              ec := 1;
+              tprec.sk := 255;
               for bj := 1 to length(machine.symbols) do
-                if machine.rules[qi, bi].sk = machine.symbols[bj] then ec := 0;
-              if ec > 0 then err := 38;
-              if err > 0 then goto error;}
-
-              { D }
-{              machine.rules[qi, bi].D := ss[bi * 5 + 3];}
+                if ss[bi * 10 + 3] = machine.symbols[bj] then tprec.sk := bj;
               { - check value }
-{              ec := 1;
-              for bj := 1 to length(HMD) do
-                if machine.rules[qi, bi].D = HMD[bj] then ec := 0;
-              if ec > 0 then err := 34;
-              if err > 0 then goto error;}
-
-writeln(qi,': ',i);
-
-
+              if tprec.sk = 255 then err := 54;
+              if err > 0 then goto error;
+              { dj }
+              tprec.dj := 255;
+              for bj := 1 to 3 do
+                if ss[bi * 10 + 4] = HMD[bj] then tprec.dj := bj - 1;
+              { - check value }
+              if tprec.dj = 255 then err := 50;
+              if err > 0 then goto error;
+              { dk }
+              tprec.dk := 255;
+              for bj := 1 to 3 do
+                if ss[bi * 10 + 5] = HMD[bj] then tprec.dk := bj - 1;
+              { - check value }
+              if tprec.dk = 255 then err := 51;
+              if err > 0 then goto error;
+              { trm }
+              err := 0;
+              val(ss[bi * 10 + 7], i, ec);
+              if ec > 0 then err := 103 else
+                if ss[bi * 10 + 6] = DC[1] then tprec.trm := i else
+                  if ss[bi * 10 + 6] = DC[2] then tprec.trm := i + 6 else err := 102;
+              { - check value }
+              if (i < 0) or (i > 15) then err := 52;
+              if err > 0 then goto error;
               { qm }
               val(ss[bi * 10 + 8] + ss[bi * 10 + 9] + ss[bi * 10 + 10], i, ec);
               { - check value }
@@ -284,15 +293,6 @@ writeln(qi,': ',i);
               bi := bi + 1;
             end;
           end;
-
-{ 12345 }
-{ 00R01 }
-
-{ 0000000001 }
-{ 1234567890 }
-{ R5BLST1015 }
-
-
           { load command line commands }
           if (stat_segment and $41 = $41) then
             if (s <> LSEGMENTS[3] + LBEGIN) and
