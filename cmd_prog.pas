@@ -36,8 +36,7 @@ begin
   if (ip1 < 0) or (ip1 > 126) then err := 24;
   if err = 0 then
   begin
-    if length(machine.progname) <> 0 then err := 36 else
-{    if length(machine.progname) = 0 then err := 36 else }
+    if length(machine.progname) = 0 then err := 36 else
     begin
       if ip1 > ip2 then
       begin

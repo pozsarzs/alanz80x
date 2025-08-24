@@ -223,7 +223,75 @@ begin
             end;
           end;
 
-          { ... load tuples ... }
+
+          { load program }
+          if (s[1] + s[2] = 'ST') and (stat_segment = $05) then
+          begin
+            { STnnn found in the opened segment PROG and CARD }
+            { - remove all spaces and tabulators }
+            ss := '';
+            for bi := 1 to length(s) do
+              if (s[bi] <> #32) and (s[bi] <> #9) then ss := ss + s[bi];
+            { qi }
+            val(ss[3] + ss[4]+ ss[5], qi, ec);
+            { - check value }
+            if ec > 0 then err := 32+16 else
+              if qi > 126 then err := 33+16;
+            if err > 0 then goto error;
+            delete(ss, 1, 5);
+            writeln(ss);
+            bi := 0;
+            while (length(ss) >= (bi * 10 + 10)) and (bi < 127) do
+            begin
+              { sj }
+{              machine.rules[qi, bi].sj := ss[bi * 5 + 1];}
+              { - check value }
+{              ec := 1;
+              for bj := 1 to length(machine.symbols) do
+                if machine.rules[qi, bi].sj = machine.symbols[bj] then ec := 0;
+              if ec > 0 then err := 37;
+              if err > 0 then goto error;}
+              { sk }
+{              machine.rules[qi, bi].sk := ss[bi * 5 + 2];}
+              { - check value }
+{              ec := 1;
+              for bj := 1 to length(machine.symbols) do
+                if machine.rules[qi, bi].sk = machine.symbols[bj] then ec := 0;
+              if ec > 0 then err := 38;
+              if err > 0 then goto error;}
+
+              { D }
+{              machine.rules[qi, bi].D := ss[bi * 5 + 3];}
+              { - check value }
+{              ec := 1;
+              for bj := 1 to length(HMD) do
+                if machine.rules[qi, bi].D = HMD[bj] then ec := 0;
+              if ec > 0 then err := 34;
+              if err > 0 then goto error;}
+
+writeln(qi,': ',i);
+
+
+              { qm }
+              val(ss[bi * 10 + 8] + ss[bi * 10 + 9] + ss[bi * 10 + 10], i, ec);
+              { - check value }
+              if ec > 0 then err := 51 else
+                if (i < 0) or (i > 126) then err := 52;
+              if err > 0 then goto error;
+              tprec.qm := i;
+              { store one tuple to the memory } 
+              tpblpack(qi, bi);
+              bi := bi + 1;
+            end;
+          end;
+
+{ 12345 }
+{ 00R01 }
+
+{ 0000000001 }
+{ 1234567890 }
+{ R5BLST1015 }
+
 
           { load command line commands }
           if (stat_segment and $41 = $41) then

@@ -47,15 +47,14 @@ type
     registers:   array[0..7] of TRegisters;                { register settings }
     symbols:     string[40];                                    { symbolum set }
     tapes:       array[0..5] of TTapes;                        { file settings }
-    t36com:      array[0..15] of TCommand;           { t36 file command buffer }
     tuples:      PByte;                              { pointer to tuple memory }
+    t36com:      array[0..15] of TCommand;           { t36 file command buffer }
   end;
 var
   bi: byte;
   command:       TCommand;                              { command line content }
   machine:       TTuring;                  { Turing machine base configuration }
   messages:      array[0..4095] of char;     { messages from alanz80x.msg file }
-  p0, p1, p2:    PByte;
   q:             boolean;                                         { allow exit }
   qb:            byte;                                      { breakpoint state }
   runt36com:     boolean;

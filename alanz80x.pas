@@ -37,7 +37,7 @@ function ai2tpaddr(qn, sn, byte_count: integer): PByte;
 begin
   ai2tpaddr := ptr(seg(machine.tuples^),
                    ofs(machine.tuples^) +
-                   (qn * SYMCOUNT + qn) * TPBLSIZE + byte_count);
+                   (qn * SYMCOUNT + sn) * TPBLSIZE + byte_count);
 end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM TUPLE NUMBER AND BYTE COUNT }
@@ -120,9 +120,9 @@ begin
   { pack bytes and write to memory }
   with tprec do
   begin
-    p0^ := (trk * 16) + ((sk and $3c) div  4);
-    p1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
-    p2^ := (qm and $7f) + ((trm and $01) * 128);
+    po0^ := (trk * 16) + ((sk and $3c) div  4);
+    po1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
+    po2^ := (qm and $7f) + ((trm and $01) * 128);
   end;
 end;
 
@@ -311,4 +311,3 @@ begin
   freemem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   quit(0, 0);
 end.
-
