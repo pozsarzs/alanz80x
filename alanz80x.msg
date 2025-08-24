@@ -26,7 +26,7 @@
 ~The breakpoint state is 
 ~The breakpoint state is deleted.
 ~The breakpoint state is set to 
-~Number of states: 
+~ 
 ~The number of states is set to 
 ~Set of symbols:   
 ~The symbols are deleted.

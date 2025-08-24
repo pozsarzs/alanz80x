@@ -249,17 +249,19 @@ Note:
 - If the first symbol specified in the CONF section is not blank, then it will be inserted.
 - The 9-tuples must be specified in the following form:
 
- `ST012 ... t3brlr2002 ...`, where the:  
+ `ST000 R8_RST2000 ...`, where the:  
 
-- q<sub>i</sub> = 012, it is the initial state,
-- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>2</sub> (program tape), in the following it is the same as the t<sub>m</sub> of the previous tuple,
-- t<sub>k</sub> = t3, it is the result tape,
+'STnnn' is the state, where nnn is the state number. The following groups are tuples for state nnn. Meaning of the characters in the first tuple:
+
+- q<sub>i</sub> = 000, it is the initial state,
+- t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
+- r<sub>k</sub> = R8, it is the bottomless register (BLR),
 - s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
-- s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
+- s<sub>k</sub> = '_', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
-- d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,
-- r<sub>m</sub> = r2, it is the PTP register,
-- q<sub>m</sub> = 002, it is the final state.
+- d<sub>k</sub> = S, it is the head moving direction in r<sub>k</sub> register,
+- t<sub>m</sub> = T2, it is the user program tape,
+- q<sub>m</sub> = 000, it is the final state.
 
 
 ### Tapes

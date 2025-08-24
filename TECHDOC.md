@@ -19,11 +19,10 @@ The notations used in mathematical formulas are included in the description. The
 The basic program is stored in the t36 file as follows:
 
 ```
-SYMB _ABCDEFG
-SYMB _ABCDEFG
+SYMB _@#0123456789
 CARD BEGIN
-     ST000 t3_lr2001 t3clr2002 ...
-     ST001 ... 
+;    ----- s0-------- s1-------- s2-------- ... s12-------
+     ST000 R8_RST2000 T3_RRT1001 R8#RST2000 ... R89RST2000
      ... 
 CARD END
 ```
@@ -32,13 +31,13 @@ CARD END
 
 - q<sub>i</sub> = 000, it is the initial state,
 - t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
-- t<sub>k</sub> = t3, it is the result tape,
+- r<sub>k</sub> = R8, it is the bottomless register (BLR),
 - s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
-- s<sub>k</sub> = 'b', it is the symbol to be written to result tape,
+- s<sub>k</sub> = '_', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
-- d<sub>k</sub> = L, it is the head moving direction over t<sub>k</sub> tape,
-- r<sub>m</sub> = r2, it is the PTP register,
-- q<sub>m</sub> = 001, it is the final state.
+- d<sub>k</sub> = S, it is the head moving direction in r<sub>k</sub> register,
+- t<sub>m</sub> = T2, it is the user program tape,
+- q<sub>m</sub> = 000, it is the final state.
 
 
 #### In the variable
@@ -124,13 +123,13 @@ The bit encoding in the touple block is as follows:
 
 |b2 b1 b0| tj  | tk  |
 |:------:|:---:|:---:|
-| 1  1  1|stay |left |
+| 1  1  1|stay |right|
 | 1  1  0|stay |left |
-| 1  0  1|right|right|
-| 1  0  0|right|stay |
+| 1  0  1|right|stay |
+| 1  0  0|right|right|
 | 0  1  1|right|left |
-| 0  1  0|left |right| 
-| 0  0  1|left |stay |
+| 0  1  0|left |stay | 
+| 0  0  1|left |right|
 | 0  0  0|left |left |
 
 

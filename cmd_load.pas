@@ -28,9 +28,9 @@ var
   t36file:        text;
 const
   LSEGMENTS:      array[0..3] of string[4] = ('PROG', 'CARD', 'TAPE', 'COMM');
-  LLABELS:        array[0..9] of string[4] = ('NAME', 'DESC', 'SYMB', 'STAT',
-                                              'CNSL', 'DATA', 'PROG', 'RSLT',
-                                              'STCK', 'TEMP');
+  LLABELS:        array[0..8] of string[4] = ('NAME', 'DESC', 'SYMB', 'CNSL',
+                                              'DATA', 'PROG', 'RSLT', 'STCK',
+                                              'TEMP');
   LBEGIN =        'BEGIN';
   LEND =          'END';
 label
@@ -42,11 +42,11 @@ label
     D0    'PROG BEGIN' found    'NAME' found
     D1    'PROG END' found      'DESC' found
     D2    'CARD BEGIN' found    'SYMB' found
-    D3    'CARD END' found      'STAT' found
-    D4    'TAPE BEGIN' found    'DATA' found
-    D5    'TAPE END' found      'PROG' found
-    D6    'COMM BEGIN' found    'RSLT' found
-    D7    'COMM END' found      'STCK' found
+    D3    'CARD END' found      'DATA' found
+    D4    'TAPE BEGIN' found    'PROG' found
+    D5    'TAPE END' found      'RSLT' found
+    D6    'COMM BEGIN' found    'STCK' found
+    D7    'COMM END' found
 }
 
   { SET ERROR CODE AND WRITE ERROR MESSAGE }
@@ -61,13 +61,13 @@ label
   var
     bi : byte;
   begin
-    if s[5] + s[6] = PRM[1] + PRM[3] then machine.tapes[l - 4].permission := 0;
-    if s[5] + s[6] = PRM[1] + PRM[2] then machine.tapes[l - 4].permission := 1;
-    if s[5] + s[6] = PRM[2] + PRM[3] then machine.tapes[l - 4].permission := 2;
-    machine.tapes[l - 4].filename := '';
+    if s[5] + s[6] = PRM[1] + PRM[3] then machine.tapes[l - 3].permission := 0;
+    if s[5] + s[6] = PRM[1] + PRM[2] then machine.tapes[l - 3].permission := 1;
+    if s[5] + s[6] = PRM[2] + PRM[3] then machine.tapes[l - 3].permission := 2;
+    machine.tapes[l - 3].filename := '';
     for bi := 7 to length(s) do
       if (s[bi] <> #32) and (s[bi] <> #9) then
-        machine.tapes[lab - 4].filename := machine.tapes[lab - 4].filename + s[bi];
+        machine.tapes[lab - 3].filename := machine.tapes[lab - 3].filename + s[bi];
   end;
 
 begin
@@ -180,60 +180,41 @@ begin
                    for bi := 5 to length(s) do
                     machine.symbols := machine.symbols + s[bi];
                  end;
-              3: { STAT found }
-                 if stat_segment = $01 then
-                 begin
-                   { - in the opened segment PROG }
-                   stat_mandatory := stat_mandatory or $08;
-                   ss := '';
-                   for bi := 5 to length(s) do
-                     ss := ss + s[bi];
-                   val(ss, i, ec);
-                   { - error messages }
-                   if ec > 0 then err := 1 else
-                     if i > 49 then err := 2;
-                   if err > 0 then goto error else
-                   begin
-                     { - minimum value is two: q00 and q01 }
-                     if i < 2 then machine.states := 2;
-                     machine.states := i;
-                   end;
-                 end;
-              4: { CNSL found }
+              3: { CNSL found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    storetapedata(lab, s);
                  end;
-              5: { DATA found }
+              4: { DATA found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
-                   stat_mandatory := stat_mandatory or $10;
+                   stat_mandatory := stat_mandatory or $08;
                    storetapedata(lab, s);
                  end;
               5: { PROG found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
+                   stat_mandatory := stat_mandatory or $10;
+                   storetapedata(lab, s);
+                 end;
+              6: { RSLT found }
+                 if stat_segment = $1d then
+                 begin
+                   { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $20;
                    storetapedata(lab, s);
                  end;
-              7: { RSLT found }
+              7: { STCK found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
                    stat_mandatory := stat_mandatory or $40;
                    storetapedata(lab, s);
                  end;
-              8: { STCK found }
-                 if stat_segment = $1d then
-                 begin
-                   { - in the opened segment TAPE }
-                   stat_mandatory := stat_mandatory or $80;
-                   storetapedata(lab, s);
-                 end;
-              9: { TEMP found }
+              8: { TEMP found }
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }

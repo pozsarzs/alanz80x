@@ -25,9 +25,6 @@ begin
     { - short description }
     writemsg(22, false);
     writeln(machine.progdesc);
-    { - number of states }
-    writemsg(29, false);
-    writeln(machine.states);
     { - set of symbol}
     cmd_symbol('');
     { - register contents }

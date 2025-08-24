@@ -59,46 +59,72 @@ procedure tpblunpack(bi, bj: byte);
 var
   po0, po1, po2: PByte;
 
-  { decoce head moving }
-  function direction(dn, i: byte): byte;
+  { decode head moving }
+  function decdir(dn, i: byte): byte;
   begin
     if dn = 0 then
     begin
       { dj }
-      if i < 3 then direction := 0 else
-        if i > 5 then direction := 1 else
-         direction := 2;
+      if i < 3 then decdir := 0 else
+        if i > 5 then decdir := 1 else
+         decdir := 2;
     end else
     begin
       { dk }
-      if (i + 3) mod 3 = 0 then direction := 0 else
-        if (i + 2) mod 3 = 0 then direction := 2 else
-          if (i + 1) mod 3 = 0 then direction := 1 else
+      if (i + 3) mod 3 = 0 then decdir := 0 else
+        if (i + 2) mod 3 = 0 then decdir := 2 else
+          if (i + 1) mod 3 = 0 then decdir := 1 else
     end
   end;
 
 begin
-  { read from memory }
+  { set address }
   po0 := ai2tpaddr(bi, bj, 0);
   po1 := ai2tpaddr(bi, bj, 1);
   po2 := ai2tpaddr(bi, bj, 2);
-  { decode }
+  { read from memory and unpack bytes }
   with tprec do
   begin
     trk := (po0^ and $f0) div 16;
     sj := bj;
     sk := (po0^ and $0f) * 2 + (po1^ and $c0) div 64;
-    dj := direction(0, (po1^ and $38) div 8);
-    dk := direction(1, (po1^ and $38) div 8);
+    dj := decdir(0, (po1^ and $38) div 8);
+    dk := decdir(1, (po1^ and $38) div 8);
     trm := (po1^ and $17) * 2 + (po2^ and $40) div 128;
     qm := po2^ and $7f;
   end;
 end;
 
 { ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
-{ procedure tpblpack(b0, b1, b2: byte);
+procedure tpblpack(bi, bj: byte);
+var
+  po0, po1, po2: PByte;
+
+  { endcode head moving }
+  function decdir(dj, dk: byte): byte;
+  var
+   bi: byte;
+  const
+    r: array[0..7] of byte = (0, 2, 1, 20, 22, 21, 10, 12);
   begin
-  end; }
+    decdir := 8;
+    for bi := 0 to 7 do
+      if r[bi] = 10 * dj + dk then decdir := bi;
+  end;    
+
+begin
+  { set address }
+  po0 := ai2tpaddr(bi, bj, 0);
+  po1 := ai2tpaddr(bi, bj, 1);
+  po2 := ai2tpaddr(bi, bj, 2);
+  { pack bytes and write to memory }
+  with tprec do
+  begin
+    p0^ := (trk * 16) + ((sk and $3c) div  4);
+    p1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
+    p2^ := (qm and $7f) + ((trm and $01) * 128);
+  end;
+end;
 
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);
@@ -285,3 +311,4 @@ begin
   freemem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   quit(0, 0);
 end.
+

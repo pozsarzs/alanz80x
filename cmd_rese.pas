@@ -23,10 +23,9 @@ begin
     progdesc := '';
     progname := '';
     runt36com := false;
-    states := 0;
-    symbols:= '_abcdefghijklmnopqrstuvwxyz0123456789.-#';
+    symbols:= '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-';
     tprec.aqi := 0;
-    tprec.atrj := 0;
+    tprec.atrj := 2; { t2: program tape }
     { tapes }
     for bi := 0 to 5 do
     begin
