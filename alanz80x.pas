@@ -42,8 +42,9 @@ end;
 { LOAD MESSAGES FROM FILE }
 function loadmsg(filename: TFilename): boolean;
 var
-  c: char;
-  f: file of char;                                              { message file }
+  s: string[255];
+  bi: byte;
+  f: text;                                                    { message file }
   i: integer;
 begin
   for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
@@ -55,15 +56,18 @@ begin
   if ioresult <> 0 then loadmsg := false else
   begin
     repeat
-      read(f, c);
-      if (c <> #10) and (c <> #13) and (c <> #39) then
+      readln(f, s);
+      for bi := 1 to length(s) do
       begin
-        messages[i] := c;
-        i := i + 1;
-        messages[i] := messages[0];
+        if (s[bi] <> #10) and (s[bi] <> #13) and (s[bi] <> #39) then
+        begin
+          messages[i] := s[bi];
+          i := i + 1;
+          messages[i] := messages[0];
+        end;
       end;
     until eof(f) or (i = sizeof(messages) - 1);
-    writeln('Message buffer: ', i, '/', sizeof(messages), 'Byte');
+    { writeln('Message buffer: ', i, '/', sizeof(messages), 'Byte'); }
     close(f);
     loadmsg := true;
   end;
@@ -72,7 +76,7 @@ end;
 { OS INDEPENDENT FUNCTION }
 { I _cpm.pas}
 {$I _dos.pas}
-  
+
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; threedigit: boolean): TThreeDigit;
 var
@@ -125,7 +129,7 @@ begin
     qm := po2^ and $7f;
   end;
   { writeln('Memory -> variable tprec (only 4 tuples):');
-    if bj < 4 then 
+    if bj < 4 then
       with tprec do
         writeln(po0^, ' ', po1^, ' ', po2^, '-',
                 trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm); }
@@ -146,7 +150,7 @@ var
     decdir := 8;
     for bi := 0 to 7 do
       if r[bi] = 10 * dj + dk then decdir := bi;
-  end;    
+  end;
 
 begin
   { set address }
@@ -161,7 +165,7 @@ begin
     po2^ := (qm and $7f) + ((trm and $01) * 128);
   end;
   { writeln('Variable tprec -> memory (only 4 tuples):');
-    if bj < 4 then 
+    if bj < 4 then
       with tprec do
         writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
                 po0^, ' ', po1^, ' ', po2^); }
@@ -305,7 +309,7 @@ begin
     { run commands from t36 file }
     if runt36com then
     begin
-      for bi := 0 to 15 do
+      for bi := 0 to comline - 1  do
         if (length(machine.t36com[bi]) > 0) and (machine.t36com[bi][1] <> #0) then
           if parsingcommand(machine.t36com[bi]) then goto quitprog;
       runt36com := false;

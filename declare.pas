@@ -53,6 +53,7 @@ type
 var
   bi: byte;
   command:       TCommand;                              { command line content }
+  comline:       byte;                  { number of line in t36 command buffer }
   machine:       TTuring;                  { Turing machine base configuration }
   messages:      array[0..4095] of char;     { messages from alanz80x.msg file }
   q:             boolean;                                         { allow exit }

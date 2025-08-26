@@ -16,7 +16,6 @@
 overlay procedure cmd_load(p1: TSplitted);
 var
   bi, bj:         byte;
-  comline:        byte;
   err:            byte;                                           { error code }
   ec, i:          integer;
   lab, seg:       byte;

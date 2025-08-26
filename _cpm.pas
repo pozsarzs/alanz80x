@@ -22,7 +22,7 @@
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
 function ai2tpaddr(qn, sn, byte_count: integer): PByte;
 begin
-  ai2tpaddr := ptr(machine.tuples^ +
+  ai2tpaddr := ptr(ord(machine.tuples) +
                    (qn * SYMCOUNT + sn) * TPBLSIZE + byte_count);
 end;
 
