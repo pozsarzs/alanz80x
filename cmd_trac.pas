@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'trace' }
-procedure cmd_trace(p1: TSplitted);
+overlay procedure cmd_trace(p1: TSplitted);
 var
   err: byte;                                                      { error code }
 begin

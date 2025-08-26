@@ -15,13 +15,15 @@
 { COMMAND 'tape' }
 procedure cmd_tape(p1, p2: TSplitted);
 var
-  bi:  byte;
-  dn:  string[3];
-  ec:  integer;
-  err: byte;                                                      { error code }
-  fn:  string[8];
-  ip1: integer;                                           { function parameter }
-
+  bi:     byte;
+  dn:     string[3];
+  err:    byte;                                                   { error code }
+  fn:     string[8];
+  ip1:    integer;                                        { function parameter }
+const
+  P1MIN = 0;                                               { valid range of p1 }
+  P1MAX = 5;
+  
   { write selected register content }
   procedure writetaperec(n: byte);
   begin
@@ -46,32 +48,30 @@ begin
   end else
   begin
     { check parameter p1 }
-    val(p1, ip1, ec);
-    if ec <> 0 then err := 23 else
-      if (ip1 < 0) or (ip1 > 5) then err := 24 else
+    if parcomp(p1, ip1, err, P1MIN, P1MAX) then
+    begin
+      if length(p2) = 0 then
       begin
-        if length(p2) = 0 then
+        { show selected }
+        writemsg(85, true);
+        writetaperec(ip1);
+      end else
+      begin
+        { assign file to selected tape }
+        fn := p2;
+        for bi := 1 to length(fn) do fn[bi] := upcase(fn[bi]);
+        if ip1 = 0 then
         begin
-          { show selected }
-            writemsg(85, true);
-            writetaperec(ip1);
+          dn := fn;
+          machine.tapes[ip1].filename := dn + ':';
         end else
         begin
-          { assign file to selected tape }
-          fn := p2;
-          for bi := 1 to length(fn) do fn[bi] := upcase(fn[bi]);
-          if ip1 = 0 then
-          begin
-            dn := fn;
-            machine.tapes[ip1].filename := dn + ':';
-          end else
-          begin
-            machine.tapes[ip1].filename := fn + '.' + EXT[ip1] + '36';
-          end;
-          writemsg(40, false);
-          writeln(machine.tapes[ip1].filename + '.');
+          machine.tapes[ip1].filename := fn + '.' + EXT[ip1] + '36';
         end;
+        writemsg(40, false);
+        writeln(machine.tapes[ip1].filename + '.');
       end;
+    end;
   end;
   { error message }
   if err > 0 then writemsg(err, true);

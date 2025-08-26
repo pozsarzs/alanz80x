@@ -13,20 +13,20 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'limit' }
-procedure cmd_limit(p1: TSplitted);
+overlay procedure cmd_limit(p1: TSplitted);
 var
-  ec:  integer;
-  err: byte;                                                      { error code }
-  ip1: integer;                                           { function parameter }
+  err:    byte;                                                   { error code }
+  ip1:    integer;                                        { function parameter }
 const
-  max= 32767;
+  P1MIN = 1;                                               { valid range of p1 }
+  P1MAX = 32766;
 begin
   err := 0;
   { check parameters }
   if length(p1) = 0 then
   begin
     { get step limit }
-    if sl = max then writemsg(74, true) else
+    if sl = P1MAX + 1 then writemsg(74, true) else
     begin
       writemsg(75, false);
       writeln(sl, '.');
@@ -36,19 +36,17 @@ begin
     if p1 = '-' then
     begin
       { reset step limit }
-      sl := max;
+      sl := P1MAX + 1;
       writemsg(76, true)
     end else
     begin
       { set step limit }
-      val(p1, ip1, ec);
-      if ec <> 0 then err := 23 else
-        if ((ip1 < 0) or (ip1 > max)) then err := 24 else
-        begin
-          sl := ip1;
-          writemsg(77, false);
-          writeln(sl, '.');
-        end
+      if parcomp(p1, ip1, err, P1MIN, P1MAX) then
+      begin
+        sl := ip1;
+        writemsg(77, false);
+        writeln(sl, '.');
+      end
     end;
   end;
   { error message }

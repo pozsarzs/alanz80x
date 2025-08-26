@@ -19,6 +19,59 @@ program alanz80x;
 
 label
   quitprog;
+
+{ WRITE A MESSAGE TO SCREEN }
+procedure writemsg(count: byte; linefeed: boolean);
+var
+  isn: byte;                                           { initial signal number }
+  p:   integer;                                            { position in array }
+label
+  lf;
+begin
+  bi := 0;
+  for p := 0 to sizeof(MESSAGES) - 1 do
+  begin
+    if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
+    if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
+    if (bi > count) or (bi = 255) then goto lf;
+  end;
+ lf:
+  if linefeed then writeln;
+end;
+
+{ LOAD MESSAGES FROM FILE }
+function loadmsg(filename: TFilename): boolean;
+var
+  c: char;
+  f: file of char;                                              { message file }
+  i: integer;
+begin
+  for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
+  i := 0;
+  assign(f, filename);
+  {$I-}
+  reset(f);
+  {$I+}
+  if ioresult <> 0 then loadmsg := false else
+  begin
+    repeat
+      read(f, c);
+      if (c <> #10) and (c <> #13) and (c <> #39) then
+      begin
+        messages[i] := c;
+        i := i + 1;
+        messages[i] := messages[0];
+      end;
+    until eof(f) or (i = sizeof(messages) - 1);
+    writeln('Message buffer: ', i, '/', sizeof(messages), 'Byte');
+    close(f);
+    loadmsg := true;
+  end;
+end;
+
+{ OS INDEPENDENT FUNCTION }
+{ I _cpm.pas}
+{$I _dos.pas}
   
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; threedigit: boolean): TThreeDigit;
@@ -31,28 +84,6 @@ begin
     if length(result) = 2 then result := '0' + result;
   addzero := result;
 end;
-
-{ CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
-function ai2tpaddr(qn, sn, byte_count: integer): PByte;
-begin
-  ai2tpaddr := ptr(seg(machine.tuples^),
-                   ofs(machine.tuples^) +
-                   (qn * SYMCOUNT + sn) * TPBLSIZE + byte_count);
-end;
-
-{ CALCULATE TUPLE BLOCK ADDRESS FROM TUPLE NUMBER AND BYTE COUNT }
-{ function tn2tpaddr(tuple_number, byte_count: integer): PByte;
-  begin
-    tn2tpaddr := ptr(seg(machine.tuples^),
-                     ofs(machine.tuples^) + tuple_number * TPBLSIZE + byte_count);
-  end; }
-
-{ CALCULATE TUPLE BLOCK ADDRESS FROM BYTE NUMBER}
-{ function bn2tpaddr(byte_number: integer): PByte;
-  begin
-    bn2tpaddr := ptr(seg(machine.tuples^),
-                     ofs(machine.tuples^) + byte_number);
-  end; }
 
 { DECODE TUPLE BLOCK AND UNPACK TO A RECORD TYPE VARIABLE }
 procedure tpblunpack(bi, bj: byte);
@@ -93,10 +124,11 @@ begin
     trm := (po1^ and $07) * 2 + (po2^ and $80) div 128;
     qm := po2^ and $7f;
   end;
-  { if bj < 4 then 
-    with tprec do
-      writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
-              po0^, ' ', po1^, ' ', po2^); }
+  { writeln('Memory -> variable tprec (only 4 tuples):');
+    if bj < 4 then 
+      with tprec do
+        writeln(po0^, ' ', po1^, ' ', po2^, '-',
+                trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm); }
 end;
 
 { ENCODE RECORD TYPE VARIABLE AND PACK TO TUPLE BLOCK }
@@ -128,61 +160,25 @@ begin
     po1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
     po2^ := (qm and $7f) + ((trm and $01) * 128);
   end;
-  { if bj < 4 then 
-    with tprec do
-      writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
-              po0^, ' ', po1^, ' ', po2^); }
+  { writeln('Variable tprec -> memory (only 4 tuples):');
+    if bj < 4 then 
+      with tprec do
+        writeln(trk, ' ', sj, ' ', sk, ' ', dj, ' ', dk, ' ', trm, ' ', qm, '-',
+                po0^, ' ', po1^, ' ', po2^); }
 end;
 
-{ WRITE A MESSAGE TO SCREEN }
-procedure writemsg(count: byte; linefeed: boolean);
+{ CONVERT COMMAND PARAMETER AND CHECK RANGE }
+function parcomp(var p: TSplitted; var i: integer; var e: byte;
+                 min, max: integer): boolean;
 var
-  isn: byte;                                           { initial signal number }
-  p:   integer;                                            { position in array }
-label
-  lf;
+  ec: integer;
 begin
-  bi := 0;
-  for p := 0 to sizeof(MESSAGES) - 1 do
-  begin
-    if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
-    if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
-    if (bi > count) or (bi = 255) then goto lf;
-  end;
- lf:
-  if linefeed then writeln;
-end;
-
-{ OS INDEPENDENT FUNCTION }
-{$I _dos.pas}
-
-{ LOAD MESSAGES FROM FILE }
-function loadmsg(filename: TFilename): boolean;
-var
-  c: char;
-  f: file of char;                                              { message file }
-  i: integer;
-begin
-  for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
   i := 0;
-  assign(f, filename);
-  {$I-}
-  reset(f);
-  {$I+}
-  if ioresult <> 0 then loadmsg := false else
-  begin
-    repeat
-      read(f, c);
-      if (c <> #10) and (c <> #13) then
-      begin
-        messages[i] := c;
-        i := i + 1;
-        messages[i] := messages[0];
-      end;
-    until eof(f) or (i = sizeof(messages) - 1);
-    close(f);
-    loadmsg := true;
-  end;
+  ec := 0;
+  val(p, i, ec);
+  if ec <> 0 then e := 23 else
+    if (i < min) or (i > max) then e := 24 else e := 0;
+  parcomp := (e = 0);
 end;
 
 {$i cmd_rese.pas}
@@ -197,17 +193,17 @@ label
   break1, break2, break3, break4;
 
 {$i cmd_brea.pas}
-{$i cmd_load.pas}
 {$i cmd_help.pas}
 {$i cmd_limi.pas}
+{$i cmd_load.pas}
 {$i cmd_prog.pas}
-{$i cmd_reg.pas}
 {$i cmd_rest.pas}
 {$i cmd_run.pas}
-{$i cmd_symb.pas}
-{$i cmd_tape.pas}
 {$i cmd_trac.pas}
 
+{$i cmd_symb.pas}
+{$i cmd_reg.pas}
+{$i cmd_tape.pas}
 {$i cmd_info.pas}
 
 begin

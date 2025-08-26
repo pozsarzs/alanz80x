@@ -84,3 +84,4 @@ const
   SYMCOUNT =     40;                             { maximal number of symbolums }
   TPBLCOUNT =    5080;                         { maximal number of tuple block }
   TPBLSIZE  =    3;                                { byte allocated by a tuple }
+  

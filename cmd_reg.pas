@@ -15,10 +15,12 @@
 { COMMAND 'reg' }
 procedure cmd_reg(p1: TSplitted);
 var
-  bi:  byte;
-  ec:  integer;
-  err: byte;                                                      { error code }
-  ip1: integer;                                           { function parameter }
+  bi:     byte;
+  err:    byte;                                                   { error code }
+  ip1:    integer;                                        { function parameter }
+const
+  P1MIN = 0;                                               { valid range of p1 }
+  P1MAX = 7;
 
   { write selected register content }
   procedure writeregrec(n: byte);
@@ -44,13 +46,11 @@ begin
   end else
   begin
     { show selected }
-    val(p1, ip1, ec);
-    if ec <> 0 then err := 23 else
-      if (ip1 < 0) or (ip1 > 7) then err := 24 else
-      begin
-        writemsg(85, true);
-        writeregrec(ip1);
-      end;
+    if parcomp(p1, ip1, err, P1MIN, P1MAX) then
+    begin
+      writemsg(85, true);
+      writeregrec(ip1);
+    end;
   end;
   { error message }
   if err > 0 then writemsg(err, true);

@@ -13,11 +13,13 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'break' }
-procedure cmd_break(p1: TSplitted);
+overlay procedure cmd_break(p1: TSplitted);
 var
-  err: byte;                                                      { error code }
-  ec:  integer;
-  ip1: integer;                                           { function parameter }
+  err:    byte;                                                   { error code }
+  ip1:    integer;                                        { function parameter }
+const
+  P1MIN = 1;                                               { valid range of p1 }
+  P1MAX = 126;
 begin
   err := 0;
   { check parameters }
@@ -39,14 +41,12 @@ begin
     end else
     begin
       { set breakpoint address }
-      val(p1, ip1, ec);
-      if ec <> 0 then err := 23 else
-        if (ip1 < 0) or (ip1 > 255) then err := 24 else
-        begin
-          qb := ip1;
-          writemsg(28, false);
-          writeln(addzero(qb, true), '.');
-        end;
+      if parcomp(p1, ip1, err, P1MIN, P1MAX) then
+      begin
+        qb := ip1;
+        writemsg(28, false);
+        writeln(addzero(qb, true), '.');
+      end;
     end;
   end;
   { error message }

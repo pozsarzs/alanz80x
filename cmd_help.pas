@@ -13,9 +13,9 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'help' }
-procedure cmd_help(p1: TSplitted);
+overlay procedure cmd_help(p1: TSplitted);
 var
-  bi: byte;
+  bi:  byte;
   err: byte;                                                      { error code }
 begin
   err := 1;

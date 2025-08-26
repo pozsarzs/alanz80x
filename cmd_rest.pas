@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'restore' }
-procedure cmd_restore(verbose: boolean);
+overlay procedure cmd_restore(verbose: boolean);
 var
   bi, bj: byte;
 begin

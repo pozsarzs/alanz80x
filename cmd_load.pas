@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'load' }
-procedure cmd_load(p1: TSplitted);
+overlay procedure cmd_load(p1: TSplitted);
 var
   bi, bj:         byte;
   comline:        byte;
@@ -36,18 +36,16 @@ const
 label
   error;
 
-{
-    bit   stat_segment          stat_mandatory
-    ------------------------------------------
-    D0    'PROG BEGIN' found    'NAME' found
-    D1    'PROG END' found      'DESC' found
-    D2    'CARD BEGIN' found    'SYMB' found
-    D3    'CARD END' found      'DATA' found
-    D4    'TAPE BEGIN' found    'PROG' found
-    D5    'TAPE END' found      'RSLT' found
-    D6    'COMM BEGIN' found    'STCK' found
-    D7    'COMM END' found
-}
+{ bit   stat_segment        stat_mandatory
+  ----------------------------------------
+  D0    'PROG BEGIN' found  'NAME' found
+  D1    'PROG END' found    'DESC' found
+  D2    'CARD BEGIN' found  'SYMB' found
+  D3    'CARD END' found    'DATA' found
+  D4    'TAPE BEGIN' found  'PROG' found
+  D5    'TAPE END' found    'RSLT' found
+  D6    'COMM BEGIN' found  'STCK' found
+  D7    'COMM END' found                   }
 
   { SET ERROR CODE AND WRITE ERROR MESSAGE }
   procedure errmsg(b: byte);

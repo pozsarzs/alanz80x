@@ -34,8 +34,8 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |licence                 |EUPL v1.2                                            |
 |language                |en                                                   |
 |user interface          |CLI                                                  |
-|programming language    |Borland Turbo Pascal 3.x                             |
-|architecture            |ix86, Z80                                            |
+|language and compiler   |Borland Turbo Pascal v3.01a PC-DOS and CP/M-80 (1985)|
+|architecture            |i86, Z80                                             |
 |OS                      |CP/M and DOS                                         |
 |symbol set              |up to 40 characters                                  |
 |state set               |up to 128 states                                     |

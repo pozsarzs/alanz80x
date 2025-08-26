@@ -13,27 +13,26 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'prog' }
-procedure cmd_prog(p1, p2: TSplitted);
+overlay procedure cmd_prog(p1, p2: TSplitted);
 var
-  bi, bj:        byte;
-  ip1, ip2:      integer;                                { function parameters }
-  ec:            integer;
-  err: byte;                                                      { error code }
+  bi, bj:   byte;
+  ip1, ip2: integer;                                     { function parameters }
+  ec:       integer;
+  err:      byte;                                                 { error code }
+const
+  P12MIN =  0;                                             { valid range of p1 }
+  P12MAX =  126;
 begin
   err := 0;
   { check parameters }
-  if length(p2) > 0 then
-  begin
-    val(p2, ip2, ec);
-    if ec <> 0 then err := 23;
-  end else ip2 := STCOUNT - 1;
-  if (ip2 < 0) or (ip2 > 126) then err := 24;
   if length(p1) > 0 then
   begin
-    val(p1, ip1, ec);
-    if ec <> 0 then err := 23;
+    if parcomp(p1, ip1, err, P12MIN, P12MAX) then;
   end else ip1 := 0;
-  if (ip1 < 0) or (ip1 > 126) then err := 24;
+  if length(p2) > 0 then
+  begin
+    if parcomp(p2, ip2, err, P12MIN, P12MAX) then;
+  end else ip2 := ip1;
   if err = 0 then
   begin
     if length(machine.progname) = 0 then err := 36 else
@@ -76,8 +75,7 @@ begin
         writeln;
       end;
     end;
-  end else
-    { error message }
-    writemsg(err, true);
+  end;
+  { error message }
+  if err > 0 then writemsg(err, true);
 end;
-

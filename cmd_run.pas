@@ -13,6 +13,6 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'run' }
-procedure cmd_run(p1: boolean; p2: TSplitted);
+overlay procedure cmd_run(p1: boolean; p2: TSplitted);
 begin
 end;
