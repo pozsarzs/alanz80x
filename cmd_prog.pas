@@ -35,7 +35,7 @@ begin
   end else ip2 := ip1;
   if err = 0 then
   begin
-    if length(machine.progname) = 0 then err := 36 else
+    if length(progname) = 0 then err := 46 else
     begin
       if ip1 > ip2 then
       begin
@@ -43,7 +43,7 @@ begin
         ip2 := ip1;
         ip1 := ec;
       end;
-      writemsg(66, true);
+      writemsg(76, true);
       for bi := ip1 to ip2 do
       begin
         write(addzero(bi, true), ': ');                                   { qi }

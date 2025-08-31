@@ -1,8 +1,8 @@
 { +--------------------------------------------------------------------------+ }
 { | AlanZ80X v0.1 * Extended Turing machine                                  | }
 { | Copyright (C) 2025 Pozsar Zsolt <pozsarzs@gmail.com>                     | }
-{ | cmd_help.pas                                                             | }
-{ | Command 'help'                                                           | }
+{ | cmd_echo.pas                                                             | }
+{ | Command 'echo'                                                           | }
 { +--------------------------------------------------------------------------+ }
 
 { This program is free software: you can redistribute it and/or modify it
@@ -12,20 +12,19 @@
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. }
 
-{ COMMAND 'help' }
-overlay procedure cmd_help(p1: TSplitted);
+{ COMMAND 'echo' }
+overlay procedure cmd_echo(p1: TSplitted);
 var
-  bi:  byte;
   err: byte;                                                      { error code }
 begin
-  err := 26;
-  { show description about all or selected command(s) }
-  for bi := 0 to COMMARRSIZE do
-    if (length(p1) = 0) or (COMMANDS[bi] = p1) then
-    begin 
-      err := 0; 
-      writemsg(bi + 1, true);
-    end;    
-  { error message }
-  if err > 0 then writemsg(err, true);
+  err := 0;
+  { check parameters and set value }
+  if length(p1) = 0 then echo := not echo else
+    if upcase(p1[1]) + upcase(p1[2])  = 'ON' then echo := true else
+      if upcase(p1[1]) + upcase(p1[2]) + upcase(p1[3]) = 'OFF'
+        then echo := false
+        else err := 34;
+  { messages }
+  if err > 0 then writemsg(err, true) else
+    if echo then writemsg(114, true) else writemsg(115, true);
 end;

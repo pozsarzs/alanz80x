@@ -20,12 +20,12 @@ var
   ip1:    integer;                                        { function parameter }
 const
   P1MIN = 0;                                               { valid range of p1 }
-  P1MAX = 7;
+  P1MAX = 6;
 
   { write selected register content }
   procedure writeregrec(n: byte);
   begin
-    writemsg(n + 86, false);
+    writemsg(n + 97, false);
     write(machine.registers[n].data: 7, ' (');
     case machine.registers[n].permission of
       0: write(PRM[1]+PRM[3]);
@@ -41,14 +41,14 @@ begin
   if length(p1) = 0 then
   begin
     { show all }
-    writemsg(85, true);
-    for bi := 0 to 7 do writeregrec(bi);
+    writemsg(96, true);
+    for bi := P1MIN to P1MAX do writeregrec(bi);
   end else
   begin
     { show selected }
     if parcomp(p1, ip1, err, P1MIN, P1MAX) then
     begin
-      writemsg(85, true);
+      writemsg(96, true);
       writeregrec(ip1);
     end;
   end;

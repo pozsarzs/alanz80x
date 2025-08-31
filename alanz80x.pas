@@ -23,8 +23,8 @@ label
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);
 var
-  isn: byte;                                           { initial signal number }
-  p:   integer;                                            { position in array }
+  bi: byte;                                            { initial signal number }
+  p:  integer;                                             { position in array }
 label
   lf;
 begin
@@ -140,7 +140,7 @@ procedure tpblpack(bi, bj: byte);
 var
   po0, po1, po2: PByte;
 
-  { endcode head moving }
+  { encode head moving }
   function decdir(dj, dk: byte): byte;
   var
    bi: byte;
@@ -180,8 +180,8 @@ begin
   i := 0;
   ec := 0;
   val(p, i, ec);
-  if ec <> 0 then e := 23 else
-    if (i < min) or (i > max) then e := 24 else e := 0;
+  if ec <> 0 then e := 33 else
+    if (i < min) or (i > max) then e := 34 else e := 0;
   parcomp := (e = 0);
 end;
 
@@ -196,8 +196,11 @@ var
 label
   break1, break2, break3, break4;
 
+{ procedures and function in overlay file }
+{$i cmd_echo.pas}
 {$i cmd_brea.pas}
 {$i cmd_help.pas}
+{$i cmd_intr.pas}
 {$i cmd_limi.pas}
 {$i cmd_load.pas}
 {$i cmd_prog.pas}
@@ -205,6 +208,7 @@ label
 {$i cmd_run.pas}
 {$i cmd_trac.pas}
 
+{ procedures and function in main binary file }
 {$i cmd_symb.pas}
 {$i cmd_reg.pas}
 {$i cmd_tape.pas}
@@ -264,22 +268,24 @@ begin
       begin
         case bi of
            0: cmd_break(splitted[1]);
-           1: cmd_help(splitted[1]);
-           2: cmd_info;
-           3: cmd_limit(splitted[1]);
-           4: cmd_load(splitted[1]);
-           5: cmd_prog(splitted[1], splitted[2]);
-           6: parsingcommand := true;
-           7: cmd_reg(splitted[1]);
-           8: cmd_reset(true);
-           9: cmd_restore(true);
-          10: cmd_run(false, splitted[1]);
-          11: cmd_run(true, splitted[1]);
-          12: cmd_symbol(splitted[1]);
-          13: cmd_tape(splitted[1], splitted[2]);
-          14: cmd_trace(splitted[1]);
+           1: cmd_echo(splitted[1]);
+           2: cmd_help(splitted[1]);
+           3: cmd_info;
+           4: cmd_intr(splitted[1]);
+           5: cmd_limit(splitted[1]);
+           6: cmd_load(splitted[1]);
+           7: cmd_prog(splitted[1], splitted[2]);
+           8: parsingcommand := true;
+           9: cmd_reg(splitted[1]);
+          10: cmd_reset(true);
+          11: cmd_restore(true);
+          12: cmd_run(false, splitted[1]);
+          13: cmd_run(true, splitted[1]);
+          14: cmd_symbol(splitted[1]);
+          15: cmd_tape(splitted[1], splitted[2]);
+          16: cmd_trace(splitted[1]);
         end;
-      end else writemsg(1, true);
+      end else writemsg(26, true);
     end;
   end;
 end;
@@ -298,20 +304,20 @@ begin
   end;
   { allocate memory for tuples }
   getmem(machine.tuples, TPBLCOUNT * TPBLSIZE);
-  if machine.tuples = nil then quit(2, 83);
-  { reset machine }
+  if machine.tuples = nil then quit(2, 93);
+  { cold reset }
   cmd_reset(false);
-  trace := false;
   { main operation }
   repeat
-    write(PROMPT); readln(command);
+    write(PROMPT);
+    readln(command);
     q := parsingcommand(command);
     { run commands from t36 file }
     if runt36com then
     begin
       for bi := 0 to comline - 1  do
-        if (length(machine.t36com[bi]) > 0) and (machine.t36com[bi][1] <> #0) then
-          if parsingcommand(machine.t36com[bi]) then goto quitprog;
+        if (length(t36com[bi]) > 0) and (t36com[bi][1] <> #0) then
+          if parsingcommand(t36com[bi]) then goto quitprog;
       runt36com := false;
     end;
   until q = true;

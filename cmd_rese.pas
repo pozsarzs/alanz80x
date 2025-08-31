@@ -16,48 +16,60 @@
 procedure cmd_reset(verbose: boolean);
 var
   bi, bj: byte;
+  c:      string[1];
 begin
+  { reset variables related to turing machines }
+  echo := false;
+  intr := false;
+  it := 2;
+  progdesc := '';
+  progname := '';
+  qb := 0;
+  runt36com := false;
+  sl := 32767;
+  trace := false;
   { reset Turing machine base configuration }
   with machine do
   begin
-    progdesc := '';
-    progname := '';
-    runt36com := false;
     symbols:= '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-';
     tprec.aqi := 0;
-    tprec.atrj := 2; { t2: program tape }
+    tprec.atrj := it;
     { tapes }
     for bi := 0 to 5 do
     begin
-      if bi = 0
-        then tapes[bi].filename := 'CON:'
-        else tapes[bi].filename := 'DEFAULT.' + EXT[bi] + '36';
+      str(bi, c);
       case bi of
-        0: tapes[bi].permission:= 2; { console - write only }
-        1: tapes[bi].permission:= 0; { data - read only }
-        2: tapes[bi].permission:= 0; { program - read only }
-      else
-        tapes[bi].permission:= 1;    { others - read/write }
+        0: tapes[bi].filename := 'CON:';
+        1: tapes[bi].filename := 'PROGRAM.TAP';
+        2: tapes[bi].filename := 'DATA.TAP';
+        3: tapes[bi].filename := 'RESULT.TAP';
+        4: tapes[bi].filename := 'TEMP.TAP';
+        5: tapes[bi].filename := 'STACK.TAP';
+      end;
+      case bi of
+        0: tapes[bi].permission:= 2; { WO }
+        1: tapes[bi].permission:= 0; { RO }
+        2: tapes[bi].permission:= 0; { RO }
+        3: tapes[bi].permission:= 1; { RW }
+        4: tapes[bi].permission:= 1; { RW }
+        5: tapes[bi].permission:= 1; { RW }
       end;
     end;
     { registers }
-    for bi := 0 to 7 do
+    for bi := 0 to 6 do
     begin
       if bi = 0
         then registers[bi].data := '_'
         else registers[bi].data := '00000';
       if bi = 0
-        then registers[bi].permission:= 1     { ACC - read/write }
-        else registers[bi].permission:= 0;    { others - read only }
+        then registers[bi].permission:= 1  { RW }
+        else registers[bi].permission:= 0; { RO }
     end;
     { tuple memory }
     fillchar(tuples^, TPBLCOUNT * TPBLSIZE, 0);
     { t36 command buffer }
     for bi := 0 to 15 do t36com[bi] := '';
   end;
-  { reset variables related to turing machines }
-  qb := 0;
-  sl := 32767;
   { message }
-  if verbose then writemsg(42, true);
+  if verbose then writemsg(52, true);
 end;

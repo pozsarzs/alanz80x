@@ -16,7 +16,9 @@ _The AlanZ80X is an idea that takes the concept of a Turing machine to a new lev
 
 This state machine differs from Turing's original model in several ways: it has four general and two special I/O tapes and some registers.
 
-Unlike the traditional multi-tape Turing, this machine always handles only two tapes (and/or registers), it reads the one specified in the previous tuple and writes the one specified in the current tuple. The purpose and permissions of the general tapes are not specified, but the machine starts with a recommended default setting that can be changed. The recommended setup defines a user data and program tape, a temporary tape, and a results tape. The machine has two additional special-purpose tapes: the stack and the other representing one of the standard output devices. Machine can write to output device: CON:, AUX:, LST:, PRN:, TRM: and if you are very lucky, how do you have PUN: instead of or in addition tape. The tapes are represented by text files that are updated after each step.
+Unlike the traditional multi-tape Turing, this machine always handles only two tapes (and/or registers), it reads the one specified in the previous tuple and writes the one specified in the current tuple. The purpose and permissions of the general tapes are not specified, but the machine starts with a recommended default setting that can be changed.
+
+The recommended setup defines a user data and program tape, a temporary tape, and a results tape. The machine has two additional special-purpose tapes: the stack and the other representing one of the standard output devices. Machine can write to output device: CON:, AUX:, LST:, PRN:, TRM: and if you are very lucky, how do you have PUN: instead of or in addition tape. The tapes are represented by text files that are updated after each step.
 
 One register can be used arbitrarily and the others provide information about the current state of the machine. The purpose and permissions of the registers are predefined. The registers store data as a string of symbols, and can be specified in the tuple instead of a tape.
 
@@ -52,7 +54,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 |framework            |                                                     |
 | ~ user interface    |CLI                                                  |
 | ~ language          |en                                                   |
-| ~ commands          |15                                                   |
+| ~ commands          |17                                                   |
 | ~ extras            |breakpoint, tracking                                 |
 | ~ example programs  |1                                                    |
 |state machine        |                                                     | 
@@ -238,8 +240,6 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`NAME progname`            |program name                  |mandatory|mandatory|
 |`SYMB _#0123456789`        |set of symbols                |mandatory|mandatory|
 |`STAT 3`                   |number of states              |mandatory|   N/A   |
-|`ECHO ON\|OFF`             |tape write echo to TAP0       |   N/A   |optional |
-|`INTR ON\|OFF`             |interrupt detection           |   N/A   |optional |
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnnn ...`           |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
@@ -247,9 +247,12 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`     INIT 2`              |initial tape                  |   N/A   |optional |
 |`     SYMB 012345679`      |data tape content             |optional |   N/A   |
 |`     SPOS 1`              |data tape start position      |optional |   N/A   |
-|`     TAP0 WO devicename:` |assign device to output       |   N/A   |mandatory|
-|`     TAPn RO filename.ext`|assign file to general tape   |   N/A   |mandatory|
-|`     STCK RW filename.ext`|assign file to stack tape     |   N/A   |mandatory|
+|`     ECHO WO device:`     |assign device to output       |   N/A   |optional |
+|`     TAP1 RO data.tap`    |assign file to general tape   |   N/A   |mandatory|
+|`     TAP2 RO program.tap` |assign file to general tape   |   N/A   |mandatory|
+|`     TAP3 RW result.tap`  |assign file to general tape   |   N/A   |mandatory|
+|`     TAP4 RW temp.tap`    |assign file to general tape   |   N/A   |mandatory|
+|`     STCK RW stack.tap`   |assign file to stack tape     |   N/A   |mandatory|
 |`TAPE END`                 |end of tape section           |optional |mandatory|
 |`COMM BEGIN`               |begin of command section      |optional |optional |
 |`     ...`                 |command line commands         |optional |optional |
@@ -259,9 +262,7 @@ This file type is used to load the Turing machine's (base) program, define initi
 Note:  
 - This file type has limited use with the previous version of the Turing machine, the table provides guidance.
 - If the first and second symbols specified in the CONF section is not '_#', then they will be inserted.
-- The default value of the ECHO option is OFF.
-- The default value of the INTR option is OFF.
-- The default value of the INIT option in TAPE section is 1 (tape t<sub>1</sub>).
+- The default value of the INIT option in TAPE section is 2 (tape t<sub>2</sub>).
 - The 9-tuples must be specified in the following form:
 
  `ST000 R7_RST2000 ...`, where the:  
@@ -318,9 +319,12 @@ CARD BEGIN
      ST125 R8_RST2125 R8_RST2125 R70RST2127 R71RST1010 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125
 CARD END
 TAPE BEGIN
-     TAP1 D RO data.tap
-     TAP2 D RO program.tap
-     TAP3 D RW result.tap
+     ECHO WO CON:
+     TAP1 RO data.tap
+     TAP2 RO program.tap
+     TAP3 RW result.tap
+     TAP4 RW temp.tap
+     STCK RW stack.tap
 TAPE END
 COMM BEGIN
      TRACE ON
@@ -337,17 +341,19 @@ The program can be controlled with the following command line commands.
 |   |command                |description                                       |
 |--:|-----------------------|--------------------------------------------------|
 |  1|`break [state\|-]`     |set, get and reset breakpoint state (qb)          |
-|  2|`help [command]`       |help with using the program                       |
-|  3|`info`                 |show all information about this machine           |
-|  5|`limit [steps\|-]`     |set, get and reset number of steps                |
-|  6|`load filename.t36`    |load t36 file                                     |
-|  7|`prog [from][to]`      |show program                                      |
-|  8|`quit`                 |exit the program                                  |
-|  9|`reg [0..7]`           |show register content                             |
-| 10|`reset`                |reset program (cold reset)                        |
-| 11|`restore`              |restore machine to original state (warm reset)    |
-| 12|`run [head position]`  |run from data tape head position                  |
-| 13|`step [head position]` |run step-by-step from data tape head position     |
-| 14|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
-| 15|`tape [0..5][filename]`|show tape content or assign file or device to tape|
-| 16|`trace [on\|off]`      |turn tracking on and off                          |
+|  2|`echo [on\|off]`       |turn tape echo to standard output on and off      |
+|  3|`help [command]`       |help with using the program                       |
+|  4|`info`                 |show all information about this machine           |
+|  5|`intr [on\|off]`       |turn interrupt detection on and off               |
+|  6|`limit [steps\|-]`     |set, get and reset number of steps                |
+|  7|`load filename.t36`    |load t36 file                                     |
+|  8|`prog [from][to]`      |show program                                      |
+|  9|`quit`                 |exit the program                                  |
+| 10|`reg [0..7]`           |show register content                             |
+| 11|`reset`                |reset program (cold reset)                        |
+| 12|`restore`              |restore machine to original state (warm reset)    |
+| 13|`run [head position]`  |run from data tape head position                  |
+| 14|`step [head position]` |run step-by-step from data tape head position     |
+| 15|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
+| 16|`tape [0..5][filename]`|show tape content or assign file or device to tape|
+| 17|`trace [on\|off]`      |turn tracking on and off                          |

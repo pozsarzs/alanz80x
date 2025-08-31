@@ -24,11 +24,12 @@ CARD BEGIN
      ST015 T4ALLR2012 R4FSSR4015 T1CRSR2008 T2ALLT2011 R4FSLR4008 R6ARLT2015 T2GRRR4002 R5ELRT3013
 CARD END
 TAPE BEGIN
-     DATA RO random.d36
-     PROG RO random.p36
-     RSLT RW random.r36
-     STCK RW random.s36
-     TEMP RW random.t36
+     ECHO WO lst:
+     TAP1 RO random.dat
+     TAP2 RO random.prg
+     TAP3 RW random.rlt
+     TAP4 RW random.tmp
+     STCK RW random.stk
 TAPE END
 COMM BEGIN
      TRACE ON

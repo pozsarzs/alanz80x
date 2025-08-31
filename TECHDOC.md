@@ -22,7 +22,7 @@ The basic program is stored in the t36 file as follows:
 SYMB _@#0123456789
 CARD BEGIN
 ;    ----- s0-------- s1-------- s2-------- ... s12-------
-     ST000 R8_RST2000 T3_RRT1001 R8#RST2000 ... R89RST2000
+     ST000 R7_RST2000 T3_RRT1001 R7#RST2000 ... R79RST2000
      ... 
 CARD END
 ```
@@ -31,12 +31,12 @@ CARD END
 
 - q<sub>i</sub> = 000, it is the initial state,
 - t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
-- r<sub>k</sub> = R8, it is the bottomless register (BLR),
+- r<sub>k</sub> = R7, it is the bottomless register (BLR),
 - s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
 - s<sub>k</sub> = '_', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
 - d<sub>k</sub> = S, it is the head moving direction in r<sub>k</sub> register,
-- t<sub>m</sub> = T2, it is the user program tape,
+- t<sub>m</sub> = T2, it is the 2nd general tape,
 - q<sub>m</sub> = 000, it is the final state.
 
 

@@ -26,9 +26,9 @@ begin
   if length(p1) = 0 then
   begin
     { get step limit }
-    if sl = P1MAX + 1 then writemsg(74, true) else
+    if sl = P1MAX + 1 then writemsg(84, true) else
     begin
-      writemsg(75, false);
+      writemsg(85, false);
       writeln(sl, '.');
     end;
   end else
@@ -37,14 +37,14 @@ begin
     begin
       { reset step limit }
       sl := P1MAX + 1;
-      writemsg(76, true)
+      writemsg(86, true)
     end else
     begin
       { set step limit }
       if parcomp(p1, ip1, err, P1MIN, P1MAX) then
       begin
         sl := ip1;
-        writemsg(77, false);
+        writemsg(87, false);
         writeln(sl, '.');
       end
     end;

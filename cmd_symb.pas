@@ -34,7 +34,7 @@ begin
     if p1 = '-' then
     begin
       { reset symbol list }
-      machine.symbols := SPACE;
+      machine.symbols := SYMBOLSET;
       writemsg(32, true)
     end else
     begin
@@ -61,7 +61,7 @@ begin
         end;
       end;
     break1:
-      machine.symbols := SPACE + s;
+      machine.symbols := SYMBOLSET[1] + SYMBOLSET[2] + s;
       { warning messages }
       if length(p1) > 40 then writemsg(35, true);
       if err > 0 then writemsg(err, true);

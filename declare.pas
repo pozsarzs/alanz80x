@@ -14,22 +14,22 @@
 
 type
   { GENERAL TYPES }
-  PByte =        ^byte;                                    { byte pointer type }
+  PByte =        ^byte;
   TCommand =     string[255];
   TFilename =    string[12];
   TSplitted =    string[64];
   TThreeDigit =  string[3];
-  TRegStr =      string[5];
   { TYPES RELATED TO TURING MACHINES }
-  TTapes =       record
-    filename:    TFilename;
-    permission:  byte;
+  TTapes =       record                                            { TAPE TYPE }
+    data:        string[255];                                   { tape content }
+    filename:    TFilename;                              { file or device name }
+    permission:  byte;                                       { file permission }
   end;
-  TRegisters =   record                                            { registers }
-    data:        TRegStr;
-    permission:  byte;
+  TRegisters =   record                                        { REGISTER TYPE }
+    data:        string[5];                                 { register content }
+    permission:  byte;                                   { register permission }
   end;
-  TTPRecently =  record                                  { recently read tuple }
+  TTPRecently =  record                                           { TUPLE TYPE }
     aqi:         byte;                                          { actual state }
     atrj:        byte;                             { actual input data carrier }
     trk:         byte; { tape or register to which the machine writes a symbol }
@@ -41,46 +41,49 @@ type
     qm:          byte;                                            { next state }
   end;
   { TURING MACHINE BASE CONFIGURATION TYPE }
-  TTuring =      record                         { Turing machine configuration }
-    progdesc:    string[64];                          { description of program }
-    progname:    string[8];                                  { name of program }
-    registers:   array[0..7] of TRegisters;                { register settings }
+  TTuring =      record                                  { TURING MACHINE TYPE }
+    registers:   array[0..6] of TRegisters;                    { registers set }
     symbols:     string[40];                                    { symbolum set }
-    tapes:       array[0..5] of TTapes;                        { file settings }
-    tuples:      PByte;                              { pointer to tuple memory }
-    t36com:      array[0..15] of TCommand;           { t36 file command buffer }
+    tapes:       array[0..5] of TTapes;                             { tape set }
+    tuples:      PByte;                                          { state table }
   end;
 var
   bi: byte;
-  command:       TCommand;                              { command line content }
   comline:       byte;                  { number of line in t36 command buffer }
+  command:       TCommand;                              { command line content }
   machine:       TTuring;                  { Turing machine base configuration }
   messages:      array[0..4095] of char;     { messages from alanz80x.msg file }
-  q:             boolean;                                         { allow exit }
+  progdesc:      string[64];                          { description of program }
+  progname:      string[8];                                  { name of program }
   qb:            byte;                                      { breakpoint state }
+  it:            byte;                                          { initial tape }
+  q:             boolean;                                         { allow exit }
   runt36com:     boolean;
   sl:            integer;                                 { program step limit }
   splitted:      array[0..7] of TSplitted;                  { splitted command }
+  t36com:        array[0..15] of TCommand;           { t36 file command buffer }
   tprec:         TTPRecently;                            { recently read tuple }
-  trace:         boolean;                                      { turn tracking }
+  trace:         boolean;                                           { tracking }
+  intr:          boolean;                        { interrupt request detecting }
+  echo:          boolean;                   { tape echo to standard out device }
 const
-  COMMARRSIZE =  14;
+  COMMARRSIZE =  16;
   COMMENT =      #59;
   COMMANDS:      array[0..COMMARRSIZE] of string[7] = (
-                 'break', 'help', 'info',   'limit', 'load',
-                 'prog',  'quit', 'reg',    'reset', 'restore',
-                 'run',   'step', 'symbol', 'tape',  'trace');
+                 'break', 'echo',    'help', 'info', 'intr',
+                 'limit', 'load',    'prog', 'quit', 'reg',
+                 'reset', 'restore', 'run',  'step', 'symbol',
+                 'tape',  'trace');
   DC:            string[2] = 'TR';
-  EXT:           string[5] = 'DPRST';
   HEADER1 =      'AlanZ80X v0.1';
   HEADER2 =      '(C) 2025 Pozsar Zsolt <pozsarzs@gmail.com> EUPL v1.2';
   HINT =         'Type ''help [command]'' for more information.';
-  HMD:           string[3] = 'LSR';                   { head moving directions }
+  HMD:           string[3] = 'LSR';
   MSGERR =       'Cannot load message file: ';
   MSGFILE =      'ALANZ80X.MSG';
   PRM:           string[3]= 'RWO';
   PROMPT =       'TM>';
-  SPACE =        #95;
+  SYMBOLSET:     string[40] = '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-';
   STCOUNT =      127;                               { maximal number of states }
   SYMCOUNT =     40;                             { maximal number of symbolums }
   TPBLCOUNT =    5080;                         { maximal number of tuple block }

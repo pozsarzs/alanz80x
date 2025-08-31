@@ -26,9 +26,9 @@ begin
   if length(p1) = 0 then
   begin
     { get breakpoint address }
-    if qb = 0 then writemsg(25, true) else
+    if qb = 0 then writemsg(35, true) else
     begin
-      writemsg(26, false);
+      writemsg(36, false);
       writeln(addzero(qb, true), '.');
     end;
   end else
@@ -37,14 +37,14 @@ begin
     begin
       { reset breakpoint }
       qb := 0;
-      writemsg(27, true);
+      writemsg(37, true);
     end else
     begin
       { set breakpoint address }
       if parcomp(p1, ip1, err, P1MIN, P1MAX) then
       begin
         qb := ip1;
-        writemsg(28, false);
+        writemsg(38, false);
         writeln(addzero(qb, true), '.');
       end;
     end;

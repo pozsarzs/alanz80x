@@ -27,7 +27,7 @@ const
   { write selected register content }
   procedure writetaperec(n: byte);
   begin
-    writemsg(n + 94, false);
+    writemsg(n + 104, false);
     write(machine.tapes[n].filename:14, ' (');
     case machine.tapes[n].permission of
       0: write(PRM[1]+PRM[3]);
@@ -43,8 +43,11 @@ begin
   if length(p1) = 0 then
   begin
     { show all }
-    writemsg(40, true);
-    for bi := 0 to 5 do writetaperec(bi);
+    writemsg(50, true);
+    for bi := P1MIN to P1MAX do writetaperec(bi);
+    writeln;
+    writemsg(39, false);
+    writeln(it);
   end else
   begin
     { check parameter p1 }
@@ -53,7 +56,7 @@ begin
       if length(p2) = 0 then
       begin
         { show selected }
-        writemsg(85, true);
+        writemsg(50, true);
         writetaperec(ip1);
       end else
       begin
@@ -66,9 +69,9 @@ begin
           machine.tapes[ip1].filename := dn + ':';
         end else
         begin
-          machine.tapes[ip1].filename := fn + '.' + EXT[ip1] + '36';
+          machine.tapes[ip1].filename := fn + '.TAP';
         end;
-        writemsg(40, false);
+        writemsg(50, false);
         writeln(machine.tapes[ip1].filename + '.');
       end;
     end;
