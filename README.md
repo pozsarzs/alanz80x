@@ -14,42 +14,59 @@ _The AlanZ80X is an idea that takes the concept of a Turing machine to a new lev
 
 ### In a nutshell 
 
-This state machine differs from Turing's original model in several ways: it has four general I/O tapes, a stack tape and some registers. Can write to standard output device (CON:, PRN:, LST:) instead of tape. The tapes are represented by typed files. One register can be used arbitrarily and the others provide information about the current state of the machine. The machine also has a simple interrupt handling. The interrupt request is initiated by flag files. The machine's basic program, settings, and commands required for automated execution contained in t36 file. In the state change table, the basic program is divided into parts according to the number of instruction codes and interrupts on the program tape.
+This state machine differs from Turing's original model in several ways: it has four general and two special I/O tapes and some registers.
+
+Unlike the traditional multi-tape Turing, this machine always handles only two tapes (and/or registers), it reads the one specified in the previous tuple and writes the one specified in the current tuple. The purpose and permissions of the general tapes are not specified, but the machine starts with a recommended default setting that can be changed. The recommended setup defines a user data and program tape, a temporary tape, and a results tape. The machine has two additional special-purpose tapes: the stack and the other representing one of the standard output devices. Machine can write to output device: CON:, AUX:, LST:, PRN:, TRM: and if you are very lucky, how do you have PUN: instead of or in addition tape. The tapes are represented by text files that are updated after each step.
+
+One register can be used arbitrarily and the others provide information about the current state of the machine. The purpose and permissions of the registers are predefined. The registers store data as a string of symbols, and can be specified in the tuple instead of a tape.
+
+The machine also has a simple interrupt handling. The interrupt request is initiated by a keystroke.
+
+The machine works only based on the status table. The machine's basic program (tuples), settings, and commands required for automated execution contained in t36 file. In the state change table, the basic program is divided into parts according to the number of instruction codes and interrupts on the program tape.
 
 
 ### How it works?
 
-The framework is command-line controlled. When the t36 file is loaded, the machine is initialized, the basic program is loaded, and - if specified - the commands are executed. After the machine starts, it starts reading the program tape (p36) and, if necessary, the data tape (d36). The program and data tape are read-only by default, but this can be overridden. During operations, the stack tape (s36), which acts as a traditional stack, the temporary tape (t36) and the accumulator register (ACC) can also be used. The result tape (r36) is used to print the result, which is by default read/write only. It is also possible to write to the console, but this is write-only. The result tape can be used in the same way as the single tape of a traditional Turing machine. The machine works only by reading and writing symbols and using state transitions.  
+The framework is command-line controlled. The help provides information about the commands available on the command line. We can change the program's breakpoint, tracking, number of steps, symbol set, and the association of tapes and files. We can get various information about the machine, tapes, and registers. We can load the t36 file and run the machine even step by step.
 
-When an interrupt request is detected, the basic program jumps to the appropriate state and then acts accordingly. On a multitasking system, the signal file can be created by another program, but on CP/M and DOS we have to make do with the options provided by the framework system. A hot-key creates the file, which is handled by the running machine. (The machine does not handle the keystrokes.)
+Its operation is generally simple: the loaded t36 file contains all the data required for the machine to operate. After starting the machine, it determines the symbol to be printed and the next state based on the scanned symbol and the current state.
+
+This process is not that simple in the default setting: after the machine starts, it starts reading the program tape (t<sub>2</sub>), then reads the corresponding data from the data tape (t<sub>1</sub>). The program and data tape now are read-only. During operations, the stack tape (t<sub>5</sub>), which acts as a traditional stack, the temporary tape (t<sub>4</sub>) and the accumulator register (r<sub>0</sub>) can also be used. The result tape (t<sub>3</sub>) is used to print the result. It is also possible to write to the console, but this is always write-only.
+
+Because the tape functions are just names, they must be ensured by setting the appropriate permissions and writing the status table correctly. For example, there is no pre-written stack management.
+
+The state vectors for commands and interrupts are placed in two rows of the state table (jump tables). When an interrupt request is detected, the basic program jumps to the appropriate state and then acts accordingly.
 
 Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>  
 
 
 ## Features
 
-|features                |                                                     |
-|------------------------|-----------------------------------------------------|
-|version                 |v0.1                                                 |
-|licence                 |EUPL v1.2                                            |
-|language                |en                                                   |
-|user interface          |CLI                                                  |
-|language and compiler   |Borland Turbo Pascal v3.01a PC-DOS and CP/M-80 (1985)|
-|architecture            |i86, Z80                                             |
-|OS                      |CP/M and DOS                                         |
-|symbol set              |up to 40 characters                                  |
-|state set               |up to 128 states                                     |
-|interrupts              |4                                                    |
-|registers               |9                                                    |
-|source files            |base program and settings (*.t36)                    |
-|                        |user program code (*.p36)                            |
-|                        |user data (*.d36)                                    |
-|                        |IRQ flags (*.i36)                                    |
-|work files              |temporary tape (*.t36)                               |
-|                        |stack tape - virtual memory (*.s36)                  |
-|target files            |result tape (*.r36)                                  |
-|built-in commands       |15 (can also be used in a program file)              |
-|example program         |? scripts                                            |
+|features             |                                                     |
+|---------------------|-----------------------------------------------------|
+|version              |v0.1                                                 |
+|licence              |EUPL v1.2                                            |
+|architecture         |i86, Z80                                             |
+|OS                   |CP/M and DOS                                         |
+|compiler             |Borland Turbo Pascal v3.01a PC-DOS and CP/M-80 (1985)|
+|framework            |                                                     |
+| ~ user interface    |CLI                                                  |
+| ~ language          |en                                                   |
+| ~ commands          |15                                                   |
+| ~ extras            |breakpoint, tracking                                 |
+| ~ example programs  |1                                                    |
+|state machine        |                                                     | 
+| ~ commands          |number of symbols - 3                                |
+| ~ interrupts        |number of symbols - 3                                |
+| ~ registers         |1 general                                            |
+|                     |6 status                                             |
+|                     |1 special ('bottomless')                             |
+| ~ state set         |up to 128 states                                     |
+| ~ symbol set        |up to 40 characters (2 mandatory and 38 optional)    |
+| ~ tapes             |1 virtual (to standard output)                       |
+|                     |4 general                                            |
+|                     |1 special (stack)                                    |
+| ~ files             |base 'program' and settings (*.t36)                  |
 
 
 ## Screenshots
@@ -84,22 +101,13 @@ $$
 \delta: (Q \times (T \cup R) \times S) \rightarrow Q \times (T \cup R) \times S \times D
 $$
 
-Input:  current state, a selected data carrier (tape or register), and the symbol read from it.  
-Output: new state, target data carrier (tape or register), symbol to be written, and head movement.
+Input:  current state, a selected data source (tape or register), and the symbol read from it.  
+Output: new state, selected data target (tape or register), symbol to be written, and head movement.
 
 
 ## Machine of sets - sets of the machine
 
 These are the machine's sets in alphabetical order, with indexed elements. Most elements of a set are abstract identifiers, but any elements that have a value are specified. This value is used in the t36 file and in program messages.
-
-
-### Data carriers set
-
-This set is the union of the set of registers and the set of tapes. A register is not a true data carrier, but both are used for the same purpose, they only differ in their capacity.
-
-$$
-C = R \cup T, |C| = 14.
-$$
 
 
 ### Head movement direction set
@@ -114,7 +122,7 @@ $$
 - d<sub>1</sub> = S, it is the stay here, 
 - d<sub>2</sub> = R, it is the right direction.
 
-L/R movements applied to the ACC register are allowed but ineffective (they do not change the head position).
+Left/right moves must be specified for all registers and tapes, but for some they are ineffective. The stack head moves independently, for single-symbol registers the head cannot move, for standard output it always moves right.
 
 
 ### Register set
@@ -122,18 +130,17 @@ L/R movements applied to the ACC register are allowed but ineffective (they do n
 The finite set of registers and the symbol chains on them are as follows:
 
 $$
-R = \\{ r_0, \dots, r_8 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
+R = \\{ r_0, \dots, r_7 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
 $$
 
 - r<sub>0</sub>: Accumulator (ACC) - char type,
-- r<sub>1</sub>: Data Tape Position (DTP) - integer type,
-- r<sub>2</sub>: Program Tape Position (PTP) - integer type,
-- r<sub>3</sub>: Result Tape Position (RTP) - integer type,
-- r<sub>4</sub>: Stack Tape Position (STP) - integer type,
-- r<sub>5</sub>: Temporary Tape Position (TTP) - integer type,
+- r<sub>1</sub>: t<sub>1</sub> Tape Position (1TP) - integer type,
+- r<sub>2</sub>: t<sub>2</sub> Tape Position (2TP) - integer type,
+- r<sub>3</sub>: t<sub>3</sub> Tape Position (3TP) - integer type,
+- r<sub>4</sub>: t<sub>4</sub> Tape Position (4TP) - integer type,
+- r<sub>5</sub>: Stack Tape Position (STP) - integer type,
 - r<sub>6</sub>: Program Step Counter (PSC) - integer type,
-- r<sub>7</sub>: Instruction Register (IR) - char type,
-- r<sub>8</sub>: Bottomless register (BLS) - char type,
+- r<sub>7</sub>: Bottomless register (BLR) - char type,
 - w: Symbol chain in the register.
 
 All register value are stored as string. Reading and writing is done in the same way as with tape. The bottomless register swallows the symbol written into it and always returns '_' when read.
@@ -163,10 +170,10 @@ S = \\{ s_0, \dots, s_{39} \\}, \text{ where the: }
 $$
 
 - s<sub>0</sub> is the mandatory blank character (_),
-- s<sub>1</sub>-s<sub>39</sub> is are optional symbols.
+- s<sub>1</sub> is the mandatory end character (#),
+- s<sub>2</sub>-s<sub>39</sub> are optional symbols.
 
-The set has cardinality at least one, and its first element is always the blank
-symbol.
+The set must have at least two elements. To use registers, decimal numbers must also be included in the symbol set. Default symbol set is '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-'.
 
 
 ### Tape set
@@ -177,13 +184,18 @@ $$
 T = \\{ t_0, \dots, t_5 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
 $$
 
-- t<sub>0</sub>: consol or output device: CON:, LST:, PUN:,
-- t<sub>1</sub>: filename.d36, it is the data tape,
-- t<sub>2</sub>: filename.p36, it is the user program tape,
-- t<sub>3</sub>: filename.r36, it is the result tape,
-- t<sub>4</sub>: filename.s36, it is the stack tape,
-- t<sub>5</sub>: filename.t36, it is the temporary tape,
+- t<sub>0</sub>: standard output device of the OS (CON:, LST:, ...),
+- t<sub>1</sub>-t<sub>4</sub>: general purpose tapes,
+- t<sub>5</sub>: stack tape,
 - w: Symbol chain on the tape.
+
+By default:
+- t<sub>0</sub>: redirected to the CON: device,
+- t<sub>1</sub>: data tape,
+- t<sub>2</sub>: program tape,
+- t<sub>3</sub>: result tape,
+- t<sub>4</sub>: temporary tape and
+- t<sub>5</sub>: stack tape.
 
 
 ## Operation
@@ -224,20 +236,20 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`; comment`                |comment                       |         |         |
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
-|`SYMB _0123456789`         |set of symbols                |mandatory|mandatory|
+|`SYMB _#0123456789`        |set of symbols                |mandatory|mandatory|
 |`STAT 3`                   |number of states              |mandatory|   N/A   |
+|`ECHO ON\|OFF`             |tape write echo to TAP0       |   N/A   |optional |
+|`INTR ON\|OFF`             |interrupt detection           |   N/A   |optional |
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnnn ...`           |base program                  |mandatory|mandatory|
 |`CARD END`                 |end of card section           |mandatory|mandatory|
 |`TAPE BEGIN`               |begin of tape section         |optional |mandatory|
+|`     INIT 2`              |initial tape                  |   N/A   |optional |
 |`     SYMB 012345679`      |data tape content             |optional |   N/A   |
 |`     SPOS 1`              |data tape start position      |optional |   N/A   |
-|`     CNSL WO devicename:` |assign device to console      |   N/A   |mandatory|
-|`     DATA RO filename.d36`|assign file to data tape      |   N/A   |mandatory|
-|`     PROG RO filename.p36`|assign file to program tape   |   N/A   |mandatory|
-|`     STCK RW filename.s36`|assign file to stack tape     |   N/A   |mandatory|
-|`     RSLT RW filename.r36`|assign file to result tape    |   N/A   |mandatory|
-|`     TEMP RW filename.t36`|assign file to temporary tape |   N/A   |mandatory|
+|`     TAP0 WO devicename:` |assign device to output       |   N/A   |mandatory|
+|`     TAPn RO filename.ext`|assign file to general tape   |   N/A   |mandatory|
+|`     STCK RW filename.ext`|assign file to stack tape     |   N/A   |mandatory|
 |`TAPE END`                 |end of tape section           |optional |mandatory|
 |`COMM BEGIN`               |begin of command section      |optional |optional |
 |`     ...`                 |command line commands         |optional |optional |
@@ -246,53 +258,41 @@ This file type is used to load the Turing machine's (base) program, define initi
 
 Note:  
 - This file type has limited use with the previous version of the Turing machine, the table provides guidance.
-- If the first symbol specified in the CONF section is not blank, then it will be inserted.
+- If the first and second symbols specified in the CONF section is not '_#', then they will be inserted.
+- The default value of the ECHO option is OFF.
+- The default value of the INTR option is OFF.
+- The default value of the INIT option in TAPE section is 1 (tape t<sub>1</sub>).
 - The 9-tuples must be specified in the following form:
 
- `ST000 R8_RST2000 ...`, where the:  
+ `ST000 R7_RST2000 ...`, where the:  
 
 'STnnn' is the state, where nnn is the state number. The following groups are tuples for state nnn. Meaning of the characters in the first tuple:
 
 - q<sub>i</sub> = 000, it is the initial state,
 - t<sub>j</sub> = not specified, at the start t<sub>j</sub>=t<sub>0</sub>, in the following it is the same as the t<sub>m</sub> of the previous tuple.,
-- r<sub>k</sub> = R8, it is the bottomless register (BLR),
+- r<sub>k</sub> = R7, it is the bottomless register (BLR),
 - s<sub>j</sub> = not specified, the symbol number is the same as the tuple number in this status line,
 - s<sub>k</sub> = '_', it is the symbol to be written to result tape,
 - d<sub>j</sub> = R, it is the head moving direction over t<sub>j</sub> tape,
 - d<sub>k</sub> = S, it is the head moving direction in r<sub>k</sub> register,
-- t<sub>m</sub> = T2, it is the user program tape,
+- t<sub>m</sub> = T2, it is the 2nd general tape,
 - q<sub>m</sub> = 000, it is the final state.
 
 
 ### Tapes
 
-The tape stores data in human-readable form.
-
-|Type of tape  |Note                                 |Head on tape |
-|--------------|-------------------------------------|-------------|
-|data tape     |not empty, created by the user       |`D36_...`    |
-|program tape  |not empty, created by the user       |`P36_...`    |
-|result tape   |created or overwritten by the program|`R36_...`    |
-|stack tape    |created or overwritten by the program|`S36_...`    |
-|temporary tape|created or overwritten by the program|`T36_...`    |
-
-
-### IRQ flag file
-
-|Type of tape  |Note                      |Naming convention  |
-|--------------|--------------------------|-------------------|
-|IRQ flag file |empty, created by the user|`n.i36`, n = {1..4}|
+The tape stores data in human-readable form. Their content is updated with every change in status.
 
 
 ## Example program
 
 ### Program tape
 
-`P36_@1_@1_#`
+`@1_@1_#`
 
 ### Data tape
 
-`D36_12_54_#`
+`12_54_#`
 
 ### Base program card
 
@@ -305,6 +305,7 @@ The tape stores data in human-readable form.
 PROG BEGIN
 NAME INC1
 DESC Increment the input number by 1 
+INTR OFF
 SYMB _@#0123456789
 CARD BEGIN
 ;    ----- s0-------- s1-------- s2-------- s3-------- s4-------- s5-------- s6-------- s7-------- s8-------- s9-------- s10------- s11------- s12-------
@@ -317,10 +318,9 @@ CARD BEGIN
      ST125 R8_RST2125 R8_RST2125 R70RST2127 R71RST1010 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125
 CARD END
 TAPE BEGIN
-     DATA R0 inc1.d36
-     PROG RO inc1.p36
-     RSLT RW inc1.r36
-
+     TAP1 D RO data.tap
+     TAP2 D RO program.tap
+     TAP3 D RW result.tap
 TAPE END
 COMM BEGIN
      TRACE ON
@@ -339,15 +339,15 @@ The program can be controlled with the following command line commands.
 |  1|`break [state\|-]`     |set, get and reset breakpoint state (qb)          |
 |  2|`help [command]`       |help with using the program                       |
 |  3|`info`                 |show all information about this machine           |
-|  4|`limit [steps\|-]`     |set, get and reset number of steps                |
-|  5|`load filename.t36`    |load t36 file                                     |
-|  6|`prog [from][to]`      |show program                                      |
-|  7|`quit`                 |exit the program                                  |
-|  8|`reg [0..7]`           |show register content                             |
-|  9|`reset`                |reset program                                     |
-| 10|`restore`              |restore machine to original state                 |
-| 11|`run [head position]`  |run from data tape head position                  |
-| 12|`step [head position]` |run step-by-step from data tape head position     |
-| 13|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
-| 14|`tape [0..5][filename]`|show tape content or assign file or device to tape|
-| 15|`trace [on\|off]`      |turn tracking on and off                          |
+|  5|`limit [steps\|-]`     |set, get and reset number of steps                |
+|  6|`load filename.t36`    |load t36 file                                     |
+|  7|`prog [from][to]`      |show program                                      |
+|  8|`quit`                 |exit the program                                  |
+|  9|`reg [0..7]`           |show register content                             |
+| 10|`reset`                |reset program (cold reset)                        |
+| 11|`restore`              |restore machine to original state (warm reset)    |
+| 12|`run [head position]`  |run from data tape head position                  |
+| 13|`step [head position]` |run step-by-step from data tape head position     |
+| 14|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
+| 15|`tape [0..5][filename]`|show tape content or assign file or device to tape|
+| 16|`trace [on\|off]`      |turn tracking on and off                          |
