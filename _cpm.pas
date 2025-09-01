@@ -13,11 +13,11 @@
   FOR A PARTICULAR PURPOSE. }
 
 { WAIT FOR A KEY }
-{ procedure waitforkey;
-  begin
-    bdos(1);
-    writeln;
-  end; }
+procedure waitforkey;
+begin
+  bdos(1);
+  writeln;
+end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
 function ai2tpaddr(qn, sn, byte_count: integer): PByte;

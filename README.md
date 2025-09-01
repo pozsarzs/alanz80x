@@ -352,8 +352,8 @@ The program can be controlled with the following command line commands.
 | 10|`reg [0..7]`           |show register content                             |
 | 11|`reset`                |reset program (cold reset)                        |
 | 12|`restore`              |restore machine to original state (warm reset)    |
-| 13|`run [head position]`  |run from data tape head position                  |
-| 14|`step [head position]` |run step-by-step from data tape head position     |
+| 13|`run`                  |run machine                                       |
+| 14|`step`                 |run machine step-by-step                          |
 | 15|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
 | 16|`tape [0..5][filename]`|show tape content or assign file or device to tape|
 | 17|`trace [on\|off]`      |turn tracking on and off                          |

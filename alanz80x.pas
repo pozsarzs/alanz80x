@@ -185,6 +185,41 @@ begin
   parcomp := (e = 0);
 end;
 
+{ GET REGISTER VALUE }
+function getreg(r: byte): integer;
+var
+  bi: byte;
+  s: string[5];
+  i, ec: integer;
+begin
+  getreg := 0;
+  s := machine.registers[0].data;
+  for bi := 1 to 5 do
+    if s[bi] = SYMBOLSET[1] then s[bi] := #0;
+  case r of
+   0: getreg := ord(s[1]);
+   7: getreg := ord(SYMBOLSET[1]);
+  else
+    val(s, i, ec);
+    if ec <> 0 then getreg := 0 else getreg := i;
+  end;
+end;
+
+{ SET REGISTER VALUE }
+procedure setreg(r: byte; d: integer);
+var
+  bi: byte;
+begin
+  case r of
+   0: machine.registers[0].data[1] := chr(d);
+   7: ;
+  else
+    str(d, machine.registers[bi].data);
+    for bi := length(machine.registers[bi].data) to 5 do
+       machine.registers[bi].data := machine.registers[bi].data + SYMBOLSET[1];
+  end;
+end;
+
 {$i cmd_rese.pas}
 
 { PARSING COMMANDS }
@@ -279,8 +314,8 @@ begin
            9: cmd_reg(splitted[1]);
           10: cmd_reset(true);
           11: cmd_restore(true);
-          12: cmd_run(false, splitted[1]);
-          13: cmd_run(true, splitted[1]);
+          12: cmd_run(false);
+          13: cmd_run(true);
           14: cmd_symbol(splitted[1]);
           15: cmd_tape(splitted[1], splitted[2]);
           16: cmd_trace(splitted[1]);

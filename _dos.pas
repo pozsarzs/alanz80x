@@ -13,18 +13,18 @@
   FOR A PARTICULAR PURPOSE. }
 
 { WAIT FOR A KEY }
-{ procedure waitforkey;
-  type
-    TRegPack = record
-                 AX, BX, CX, DX, BP, SI, DI, DS, ES, Flags: integer;
-               end;
-  var
-    regs:      TRegPack;
-  begin
-    regs.AX := $0100;
-    msdos(regs);
-    writeln;
-  end; }
+procedure waitforkey;
+type
+  TRegPack = record
+               AX, BX, CX, DX, BP, SI, DI, DS, ES, Flags: integer;
+             end;
+var
+  regs:      TRegPack;
+begin
+  regs.AX := $0100;
+  msdos(regs);
+  writeln;
+end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
 function ai2tpaddr(qn, sn, byte_count: integer): PByte;

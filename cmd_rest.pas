@@ -16,14 +16,16 @@
 overlay procedure cmd_restore(verbose: boolean);
 var
   bi, bj: byte;
+  blank:  char;
 begin
   { reset Turing machine base configuration }
   with machine do
   begin
-    for bi := 0 to 7 do
+    blank := SYMBOLSET[1];
+    for bi := 0 to 6 do
       if bi = 0
-        then registers[bi].data := '_'
-        else registers[bi].data := '00000';
+        then setreg(bi, ord(blank))
+        else setreg(bi, 0);
     tprec.aqi := 0;
     tprec.atrj := it;
   end;

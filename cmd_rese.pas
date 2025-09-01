@@ -16,6 +16,7 @@
 procedure cmd_reset(verbose: boolean);
 var
   bi, bj: byte;
+  blank:  char;     
   c:      string[1];
 begin
   { reset variables related to turing machines }
@@ -56,11 +57,12 @@ begin
       end;
     end;
     { registers }
+    blank := SYMBOLSET[1];
     for bi := 0 to 6 do
     begin
       if bi = 0
-        then registers[bi].data := '_'
-        else registers[bi].data := '00000';
+        then setreg(bi, ord(blank))
+        else setreg(bi, 0);
       if bi = 0
         then registers[bi].permission:= 1  { RW }
         else registers[bi].permission:= 0; { RO }
