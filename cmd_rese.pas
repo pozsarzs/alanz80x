@@ -15,26 +15,37 @@
 { COMMAND 'reset' }
 procedure cmd_reset(verbose: boolean);
 var
-  bi, bj: byte;
-  blank:  char;     
-  c:      string[1];
+  bi:    byte;
+  c:     string[1];
 begin
-  { reset variables related to turing machines }
-  echo := false;
-  intr := false;
-  it := 2;
+  { reset flags }
+  flag_echo := false;
+  flag_intr := false;
+  flag_it := 2;
+  flag_runt36cmd := false;
+  flag_qb := 127;
+  flag_sl := 32767;
+  flag_trace := false;
+  { reset variables related to Turing machine }
   progdesc := '';
   progname := '';
-  qb := 0;
-  runt36com := false;
-  sl := 32767;
-  trace := false;
+  { reset recent tuple }
+  with tprec do
+  begin
+    aqi := 0;
+    atrj := flag_it;
+    trk := 0;
+    sj := ord(SYMBOLSET[1]);
+    sk := ord(SYMBOLSET[1]);
+    dj := 0;
+    dk := 0;
+    trm := 0;
+    qm := 0;
+  end;
   { reset Turing machine base configuration }
   with machine do
   begin
-    symbols:= '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-';
-    tprec.aqi := 0;
-    tprec.atrj := it;
+    symbols:= SYMBOLSET;
     { tapes }
     for bi := 0 to 5 do
     begin
@@ -48,25 +59,31 @@ begin
         5: tapes[bi].filename := 'STACK.TAP';
       end;
       case bi of
-        0: tapes[bi].permission:= 2; { WO }
-        1: tapes[bi].permission:= 0; { RO }
-        2: tapes[bi].permission:= 0; { RO }
-        3: tapes[bi].permission:= 1; { RW }
-        4: tapes[bi].permission:= 1; { RW }
-        5: tapes[bi].permission:= 1; { RW }
+        0: tapes[bi].accessmode:= 255; { NN }
+        1: tapes[bi].accessmode:= 0;   { LO }
+        2: tapes[bi].accessmode:= 0;   { LO }
+        3: tapes[bi].accessmode:= 1;   { LS }
+        4: tapes[bi].accessmode:= 1;   { LS }
+        5: tapes[bi].accessmode:= 1;   { LS }
       end;
+      tapes[bi].position := 1;
     end;
     { registers }
-    blank := SYMBOLSET[1];
-    for bi := 0 to 6 do
+    for bi := 0 to 7 do
     begin
-      if bi = 0
-        then setreg(bi, ord(blank))
-        else setreg(bi, 0);
-      if bi = 0
+      case bi of
+        0: registers[bi].value := ord(SYMBOLSET[1]);
+        6: registers[bi].value := 0;
+        7: registers[bi].value := ord(SYMBOLSET[1]);
+      else
+        registers[bi].value := tapes[bi].position;
+      end;
+      if (bi = 0) or (bi = 7)
         then registers[bi].permission:= 1  { RW }
         else registers[bi].permission:= 0; { RO }
-    end;
+      registers[bi].position := 1;
+    end; 
+    syncregs;
     { tuple memory }
     fillchar(tuples^, TPBLCOUNT * TPBLSIZE, 0);
     { t36 command buffer }

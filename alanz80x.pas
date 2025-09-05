@@ -78,14 +78,15 @@ end;
 {$I _dos.pas}
 
 { INSERT ZERO BEFORE NUMBER }
-function addzero(value: integer; threedigit: boolean): TThreeDigit;
+function addzero(value: integer; digit: byte): TFiveDigit;
 var
-  result: TThreeDigit;
+  result: TFiveDigit;
 begin
   str(value:0, result);
-  if length(result) = 1 then result := '0' + result;
-  if threedigit then
-    if length(result) = 2 then result := '0' + result;
+  while length(result) < digit do
+  begin
+   result := '0' + result; 
+   end;
   addzero := result;
 end;
 
@@ -94,7 +95,7 @@ procedure tpblunpack(bi, bj: byte);
 var
   po0, po1, po2: PByte;
 
-  { decode head moving }
+  { DECODE HEAD MOVING }
   function decdir(dn, i: byte): byte;
   begin
     if dn = 0 then
@@ -140,7 +141,7 @@ procedure tpblpack(bi, bj: byte);
 var
   po0, po1, po2: PByte;
 
-  { encode head moving }
+  { ENCODE HEAD MOVING }
   function decdir(dj, dk: byte): byte;
   var
    bi: byte;
@@ -185,38 +186,21 @@ begin
   parcomp := (e = 0);
 end;
 
-{ GET REGISTER VALUE }
-function getreg(r: byte): integer;
+{ SYNCRONIZE REGISTER CONTENTS (VALUE -> DATA) } 
+procedure syncregs;
 var
-  bi: byte;
-  s: string[5];
-  i, ec: integer;
+  bi, bj: byte;
 begin
-  getreg := 0;
-  s := machine.registers[0].data;
-  for bi := 1 to 5 do
-    if s[bi] = SYMBOLSET[1] then s[bi] := #0;
-  case r of
-   0: getreg := ord(s[1]);
-   7: getreg := ord(SYMBOLSET[1]);
-  else
-    val(s, i, ec);
-    if ec <> 0 then getreg := 0 else getreg := i;
-  end;
-end;
-
-{ SET REGISTER VALUE }
-procedure setreg(r: byte; d: integer);
-var
-  bi: byte;
-begin
-  case r of
-   0: machine.registers[0].data[1] := chr(d);
-   7: ;
-  else
-    str(d, machine.registers[bi].data);
-    for bi := length(machine.registers[bi].data) to 5 do
-       machine.registers[bi].data := machine.registers[bi].data + SYMBOLSET[1];
+  for bi := 0 to 5 do
+    machine.registers[bi].value := machine.tapes[bi].position;
+  for bi := 0 to 7 do
+  begin
+    if (bi = 0) or (bi = 7)
+    then machine.registers[bi].data := chr(machine.registers[bi].value)
+    else str(machine.registers[bi].value, machine.registers[bi].data);
+  machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[2];
+  for bj := length(machine.registers[bi].data) + 1 to 6 do
+    machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[1];
   end;
 end;
 
@@ -348,12 +332,12 @@ begin
     readln(command);
     q := parsingcommand(command);
     { run commands from t36 file }
-    if runt36com then
+    if flag_runt36cmd then
     begin
       for bi := 0 to comline - 1  do
         if (length(t36com[bi]) > 0) and (t36com[bi][1] <> #0) then
           if parsingcommand(t36com[bi]) then goto quitprog;
-      runt36com := false;
+      flag_runt36cmd := false;
     end;
   until q = true;
  quitprog:

@@ -13,130 +13,165 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'run' }
-overlay procedure cmd_run(p1: boolean);
+{overlay} procedure cmd_run(p1: boolean);
 var
-  bi:      byte;
-  err:     byte;                                                  { error code }
-  ec:      integer;
-  verbose: boolean;
+  bi:        byte;
+  err:       byte;                                                { error code }
+  ec:        integer;
+  verbose:   boolean;
+  inputtape: byte;
 label
   stop, error, found;
 
-{ LOAD ALL TAPES FROM FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
-function loadalltapes: byte;
-var
-  bi:        byte;
-  dev, tape: text;
-begin
-  loadalltapes := 0;
-  for bi := 1 to 5 do
+  { LOAD ALL TAPES FROM FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
+  function loadalltapes: boolean;
+  var
+    bi:        byte;
+    dev, tape: text;
+  label
+    err;
   begin
-    assign(tape, machine.tapes[bi].filename);
-    {$I-}
-    reset(tape);
-    {$I+}
-    if ioresult <> 0 then loadalltapes := bi else
-    begin
-      readln(tape, machine.tapes[bi].data);
-      if echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
-      close(tape);
-    end;      
-    if loadalltapes > 0 then exit;
+    loadalltapes := true;
+    assign(dev, machine.tapes[0].filename);
+    for bi := 1 to 5 do
+      if machine.tapes[bi].accessmode < 2 then
+      begin
+        assign(tape, machine.tapes[bi].filename);
+        {$I-}
+        reset(tape);
+        {$I+}
+        if ioresult <> 0 then
+        begin
+          loadalltapes := false;
+          writemsg(51, false);
+          writeln(bi,' (' + machine.tapes[bi].filename + ')');
+        end else
+        begin
+          readln(tape, machine.tapes[bi].data);
+          if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
+          close(tape);
+        end;
+      end;
   end;
-end;
 
-{ SAVE ALL TAPES TO FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
-function savealltapes: byte;
-var
-  bi:         byte;
-  dev, tape:  text;
-begin
-  savealltapes := 0;
-  assign(dev, machine.tapes[0].filename);
-  for bi := 1 to 5 do
+  { SAVE ALL TAPES TO FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
+  function savealltapes: boolean;
+  var
+    bi:        byte;
+    dev, tape: text;
+  label
+    err;
   begin
-    assign(tape, machine.tapes[bi].filename);
-    {$I-}
-    rewrite(tape);
-    {$I+}
-    if ioresult <> 0 then savealltapes := bi else
+    savealltapes := true;
+    assign(dev, machine.tapes[0].filename);
+    for bi := 1 to 5 do
     begin
-      writeln(tape, machine.tapes[bi].data);
-      if echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
-      close(tape);
-    end;      
-    if savealltapes > 0 then exit;
-  end;
-end;
-
-begin
-  verbose := trace or p1;
-  writemsg(90, true);
-  { load all tapes }
-  err := loadalltapes;
-  writemsg(51, false);
-  writeln(err,' (' + machine.tapes[err].filename + ')');
-  err := 0; 
-  writemsg(79, true);
-  { start machine }
-  if verbose then writeln;
-  if verbose then writemsg(81, true);
-  setreg(6, 0);
-  repeat
-    setreg(6, getreg(6) + 1);
-
-
-{ Note: ACC; 1TP; 2TP; 3TP; 4TP; STP; PSC; BLR }
-{    if verbose then
-      write(machine.progcount:5, '   ', addzero(machine.tapepos), '   ',
-            addzero(machine.aqi), '   ') else write('#');
-
-
-    machine.asj := machine.tape[machine.tapepos + 99]; 
-    if verbose then write(machine.asj, '   ');
-    for bi := 0 to 39 do
-      if machine.rules[machine.aqi, bi].sj = machine.asj then goto found;
-    err := 56;
-    goto error;}
-
- found:
-
-{    machine.tape[machine.tapepos + 99] := machine.rules[machine.aqi, bi].sk;
-    if verbose then write(machine.tape[machine.tapepos + 99], '  ');
-    case machine.rules[machine.aqi, bi].D of
-      'R': machine.tapepos := machine.tapepos + 1;
-      'L': machine.tapepos := machine.tapepos - 1;
+      assign(tape, machine.tapes[bi].filename);
+      {$I-}
+      rewrite(tape);
+      {$I+}
+      if ioresult <> 0 then
+      begin
+        savealltapes := false;
+        writemsg(51, false);
+        writeln(bi,' (' + machine.tapes[bi].filename + ')');
+      end else
+      begin
+        writeln(tape, machine.tapes[bi].data);
+        if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
+        close(tape);
+      end;
     end;
-    if verbose then write(machine.rules[machine.aqi, bi].D, '  ');
-    machine.aqi := machine.rules[machine.aqi, bi].qm;
-    if verbose then writeln(addzero(machine.aqi)); }
+  end;
 
-
-    { - check program set limit}   
-    if getreg(6) = sl then
+begin
+  err := 0;
+  verbose := flag_trace or p1;
+  if length(progname) = 0 then err := 46 else
+  begin
+    writemsg(90, true);
+    { load all tapes }
+    if loadalltapes then
     begin
-      writemsg(83, true);
+      writemsg(79, true);
+      { start machine }
+      if verbose then writeln;
+      if verbose then writemsg(81, true);
+      { reset register PSC }
+      machine.registers[6].value := 0;
+      syncregs;
+      tprec.atrj := flag_it;
+      tprec.aqi := 0;
+      repeat
+        { increment PSC by 1 }
+        machine.registers[6].value := machine.registers[6].value + 1;
+        syncregs;
+        { read one symbol from input tape or register}
+
+{..}
+
+        if verbose then
+        begin
+          write(addzero(machine.registers[6].value, 5):5, ':  ');         { SC }
+          with tprec do
+          begin
+            write(addzero(aqi, 3):3, '  ');                               { qi }
+            if atrj > 5                                                  { trj }
+              then write(DC[2], atrj - 6)
+              else write(DC[1], atrj);
+            write('  ');
+            if trk > 5                                                   { trk }
+              then write(DC[2], trk - 6)
+              else write(DC[1], trk);
+            write('  ');
+            write(machine.symbols[sj],'   ');                             { sj }
+            write(machine.symbols[sk],'   ');                             { sk }
+            write(HMD[dj + 1],'   ');                                     { dj }
+            write(HMD[dk + 1],'   ');                                     { dk }
+            if trm > 5                                                   { trm }
+              then write(DC[2], trm - 6)
+              else write(DC[1], trm);
+            write('  ');
+            writeln(addzero(qm, 3):3);                                    { qm }
+          end;
+        end else write('#');
+
+{..}
+
+       found:
+
+{..}
+
+        { - check program set limit}
+        if machine.registers[6].value = flag_sl then
+        begin
+          writemsg(83, true);
+          goto stop;
+        end;
+        { - check breakpoint }
+        if tprec.aqi = flag_qb then
+        begin
+          writemsg(89, true);
+          writemsg(88, true);
+          waitforkey;
+        end;
+        { - step-by-step running mode }
+        if p1 then
+        begin
+          writemsg(88, true);
+          waitforkey;
+        end;
+{!}     goto stop;
+      until (tprec.aqi = 127) or (machine.registers[6].value = 32767);
+      writeln;
       goto stop;
+     error:
+      { machine is stopped }
+      writemsg(err, true);
+     stop:
+      writemsg(80, true);
     end;
-    { - check breakpoint }   
-    if tprec.aqi = qb then
-    begin
-      writemsg(89, true);
-      writemsg(88, true);
-      waitforkey;
-    end;
-    { - step-by-step running mode }   
-    if p1 then
-    begin
-      writemsg(88, true);
-      waitforkey;
-    end;
-  until (tprec.aqi = 127) or (getreg(6) = 32767);
-  writeln;
-  goto stop;
-error:
-  { machine is stopped }
-  writemsg(err, true);
-stop:
-  writemsg(80, true);
-end;
+  end;
+  { error message }
+  if err > 0 then writemsg(err, true)
+end;  

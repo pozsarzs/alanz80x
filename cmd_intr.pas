@@ -13,18 +13,18 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'intr' }
-overlay procedure cmd_intr(p1: TSplitted);
+{overlay} procedure cmd_intr(p1: TSplitted);
 var
   err: byte;                                                      { error code }
 begin
   err := 0;
   { check parameters and set value }
-  if length(p1) = 0 then  intr := not intr else
-    if upcase(p1[1]) + upcase(p1[2])  = 'ON' then intr := true else
+  if length(p1) = 0 then flag_intr := not flag_intr else
+    if upcase(p1[1]) + upcase(p1[2])  = 'ON' then flag_intr := true else
       if upcase(p1[1]) + upcase(p1[2]) + upcase(p1[3]) = 'OFF'
-        then intr := false
+        then flag_intr := false
         else err := 34;
   { messages }
   if err > 0 then writemsg(err, true) else
-    if intr then writemsg(116, true) else writemsg(117, true);
+    if flag_intr then writemsg(116, true) else writemsg(117, true);
 end;

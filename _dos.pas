@@ -14,16 +14,16 @@
 
 { WAIT FOR A KEY }
 procedure waitforkey;
-type
+{type
   TRegPack = record
                AX, BX, CX, DX, BP, SI, DI, DS, ES, Flags: integer;
              end;
 var
-  regs:      TRegPack;
+  regs:      TRegPack;}
 begin
-  regs.AX := $0100;
+{  regs.AX := $0100;
   msdos(regs);
-  writeln;
+  writeln;}
 end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }

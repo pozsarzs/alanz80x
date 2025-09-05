@@ -13,21 +13,33 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'restore' }
-overlay procedure cmd_restore(verbose: boolean);
+{overlay} procedure cmd_restore(verbose: boolean);
 var
-  bi, bj: byte;
-  blank:  char;
+  bi: byte;
 begin
   { reset Turing machine base configuration }
   with machine do
   begin
-    blank := SYMBOLSET[1];
-    for bi := 0 to 6 do
-      if bi = 0
-        then setreg(bi, ord(blank))
-        else setreg(bi, 0);
-    tprec.aqi := 0;
-    tprec.atrj := it;
+    { registers }
+    for bi := 0 to 7 do
+     case bi of
+       0: registers[bi].value := ord(SYMBOLSET[1]);
+       6: registers[bi].value := 0;
+       7: registers[bi].value := ord(SYMBOLSET[1]);
+     else
+       registers[bi].value := tapes[bi].position;
+     end;
+    for bi := 0 to 7 do
+      if (bi = 0) or (bi = 7)
+        then registers[bi].permission:= 1  { RW }
+        else registers[bi].permission:= 0; { RO }
+    syncregs;
+  end;
+  { reset recent tuple }
+  with tprec do
+  begin
+    aqi := 0;
+    atrj := flag_it;
   end;
   { message }
   if verbose then writemsg(78, true);

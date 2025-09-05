@@ -23,18 +23,24 @@ var
 const
   P1MIN = 0;                                               { valid range of p1 }
   P1MAX = 5;
-  
-  { write selected register content }
+
+  { WRITE TAPE FILE NAME AND ACCESS MODE }
   procedure writetaperec(n: byte);
   begin
+    if flag_it = n
+      then write(' *    ')
+      else write('      ');
     writemsg(n + 104, false);
-    write(machine.tapes[n].filename:14, ' (');
-    case machine.tapes[n].permission of
-      0: write(PRM[1]+PRM[3]);
-      1: write(PRM[1]+PRM[2]);
-      2: write(PRM[2]+PRM[3]);
+    write(machine.tapes[n].filename:12, '    ');
+    case machine.tapes[n].accessmode of
+      0: write(AM[1] + AM[3]); { load only }
+      1: write(AM[1] + AM[2]); { load and save }
+      2: write(AM[2] + AM[3]); { save only }
+    else
+      write('NN'); { none }
     end;
-    writeln(')');
+    write('      ');
+    writeln(machine.tapes[n].position:3);
   end;
 
 begin
@@ -44,10 +50,9 @@ begin
   begin
     { show all }
     writemsg(50, true);
-    for bi := P1MIN to P1MAX do writetaperec(bi);
     writeln;
-    writemsg(39, false);
-    writeln(it);
+    writemsg(91, true);
+    for bi := P1MIN to P1MAX do writetaperec(bi);
   end else
   begin
     { check parameter p1 }
@@ -57,6 +62,8 @@ begin
       begin
         { show selected }
         writemsg(50, true);
+        writeln;
+        writemsg(91, true);
         writetaperec(ip1);
       end else
       begin

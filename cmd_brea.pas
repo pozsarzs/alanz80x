@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'break' }
-overlay procedure cmd_break(p1: TSplitted);
+{overlay} procedure cmd_break(p1: TSplitted);
 var
   err:    byte;                                                   { error code }
   ip1:    integer;                                        { function parameter }
@@ -26,26 +26,26 @@ begin
   if length(p1) = 0 then
   begin
     { get breakpoint address }
-    if qb = 0 then writemsg(35, true) else
+    if flag_qb = 127 then writemsg(35, true) else
     begin
       writemsg(36, false);
-      writeln(addzero(qb, true), '.');
+      writeln(addzero(flag_qb, 3), '.');
     end;
   end else
   begin
     if p1 = '-' then
     begin
       { reset breakpoint }
-      qb := 0;
+      flag_qb := 127;
       writemsg(37, true);
     end else
     begin
       { set breakpoint address }
       if parcomp(p1, ip1, err, P1MIN, P1MAX) then
       begin
-        qb := ip1;
+        flag_qb := ip1;
         writemsg(38, false);
-        writeln(addzero(qb, true), '.');
+        writeln(addzero(flag_qb, 3), '.');
       end;
     end;
   end;

@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'limit' }
-overlay procedure cmd_limit(p1: TSplitted);
+{overlay} procedure cmd_limit(p1: TSplitted);
 var
   err:    byte;                                                   { error code }
   ip1:    integer;                                        { function parameter }
@@ -26,26 +26,26 @@ begin
   if length(p1) = 0 then
   begin
     { get step limit }
-    if sl = P1MAX + 1 then writemsg(84, true) else
+    if flag_sl = P1MAX + 1 then writemsg(84, true) else
     begin
       writemsg(85, false);
-      writeln(sl, '.');
+      writeln(flag_sl, '.');
     end;
   end else
   begin
     if p1 = '-' then
     begin
       { reset step limit }
-      sl := P1MAX + 1;
+      flag_sl := P1MAX + 1;
       writemsg(86, true)
     end else
     begin
       { set step limit }
       if parcomp(p1, ip1, err, P1MIN, P1MAX) then
       begin
-        sl := ip1;
+        flag_sl := ip1;
         writemsg(87, false);
-        writeln(sl, '.');
+        writeln(flag_sl, '.');
       end
     end;
   end;

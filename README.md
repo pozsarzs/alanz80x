@@ -14,11 +14,9 @@ _The AlanZ80X is an idea that takes the concept of a Turing machine to a new lev
 
 ### In a nutshell 
 
-This state machine differs from Turing's original model in several ways: it has four general and two special I/O tapes and some registers.
+This state machine differs from Turing's original model in several ways: it has four general and two special I/O tapes and some registers. But differs from traditional multi-tape machine, because it always handles only two tapes (and/or registers). It reads the one specified in the previous tuple and writes the one specified in the current tuple. The purpose and access mode of the general tapes are not specified. The machine will return to this setting after restarting.
 
-Unlike the traditional multi-tape Turing, this machine always handles only two tapes (and/or registers), it reads the one specified in the previous tuple and writes the one specified in the current tuple. The purpose and permissions of the general tapes are not specified, but the machine starts with a recommended default setting that can be changed.
-
-The recommended setup defines a user data and program tape, a temporary tape, and a results tape. The machine has two additional special-purpose tapes: the stack and the other representing one of the standard output devices. Machine can write to output device: CON:, AUX:, LST:, PRN:, TRM: and if you are very lucky, how do you have PUN: instead of or in addition tape. The tapes are represented by text files that are updated after each step.
+The recommended setup defines a user data and program tape, a temporary tape, and a results tape. The machine has two additional special-purpose tapes: the stack and the other representing one of the standard output devices. Machine can write to output device: CON:, AUX:, LST:, PRN:, TRM: and if you are very lucky, how do you have PUN: instead of or in addition tape. You can also configure the way the tapes are accessed and the feedback method for failed readings. The tapes are represented by text files that are updated after each step. 
 
 One register can be used arbitrarily and the others provide information about the current state of the machine. The purpose and permissions of the registers are predefined. The registers store data as a string of symbols, and can be specified in the tuple instead of a tape.
 
@@ -34,8 +32,6 @@ The framework is command-line controlled. The help provides information about th
 Its operation is generally simple: the loaded t36 file contains all the data required for the machine to operate. After starting the machine, it determines the symbol to be printed and the next state based on the scanned symbol and the current state.
 
 This process is not that simple in the default setting: after the machine starts, it starts reading the program tape (t<sub>2</sub>), then reads the corresponding data from the data tape (t<sub>1</sub>). The program and data tape now are read-only. During operations, the stack tape (t<sub>5</sub>), which acts as a traditional stack, the temporary tape (t<sub>4</sub>) and the accumulator register (r<sub>0</sub>) can also be used. The result tape (t<sub>3</sub>) is used to print the result. It is also possible to write to the console, but this is always write-only.
-
-Because the tape functions are just names, they must be ensured by setting the appropriate permissions and writing the status table correctly. For example, there is no pre-written stack management.
 
 The state vectors for commands and interrupts are placed in two rows of the state table (jump tables). When an interrupt request is detected, the basic program jumps to the appropriate state and then acts accordingly.
 
@@ -58,8 +54,8 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 | ~ extras            |breakpoint, tracking                                 |
 | ~ example programs  |1                                                    |
 |state machine        |                                                     | 
-| ~ commands          |number of symbols - 3                                |
-| ~ interrupts        |number of symbols - 3                                |
+| ~ commands          |number of symbols - 2                                |
+| ~ interrupts        |number of symbols - 2                                |
 | ~ registers         |1 general                                            |
 |                     |6 status                                             |
 |                     |1 special ('bottomless')                             |
@@ -191,7 +187,7 @@ $$
 - t<sub>5</sub>: stack tape,
 - w: Symbol chain on the tape.
 
-By default:
+By recommended setup:
 - t<sub>0</sub>: redirected to the CON: device,
 - t<sub>1</sub>: data tape,
 - t<sub>2</sub>: program tape,
@@ -247,12 +243,12 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`     INIT 2`              |initial tape                  |   N/A   |optional |
 |`     SYMB 012345679`      |data tape content             |optional |   N/A   |
 |`     SPOS 1`              |data tape start position      |optional |   N/A   |
-|`     ECHO WO device:`     |assign device to output       |   N/A   |optional |
-|`     TAP1 RO data.tap`    |assign file to general tape   |   N/A   |mandatory|
-|`     TAP2 RO program.tap` |assign file to general tape   |   N/A   |mandatory|
-|`     TAP3 RW result.tap`  |assign file to general tape   |   N/A   |mandatory|
-|`     TAP4 RW temp.tap`    |assign file to general tape   |   N/A   |mandatory|
-|`     STCK RW stack.tap`   |assign file to stack tape     |   N/A   |mandatory|
+|`     ECHO device:`        |assign device to output       |   N/A   |optional |
+|`     TAP1 LO data.tap`    |assign file to general tape   |   N/A   |mandatory|
+|`     TAP2 LO program.tap` |assign file to general tape   |   N/A   |mandatory|
+|`     TAP3 SO result.tap`  |assign file to general tape   |   N/A   |mandatory|
+|`     TAP4 NN temp.tap`    |assign file to general tape   |   N/A   |mandatory|
+|`     STCK NN stack.tap`   |assign file to stack tape     |   N/A   |mandatory|
 |`TAPE END`                 |end of tape section           |optional |mandatory|
 |`COMM BEGIN`               |begin of command section      |optional |optional |
 |`     ...`                 |command line commands         |optional |optional |
@@ -264,6 +260,7 @@ Note:
 - If the first and second symbols specified in the CONF section is not '_#', then they will be inserted.
 - The default value of the INIT option in TAPE section is 2 (tape t<sub>2</sub>).
 - The 9-tuples must be specified in the following form:
+- Tape access modes: LO/LS/SO/NN Load only/Load and save/Save only/None.
 
  `ST000 R7_RST2000 ...`, where the:  
 
@@ -319,12 +316,12 @@ CARD BEGIN
      ST125 R8_RST2125 R8_RST2125 R70RST2127 R71RST1010 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125
 CARD END
 TAPE BEGIN
-     ECHO WO CON:
-     TAP1 RO data.tap
-     TAP2 RO program.tap
-     TAP3 RW result.tap
-     TAP4 RW temp.tap
-     STCK RW stack.tap
+     ECHO CON:
+     TAP1 LO data.tap
+     TAP2 LO program.tap
+     TAP3 SO result.tap
+     TAP4 NN temp.tap
+     STCK NN stack.tap
 TAPE END
 COMM BEGIN
      TRACE ON

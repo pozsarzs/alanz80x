@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'load' }
-overlay procedure cmd_load(p1: TSplitted);
+{overlay} procedure cmd_load(p1: TSplitted);
 var
   bi, bj:         byte;
   err:            byte;                                           { error code }
@@ -21,7 +21,7 @@ var
   lab, seg:       byte;
   line:           byte;
   qi:             integer;
-  s, ss:          string[255];
+  s, ss, sss:     string[255];
   stat_mandatory: byte;                      { status byte of mandatory labels }
   stat_segment:   byte;                      { status byte of program segments }
   t36file:        text;
@@ -60,9 +60,10 @@ label
   begin
     with machine do
     begin
-      if s[5] + s[6] = PRM[1] + PRM[3] then tapes[l - 3].permission := 0;
-      if s[5] + s[6] = PRM[1] + PRM[2] then tapes[l - 3].permission := 1;
-      if s[5] + s[6] = PRM[2] + PRM[3] then tapes[l - 3].permission := 2;
+      if s[5] + s[6] = AM[1] + AM[3] then tapes[l - 3].accessmode := 0 else
+        if s[5] + s[6] = AM[1] + AM[2] then tapes[l - 3].accessmode := 1 else
+          if s[5] + s[6] = AM[2] + AM[3] then tapes[l - 3].accessmode := 2 else
+            tapes[l - 3].accessmode := 3;
       tapes[l - 3].filename := '';
       for bi := 7 to length(s) do
         if (s[bi] <> #32) and (s[bi] <> #9) then
@@ -74,7 +75,6 @@ begin
   err := 0;
   stat_mandatory := 0;
   stat_segment := 0;
-  runt36com := false;
   { check parameters }
   if length(p1) = 0 then err := 33 else
   begin
@@ -100,6 +100,7 @@ begin
         { - check comment sign }
         if (s[1] <> COMMENT) and (length(s) > 0) then
         begin
+          sss := s;
           { search segment }
           seg := 255;
           for bi := 0 to 3 do
@@ -179,9 +180,10 @@ begin
                  begin
                    { - in the opened segment PROG }
                    stat_mandatory := stat_mandatory or $04;
-                   machine.symbols := '';
+                   machine.symbols := SYMBOLSET[1] +  SYMBOLSET[2];
                    for bi := 5 to length(s) do
-                    machine.symbols := machine.symbols + s[bi];
+                     if (s[bi] <> SYMBOLSET[1]) and (s[bi] <> SYMBOLSET[2])
+                       then machine.symbols := machine.symbols + s[bi];               
                  end;
               3: { ECHO found }
                  if stat_segment = $1d then
@@ -228,13 +230,14 @@ begin
                  if stat_segment = $1d then
                  begin
                    { - in the opened segment TAPE }
+                   ss := '';
                    for bi := 5 to length(s) do
                      ss := ss + s[bi];
                    val(ss, i, ec);
                    { - error messages }
                    if ec > 0 then err := 1 else
                      if (i > 0) or (i < 5) then err := 2;
-                   if err > 0 then goto error else it := i;
+                   if err > 0 then goto error else flag_it := i;
                  end;
             end;
           end;
@@ -312,10 +315,10 @@ begin
                (s <> LSEGMENTS[3] + LEND) and
                (s <> LSEGMENTS[0] + LEND) then
             begin
-              t36com[comline] := s;
+              t36com[comline] := sss;
               comline := comline + 1;
               { set flag }
-              runt36com := true;
+              flag_runt36cmd := true;
             end;
         end;
       until (eof(t36file)) or (line = 255);

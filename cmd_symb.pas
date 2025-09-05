@@ -27,7 +27,7 @@ begin
   if length(p1) = 0 then
   begin
     { get symbol list }
-    writemsg(31, false);
+    writemsg(41, false);
     writeln(machine.symbols);
   end else
   begin
@@ -35,7 +35,7 @@ begin
     begin
       { reset symbol list }
       machine.symbols := SYMBOLSET;
-      writemsg(32, true)
+      writemsg(42, true)
     end else
     begin
       { set symbol list }
@@ -57,13 +57,13 @@ begin
         if s[bi] = s[bi + 1] then
         begin
          delete(s, bi, 1);
-         err := 34;
+         err := 44;
         end;
       end;
     break1:
       machine.symbols := SYMBOLSET[1] + SYMBOLSET[2] + s;
       { warning messages }
-      if length(p1) > 40 then writemsg(35, true);
+      if length(p1) > 40 then writemsg(45, true);
       if err > 0 then writemsg(err, true);
       { messages }
       writemsg(33, false);

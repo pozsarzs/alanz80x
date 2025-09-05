@@ -13,18 +13,18 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'echo' }
-overlay procedure cmd_echo(p1: TSplitted);
+{overlay} procedure cmd_echo(p1: TSplitted);
 var
   err: byte;                                                      { error code }
 begin
   err := 0;
   { check parameters and set value }
-  if length(p1) = 0 then echo := not echo else
-    if upcase(p1[1]) + upcase(p1[2])  = 'ON' then echo := true else
+  if length(p1) = 0 then flag_echo := not flag_echo else
+    if upcase(p1[1]) + upcase(p1[2])  = 'ON' then flag_echo := true else
       if upcase(p1[1]) + upcase(p1[2]) + upcase(p1[3]) = 'OFF'
-        then echo := false
+        then flag_echo := false
         else err := 34;
   { messages }
   if err > 0 then writemsg(err, true) else
-    if echo then writemsg(114, true) else writemsg(115, true);
+    if flag_echo then writemsg(114, true) else writemsg(115, true);
 end;
