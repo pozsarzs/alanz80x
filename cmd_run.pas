@@ -15,18 +15,18 @@
 { COMMAND 'run' }
 {overlay} procedure cmd_run(p1: boolean);
 var
-  bi:        byte;
+  bi, bj:    byte;
   err:       byte;                                                { error code }
   ec:        integer;
   verbose:   boolean;
   inputtape: byte;
 label
-  stop, error, found;
+  stop, error;
 
   { LOAD ALL TAPES FROM FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
   function loadalltapes: boolean;
   var
-    bi:        byte;
+    bi, bj:    byte;
     dev, tape: text;
   label
     err;
@@ -48,6 +48,10 @@ label
         end else
         begin
           readln(tape, machine.tapes[bi].data);
+          { convert to uppercase }
+          for bj := 1 to length(machine.tapes[bi].data) do
+            machine.tapes[bi].data[bi] := upcase(machine.tapes[bi].data[bi]);
+          { echo to standard output}
           if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
           close(tape);
         end;
@@ -78,6 +82,7 @@ label
       end else
       begin
         writeln(tape, machine.tapes[bi].data);
+        { echo to standard output}
         if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
         close(tape);
       end;
@@ -102,46 +107,45 @@ begin
       syncregs;
       tprec.atrj := flag_it;
       tprec.aqi := 0;
+      { machine is started }
       repeat
         with machine do
         begin
-          { increment PSC by 1 }
+          if verbose then
+            write(addzero(registers[6].value, 5):5, ':  ');               { r6 }
+          { - increment PSC by 1 }
           registers[6].value := registers[6].value + 1;
           syncregs;
           with tprec do
           begin
-            { read one symbol from tape or register }
-            case trk of
+            sj := 0;
+            { - read one symbol from tape or register }
+            case atrj of
               0: err := 122;                                              { t0 }
               5: ;                                                        { t5 }
-             12: symbols[sj] := SYMBOLSET[1];                             { r7 }
+             12: sj := 1;                                                 { r7 }
             else
-              if (trk < 6)
-              then                                                     { t1..4 }
-                symbols[sj] := tapes[trk].data[tapes[trk].position]
-              else                                                     { r0..6 }
-                symbols[sj] := registers[trk - 6].data[registers[trk - 6].position];
+            begin
+              if (atrj < 6)  then
+              begin                                                    { t1..4 }
+                for bj := 1 to length(machine.symbols) do
+                  if tapes[atrj].data[tapes[atrj].position] = machine.symbols[bj]
+                    then sj := bj;
+              end else                                                 { r0..6 }
+              begin
+                for bj := 1 to length(machine.symbols) do
+                  if registers[atrj - 6].data[registers[atrj - 6].position] = machine.symbols[bj]
+                    then sj := bj;
+              end;
+              if sj = 0 then err := 63;
+              end;
             end;
           end;
           if err > 0 then goto error;
-          { check symbol }
-
-          if err > 0 then goto error;
-          { load tuple }
-
-          if err > 0 then goto error;
-          { write one symbol to tape or register }
-
-          { set head positions }
-        
-          { set next input tape or register }
-
-          { set next state }
-
+          { - load tuple }
+          { - show details of this step }
           if verbose then
           begin
-            { show details of this step }
-            write(addzero(registers[6].value, 5):5, ':  ');               { r6 }
             with tprec do
             begin
               write(addzero(aqi, 3):3, '  ');                             { qi }
@@ -164,7 +168,15 @@ begin
               writeln(addzero(qm, 3):3);                                  { qm }
             end;
           end else write('#');
-        end;         
+          { - write one symbol to tape or register }
+
+          { - set head positions }
+
+          { - set next input tape or register }
+          tprec.atrj := tprec.trm;
+          { - set next state }
+          tprec.aqi := tprec.qm;
+        end;
         { - check program set limit}
         if machine.registers[6].value = flag_sl then
         begin
@@ -184,17 +196,15 @@ begin
           writemsg(88, true);
           waitforkey;
         end;
-{!}     goto stop;
       until (tprec.aqi = 127) or (machine.registers[6].value = 32767);
       writeln;
       goto stop;
-     error:
       { machine is stopped }
-      writemsg(err, true);
      stop:
       writemsg(80, true);
+     error:
     end;
   end;
   { error message }
-  if err > 0 then writemsg(err, true)
+  if err > 0 then writemsg(err, true);
 end;

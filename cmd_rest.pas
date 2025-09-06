@@ -20,6 +20,9 @@ begin
   { reset Turing machine base configuration }
   with machine do
   begin
+    { tapes }
+    for bi := 0 to 5 do
+      tapes[bi].position := 1;
     { registers }
     for bi := 0 to 7 do
      case bi of
