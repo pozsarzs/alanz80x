@@ -103,45 +103,68 @@ begin
       tprec.atrj := flag_it;
       tprec.aqi := 0;
       repeat
-        { increment PSC by 1 }
-        machine.registers[6].value := machine.registers[6].value + 1;
-        syncregs;
-        { read one symbol from input tape or register}
-
-{..}
-
-        if verbose then
+        with machine do
         begin
-          write(addzero(machine.registers[6].value, 5):5, ':  ');         { SC }
+          { increment PSC by 1 }
+          registers[6].value := registers[6].value + 1;
+          syncregs;
           with tprec do
           begin
-            write(addzero(aqi, 3):3, '  ');                               { qi }
-            if atrj > 5                                                  { trj }
-              then write(DC[2], atrj - 6)
-              else write(DC[1], atrj);
-            write('  ');
-            if trk > 5                                                   { trk }
-              then write(DC[2], trk - 6)
-              else write(DC[1], trk);
-            write('  ');
-            write(machine.symbols[sj],'   ');                             { sj }
-            write(machine.symbols[sk],'   ');                             { sk }
-            write(HMD[dj + 1],'   ');                                     { dj }
-            write(HMD[dk + 1],'   ');                                     { dk }
-            if trm > 5                                                   { trm }
-              then write(DC[2], trm - 6)
-              else write(DC[1], trm);
-            write('  ');
-            writeln(addzero(qm, 3):3);                                    { qm }
+            { read one symbol from tape or register }
+            case trk of
+              0: err := 122;                                              { t0 }
+              5: ;                                                        { t5 }
+             12: symbols[sj] := SYMBOLSET[1];                             { r7 }
+            else
+              if (trk < 6)
+              then                                                     { t1..4 }
+                symbols[sj] := tapes[trk].data[tapes[trk].position]
+              else                                                     { r0..6 }
+                symbols[sj] := registers[trk - 6].data[registers[trk - 6].position];
+            end;
           end;
-        end else write('#');
+          if err > 0 then goto error;
+          { check symbol }
 
-{..}
+          if err > 0 then goto error;
+          { load tuple }
 
-       found:
+          if err > 0 then goto error;
+          { write one symbol to tape or register }
 
-{..}
+          { set head positions }
+        
+          { set next input tape or register }
 
+          { set next state }
+
+          if verbose then
+          begin
+            { show details of this step }
+            write(addzero(registers[6].value, 5):5, ':  ');               { r6 }
+            with tprec do
+            begin
+              write(addzero(aqi, 3):3, '  ');                             { qi }
+              if atrj > 5
+                then write(DC[2], atrj - 6)                              { arj }
+                else write(DC[1], atrj);                                 { atj }
+              write('  ');
+              if trk > 5
+                then write(DC[2], trk - 6)                                { rk }
+                else write(DC[1], trk);                                   { tk }
+              write('  ');
+              write(symbols[sj],'   ');                                   { sj }
+              write(symbols[sk],'   ');                                   { sk }
+              write(HMD[dj + 1],'   ');                                   { dj }
+              write(HMD[dk + 1],'   ');                                   { dk }
+              if trm > 5
+                then write(DC[2], trm - 6)                                { rm }
+                else write(DC[1], trm);                                   { tm }
+              write('  ');
+              writeln(addzero(qm, 3):3);                                  { qm }
+            end;
+          end else write('#');
+        end;         
         { - check program set limit}
         if machine.registers[6].value = flag_sl then
         begin
@@ -174,4 +197,4 @@ begin
   end;
   { error message }
   if err > 0 then writemsg(err, true)
-end;  
+end;

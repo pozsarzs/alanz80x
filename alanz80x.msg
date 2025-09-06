@@ -36,7 +36,7 @@
 ~'The breakpoint state is '
 ~'The breakpoint state is deleted.'
 ~'The breakpoint state is set to '
-~'r7  Bottomless Register '
+~'r7  BottomLess Register '
 ~'The number of states is set to '
 ~'Set of symbols:   '
 ~'The symbol set is reset to default.'
@@ -119,3 +119,4 @@
 ~'Missing mandatory TAP3 tag.'
 ~'Missing mandatory TAP4 tag.'
 ~'Missing mandatory STCK tag.'
+~'Cannot read the echo device (t0)'
