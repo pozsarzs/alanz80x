@@ -137,6 +137,7 @@ begin
           end;
           if err > 0 then goto error;
           { - load tuple }
+          tpblunpack(tprec.aqi, tprec.sj);
           { - show details of this step }
           if verbose then
           begin
