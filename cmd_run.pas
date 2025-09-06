@@ -13,13 +13,11 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'run' }
-{overlay} procedure cmd_run(p1: boolean);
+overlay procedure cmd_run(p1: boolean);
 var
-  bi, bj:    byte;
-  err:       byte;                                                { error code }
-  ec:        integer;
-  verbose:   boolean;
-  inputtape: byte;
+  bj:      byte;
+  err:     byte;                                                  { error code }
+  verbose: boolean;
 label
   stop, error;
 
@@ -28,8 +26,6 @@ label
   var
     bi, bj:    byte;
     dev, tape: text;
-  label
-    err;
   begin
     loadalltapes := true;
     assign(dev, machine.tapes[0].filename);
@@ -63,8 +59,6 @@ label
   var
     bi:        byte;
     dev, tape: text;
-  label
-    err;
   begin
     savealltapes := true;
     assign(dev, machine.tapes[0].filename);

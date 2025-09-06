@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'echo' }
-{overlay} procedure cmd_echo(p1: TSplitted);
+overlay procedure cmd_echo(p1: TSplitted);
 var
   err: byte;                                                      { error code }
 begin

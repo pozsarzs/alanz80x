@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'break' }
-{overlay} procedure cmd_break(p1: TSplitted);
+overlay procedure cmd_break(p1: TSplitted);
 var
   err:    byte;                                                   { error code }
   ip1:    integer;                                        { function parameter }

@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'prog' }
-{overlay} procedure cmd_prog(p1, p2: TSplitted);
+overlay procedure cmd_prog(p1, p2: TSplitted);
 var
   bi, bj:   byte;
   ip1, ip2: integer;                                     { function parameters }

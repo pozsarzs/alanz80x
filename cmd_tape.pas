@@ -50,7 +50,6 @@ begin
   begin
     { show all }
     writemsg(50, true);
-    writeln;
     writemsg(91, true);
     for bi := P1MIN to P1MAX do writetaperec(bi);
   end else
@@ -62,7 +61,6 @@ begin
       begin
         { show selected }
         writemsg(50, true);
-        writeln;
         writemsg(91, true);
         writetaperec(ip1);
       end else

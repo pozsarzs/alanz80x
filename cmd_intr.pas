@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'intr' }
-{overlay} procedure cmd_intr(p1: TSplitted);
+overlay procedure cmd_intr(p1: TSplitted);
 var
   err: byte;                                                      { error code }
 begin

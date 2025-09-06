@@ -47,7 +47,6 @@ begin
   begin
     { show all }
     writemsg(96, true);
-    writeln;
     writemsg(92, true);
     for bi := P1MIN to P1MAX do writeregrec(bi);
   end else
@@ -56,7 +55,6 @@ begin
     if parcomp(p1, ip1, err, P1MIN, P1MAX) then
     begin
       writemsg(96, true);
-      writeln;
       writemsg(92, true);
       writeregrec(ip1);
     end;
