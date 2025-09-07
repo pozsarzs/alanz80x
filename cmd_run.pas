@@ -16,6 +16,7 @@
 overlay procedure cmd_run(p1: boolean);
 var
   bj:      byte;
+  dev:     text;
   err:     byte;                                                  { error code }
   verbose: boolean;
 label
@@ -24,8 +25,8 @@ label
   { LOAD ALL TAPES FROM FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
   function loadalltapes: boolean;
   var
-    bi, bj:    byte;
-    dev, tape: text;
+    bi, bj: byte;
+    tape:   text;
   begin
     loadalltapes := true;
     assign(dev, machine.tapes[0].filename);
@@ -57,8 +58,8 @@ label
   { SAVE ALL TAPES TO FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
   function savealltapes: boolean;
   var
-    bi:        byte;
-    dev, tape: text;
+    bi:   byte;
+    tape: text;
   begin
     savealltapes := true;
     assign(dev, machine.tapes[0].filename);
@@ -103,6 +104,9 @@ begin
       tprec.aqi := 0;
       { machine is started }
       repeat
+        { detect IRQ }
+        {..}
+        { main operation }
         with machine do
         begin
           if verbose then
@@ -110,13 +114,13 @@ begin
           { - increment PSC by 1 }
           registers[6].value := registers[6].value + 1;
           syncregs;
+          { - read one symbol from tape or register }
           with tprec do
           begin
             sj := 0;
-            { - read one symbol from tape or register }
             case atrj of
               0: err := 122;                                              { t0 }
-              5: ;                                                        { t5 }
+              5: { push };                                                { t5 }
              12: sj := 1;                                                 { r7 }
             else
             begin
@@ -164,14 +168,81 @@ begin
             end;
           end else write('#');
           { - write one symbol to tape or register }
-
-          { - set head positions }
-
+          with tprec do
+          begin
+            case trk of
+              0: writeln(dev, symbols[sk]);                               { t0 }
+              5: { pop };                                                 { t5 }
+             12: ;                                                        { r7 }
+            else
+              if (trk < 6)                                    { t1..4 or r0..6 }
+                then tapes[trk].data[tapes[trk].position] := symbols[sk]
+                else registers[trk - 6].data[registers[trk - 6].position] :=
+                     symbols[sk];
+            end;
+          end;
+          { - set heads position }
+          with tprec do
+          begin
+            { tape atrj }
+            case atrj of
+             0: ;                                                         { t0 }
+             5: if tapes[atrj].position > 1 then
+                  tapes[atrj].position := tapes[atrj].position - 1;       { t5 }
+             12: ;                                                        { r7 }
+            else
+              if (atrj < 6) then                              { t1..4 or r0..6 }
+              begin
+                case dj of
+                  0: if tapes[atrj].position > 1 then
+                       tapes[atrj].position := tapes[atrj].position - 1;
+                  2: if tapes[atrj].position < 255 then
+                       tapes[atrj].position := tapes[atrj].position + 1;
+                end;
+              end else
+              begin
+                case dj of
+                  0: if tapes[atrj - 6].position > 1 then
+                       tapes[atrj - 6].position := tapes[atrj - 6].position - 1;
+                  2: if tapes[atrj - 6].position < 255 then
+                       tapes[atrj - 6].position := tapes[atrj - 6].position + 1;
+                end;
+              end;
+            end;
+            { tape trk }
+            case trk of
+             0: ;                                                         { t0 }
+             5: if tapes[trk].position < 255 then
+                  tapes[trk].position := tapes[trk].position + 1;         { t5 }
+             12: ;                                                        { r7 }
+            else
+              if (trk < 6) then                               { t1..4 or r0..6 }
+              begin
+                case dj of
+                  0: if tapes[trk].position > 1 then
+                       tapes[trk].position := tapes[trk].position - 1;
+                  2: if tapes[trk].position < 255 then
+                       tapes[trk].position := tapes[trk].position + 1;
+                end;
+              end else
+              begin
+                case dj of
+                  0: if tapes[trk - 6].position > 1 then
+                       tapes[trk - 6].position := tapes[trk - 6].position - 1;
+                  2: if tapes[trk - 6].position < 255 then
+                       tapes[trk - 6].position := tapes[trk - 6].position + 1;
+                end;
+              end;
+            end;
+          end;
+          syncregs;
           { - set next input tape or register }
           tprec.atrj := tprec.trm;
           { - set next state }
           tprec.aqi := tprec.qm;
         end;
+        { - save all tapes }
+        {..}
         { - check program set limit}
         if machine.registers[6].value = flag_sl then
         begin
