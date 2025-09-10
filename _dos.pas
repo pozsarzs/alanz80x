@@ -12,18 +12,34 @@
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. }
 
-{ WAIT FOR A KEY }
-procedure waitforkey;
-{type
+{ READ A KEY FROM STANDARD INPUT }
+function keyread: char;
+type
   TRegPack = record
                AX, BX, CX, DX, BP, SI, DI, DS, ES, Flags: integer;
              end;
 var
-  regs:      TRegPack;}
+  regs:      TRegPack;
 begin
-{  regs.AX := $0100;
+  regs.AX := $0800;
   msdos(regs);
-  writeln;}
+  keyread := char(regs.ax and $00ff);
+end;
+
+{ DETECT KEYPRESS }
+function keypress: boolean;
+type
+  TRegPack = record
+               AX, BX, CX, DX, BP, SI, DI, DS, ES, Flags: integer;
+             end;
+var
+  regs:      TRegPack;
+begin
+  regs.AX := $0b00;
+  msdos(regs);
+  if (regs.ax and $00ff) = $ff
+    then keypress := true
+    else keypress := false;
 end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
@@ -54,3 +70,4 @@ begin
   writemsg(message, true);
   halt(exitcode);
 end;
+

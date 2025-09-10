@@ -265,6 +265,7 @@ begin
               if ec > 0 then err := 111 else
                 if ss[bi * 10 + 1] = DC[1] then tprec.trk := i else
                   if ss[bi * 10 + 1] = DC[2] then tprec.trk := i + 6 else err := 110;
+              if err > 0 then goto error;
               { sj }
               tprec.sj := bi + 1;
               { sk }
@@ -286,7 +287,7 @@ begin
               for bj := 1 to 3 do
                 if ss[bi * 10 + 5] = HMD[bj] then tprec.dk := bj - 1;
               { - check value }
-              if tprec.dk = 255 then err := 61;
+              if tprec.dk = 255 then err := 60;
               if err > 0 then goto error;
               { trm }
               err := 0;
@@ -294,14 +295,12 @@ begin
               if ec > 0 then err := 113 else
                 if ss[bi * 10 + 6] = DC[1] then tprec.trm := i else
                   if ss[bi * 10 + 6] = DC[2] then tprec.trm := i + 6 else err := 112;
-              { - check value }
-              if (i < 0) or (i > 15) then err := 62;
               if err > 0 then goto error;
               { qm }
               val(ss[bi * 10 + 8] + ss[bi * 10 + 9] + ss[bi * 10 + 10], i, ec);
               { - check value }
               if ec > 0 then err := 61 else
-                if (i < 0) or (i > 126) then err := 62;
+                if (i < 0) or (i > 127) then err := 62;
               if err > 0 then goto error;
               tprec.qm := i;
               { store one tuple to the memory } 

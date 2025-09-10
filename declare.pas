@@ -14,25 +14,30 @@
 
 type
   { GENERAL TYPES }
-  PByte =         ^byte;
-  TCommand =      string[255];
-  TFilename =     string[12];
-  TSplitted =     string[64];
-  TThreeDigit =   string[3];
-  TFiveDigit =    string[5];
-  TRegContent =   string[6];
+  PByte =           ^byte;
+  TCommand =        string[255];
+  TFilename =       string[12];
+  TFiveDigit =      string[5];
+  TRegContent =     string[6];
+  TSplitted =       string[64];
+  TThreeDigit =     string[3];
   { TYPES RELATED TO TURING MACHINES }
-  TTapes =        record                                           { TAPE TYPE }
-    accessmode:   byte;                                      { file permission }
-    data:         string[255];                                  { tape content }
-    filename:     TFilename;                             { file or device name }
-    position:     byte;                                        { head position }
+  TMachineContext = record                              { MACHINE CONTEXT TYPE }
+    sqm:          byte;                                     { saved next state }
+    strm:         byte;              { saved next input tape or register number}
+    sr:           array[0..5] of integer;                    { saved registers }
   end;
   TRegisters =    record                                       { REGISTER TYPE }
     data:         TRegContent;                    { register content in string }
     permission:   byte;                                  { register permission }
     position:     byte;                                        { head position }
     value:        integer;                                    { register value }
+  end;
+  TTapes =        record                                           { TAPE TYPE }
+    accessmode:   byte;                                      { file permission }
+    data:         string[255];                                  { tape content }
+    filename:     TFilename;                             { file or device name }
+    position:     byte;                                        { head position }
   end;
   TTPRecently =   record                                          { TUPLE TYPE }
     aqi:          byte;                                         { actual state }
@@ -48,6 +53,7 @@ type
   { TURING MACHINE BASE CONFIGURATION TYPE }
   TTuring =       record                                 { TURING MACHINE TYPE }
     registers:    array[0..7] of TRegisters;                   { registers set }
+    savedcontext: TMachineContext;    { saved machine context for IRQ handling }
     symbols:      string[40];                                   { symbolum set }
     tapes:        array[0..5] of TTapes;                            { tape set }
     tuples:       PByte;                                         { state table }
@@ -58,6 +64,7 @@ var
   command:        TCommand;                             { command line content }
   flag_echo:      boolean;                  { tape echo to standard out device }
   flag_intr:      boolean;                       { interrupt request detecting }
+  flag_runmode:   boolean;                  { run mode (0/1: normal/interrupt) }
   flag_it:        byte;                                         { initial tape }
   flag_runt36cmd: boolean;                    { run commands from the t36 file }
   flag_qb:        byte;                                     { breakpoint state }

@@ -15,10 +15,12 @@
 { COMMAND 'run' }
 overlay procedure cmd_run(p1: boolean);
 var
+  c:       char;
   bj:      byte;
   dev:     text;
   err:     byte;                                                  { error code }
-  verbose: boolean;
+  int:     byte;                                            { interrupt number }
+  verbose: boolean;                                          { verbose showing }
 label
   stop, error;
 
@@ -104,8 +106,6 @@ begin
       tprec.aqi := 0;
       { machine is started }
       repeat
-        { detect IRQ }
-        {..}
         { main operation }
         with machine do
         begin
@@ -120,7 +120,6 @@ begin
             sj := 0;
             case atrj of
               0: err := 122;                                              { t0 }
-              5: { push };                                                { t5 }
              12: sj := 1;                                                 { r7 }
             else
             begin
@@ -172,7 +171,6 @@ begin
           begin
             case trk of
               0: writeln(dev, symbols[sk]);                               { t0 }
-              5: { pop };                                                 { t5 }
              12: ;                                                        { r7 }
             else
               if (trk < 6)                                    { t1..4 or r0..6 }
@@ -242,7 +240,7 @@ begin
           tprec.aqi := tprec.qm;
         end;
         { - save all tapes }
-        {..}
+        if savealltapes then ;
         { - check program set limit}
         if machine.registers[6].value = flag_sl then
         begin
@@ -254,13 +252,51 @@ begin
         begin
           writemsg(89, true);
           writemsg(88, true);
-          waitforkey;
+          c := keyread;
         end;
         { - step-by-step running mode }
         if p1 then
         begin
           writemsg(88, true);
-          waitforkey;
+          c := keyread;
+        end;
+        { IRQ }
+        if flag_intr then
+          with machine do
+          begin
+            { - detecting }
+            int := 255;
+            if keypress then c := keyread;
+            for bi := 3 to length(symbols) do
+              if c = symbols[bi] then int := bi;
+            if int <> 255 then
+            begin
+              { - save machine context }
+              with savedcontext do
+              begin
+                sqm := tprec.qm;
+                strm := tprec.trm;
+                for bi:= 0 to 5 do
+                  sr[bi] := registers[bi].value;
+              end;
+              flag_runmode := true;
+              { - load tuple from IRQ vector table }
+              tpblunpack(126, int);
+              { - return from interrupt }
+              if (tprec.aqi = 127) and flag_runmode then
+              begin
+                { load saved machine context}
+                with savedcontext do
+                begin
+                  tprec.qm := sqm;
+                  tprec.trm := strm;
+                  for bi:= 0 to 5 do
+                    registers[bi].value := sr[bi];
+                  syncregs;
+              end;
+              flag_runmode := false;
+            end;
+          end;
         end;
       until (tprec.aqi = 127) or (machine.registers[6].value = 32767);
       writeln;
@@ -274,3 +310,4 @@ begin
   { error message }
   if err > 0 then writemsg(err, true);
 end;
+
