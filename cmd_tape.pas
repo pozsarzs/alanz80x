@@ -72,10 +72,7 @@ begin
         begin
           dn := fn;
           machine.tapes[ip1].filename := dn + ':';
-        end else
-        begin
-          machine.tapes[ip1].filename := fn + '.TAP';
-        end;
+        end else machine.tapes[ip1].filename := fn + '.TAP';
         writemsg(50, false);
         writeln(machine.tapes[ip1].filename + '.');
       end;

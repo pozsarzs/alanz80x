@@ -22,7 +22,7 @@ var
   int:     byte;                                            { interrupt number }
   verbose: boolean;                                          { verbose showing }
 label
-  stop, error;
+  200, 800;
 
   { LOAD ALL TAPES FROM FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
   function loadalltapes: boolean;
@@ -33,6 +33,7 @@ label
     loadalltapes := true;
     assign(dev, machine.tapes[0].filename);
     for bi := 1 to 5 do
+    begin
       if machine.tapes[bi].accessmode < 2 then
       begin
         assign(tape, machine.tapes[bi].filename);
@@ -55,6 +56,9 @@ label
           close(tape);
         end;
       end;
+      for bj := length(machine.tapes[bi].data) + 1 to MAXBYTE do
+        machine.tapes[bi].data := machine.tapes[bi].data + SYMBOLSET[1];
+    end;
   end;
 
   { SAVE ALL TAPES TO FILE WITH OPTIONAL ECHO TO STD OUT DEVICE }
@@ -66,24 +70,25 @@ label
     savealltapes := true;
     assign(dev, machine.tapes[0].filename);
     for bi := 1 to 5 do
-    begin
-      assign(tape, machine.tapes[bi].filename);
-      {$I-}
-      rewrite(tape);
-      {$I+}
-      if ioresult <> 0 then
+      if (machine.tapes[bi].accessmode = 1) or (machine.tapes[bi].accessmode = 2) then
       begin
-        savealltapes := false;
-        writemsg(51, false);
-        writeln(bi,' (' + machine.tapes[bi].filename + ')');
-      end else
-      begin
-        writeln(tape, machine.tapes[bi].data);
-        { echo to standard output}
-        if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
-        close(tape);
+        assign(tape, machine.tapes[bi].filename);
+        {$I-}
+        rewrite(tape);
+        {$I+}
+        if ioresult <> 0 then
+        begin
+          savealltapes := false;
+          writemsg(51, false);
+          writeln(bi,' (' + machine.tapes[bi].filename + ')');
+        end else
+        begin
+          writeln(tape, machine.tapes[bi].data);
+          { echo to standard output}
+          if flag_echo then writeln(dev, 't',bi,': ', machine.tapes[bi].data);
+          close(tape);
+        end;
       end;
-    end;
   end;
 
 begin
@@ -128,7 +133,7 @@ begin
                 for bj := 1 to length(machine.symbols) do
                   if tapes[atrj].data[tapes[atrj].position] = machine.symbols[bj]
                     then sj := bj;
-              end else                                                 { r0..6 }
+              end else                                                 { r0..9 }
               begin
                 for bj := 1 to length(machine.symbols) do
                   if registers[atrj - 6].data[registers[atrj - 6].position] = machine.symbols[bj]
@@ -138,9 +143,9 @@ begin
               end;
             end;
           end;
-          if err > 0 then goto error;
+          if err > 0 then goto 800;
           { - load tuple }
-          tpblunpack(tprec.aqi, tprec.sj);
+          tpblunpack(tprec.aqi, tprec.sj - 1);
           { - show details of this step }
           if verbose then
           begin
@@ -170,13 +175,10 @@ begin
           with tprec do
           begin
             case trk of
-              0: writeln(dev, symbols[sk]);                               { t0 }
-             12: ;                                                        { r7 }
-            else
-              if (trk < 6)                                    { t1..4 or r0..6 }
-                then tapes[trk].data[tapes[trk].position] := symbols[sk]
-                else registers[trk - 6].data[registers[trk - 6].position] :=
-                     symbols[sk];
+                 0: writeln(dev, symbols[sk]);                            { t0 }
+              1..5: tapes[trk].data[tapes[trk].position] := symbols[sk];{ t1-5 }
+                 6: registers[trk - 6].data[registers[trk - 6].position] :=
+                      symbols[sk];                                        { r6 }
             end;
           end;
           { - set heads position }
@@ -185,24 +187,24 @@ begin
             { tape atrj }
             case atrj of
              0: ;                                                         { t0 }
-             5: if tapes[atrj].position > 1 then
-                  tapes[atrj].position := tapes[atrj].position - 1;       { t5 }
-             12: ;                                                        { r7 }
+             5: if tapes[atrj].position > 2 then                          { t5 }
+                  tapes[atrj].position := tapes[atrj].position - 1;
+             13: ;                                                        { r7 }
             else
-              if (atrj < 6) then                              { t1..4 or r0..6 }
+              if (atrj < 6) then                                       { t1..4 }
               begin
                 case dj of
-                  0: if tapes[atrj].position > 1 then
+                  0: if tapes[atrj].position > 2 then
                        tapes[atrj].position := tapes[atrj].position - 1;
-                  2: if tapes[atrj].position < 255 then
+                  2: if tapes[atrj].position < MAXBYTE then
                        tapes[atrj].position := tapes[atrj].position + 1;
                 end;
-              end else
+              end else                                       { r0..6 and r8..9 }
               begin
                 case dj of
-                  0: if tapes[atrj - 6].position > 1 then
+                  0: if tapes[atrj - 6].position > 2 then
                        tapes[atrj - 6].position := tapes[atrj - 6].position - 1;
-                  2: if tapes[atrj - 6].position < 255 then
+                  2: if tapes[atrj - 6].position < MAXBYTE then
                        tapes[atrj - 6].position := tapes[atrj - 6].position + 1;
                 end;
               end;
@@ -210,24 +212,24 @@ begin
             { tape trk }
             case trk of
              0: ;                                                         { t0 }
-             5: if tapes[trk].position < 255 then
+             5: if tapes[trk].position < MAXBYTE then
                   tapes[trk].position := tapes[trk].position + 1;         { t5 }
              12: ;                                                        { r7 }
             else
-              if (trk < 6) then                               { t1..4 or r0..6 }
+              if (trk < 6) then                                        { t1..4 }
               begin
-                case dj of
-                  0: if tapes[trk].position > 1 then
+                case dk of
+                  0: if tapes[trk].position > 2 then
                        tapes[trk].position := tapes[trk].position - 1;
-                  2: if tapes[trk].position < 255 then
+                  2: if tapes[trk].position < MAXBYTE then
                        tapes[trk].position := tapes[trk].position + 1;
                 end;
-              end else
+              end else                                       { r0..6 and r8..9 }
               begin
-                case dj of
-                  0: if tapes[trk - 6].position > 1 then
+                case dk of
+                  0: if tapes[trk - 6].position > 2 then
                        tapes[trk - 6].position := tapes[trk - 6].position - 1;
-                  2: if tapes[trk - 6].position < 255 then
+                  2: if tapes[trk - 6].position < MAXBYTE then
                        tapes[trk - 6].position := tapes[trk - 6].position + 1;
                 end;
               end;
@@ -245,10 +247,10 @@ begin
         if machine.registers[6].value = flag_sl then
         begin
           writemsg(83, true);
-          goto stop;
+          goto 200;
         end;
         { - check breakpoint }
-        if tprec.aqi = flag_qb then
+        if (flag_qb < 127) and (tprec.aqi = flag_qb) then
         begin
           writemsg(89, true);
           writemsg(88, true);
@@ -300,14 +302,10 @@ begin
         end;
       until (tprec.aqi = 127) or (machine.registers[6].value = 32767);
       writeln;
-      goto stop;
-      { machine is stopped }
-     stop:
+     200: { machine is stopped }
       writemsg(80, true);
-     error:
+     800: { error message }
     end;
   end;
-  { error message }
   if err > 0 then writemsg(err, true);
 end;
-

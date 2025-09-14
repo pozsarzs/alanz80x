@@ -19,7 +19,7 @@ var
   ip1:    integer;                                        { function parameter }
 const
   P1MIN = 1;                                               { valid range of p1 }
-  P1MAX = 32766;
+  P1MAX = 32767;
 begin
   err := 0;
   { check parameters }

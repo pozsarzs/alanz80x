@@ -120,3 +120,5 @@
 ~'Missing mandatory TAP4 tag.'
 ~'Missing mandatory STCK tag.'
 ~'Cannot read the echo device (t0)'
+~'r8  Command Vector      '
+~'r9  Interrupt Vector    '

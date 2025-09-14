@@ -20,7 +20,7 @@ var
   err:    byte;                                                   { error code }
   s:      string[40];
 label
-  break1;
+  100;
 begin
   err := 0;
   { check parameters }
@@ -38,7 +38,7 @@ begin
       writemsg(42, true)
     end else
     begin
-      { set symbol list }
+      { set symbol set }
       s := p1;
       { - convert to uppercase and truncate to 40 }
       for bi := 1 to length(p1) do s[bi] := upcase(s[bi]);
@@ -53,15 +53,15 @@ begin
           end;
       for bi := 1 to 40 do
       begin
-        if bi = length(s) then goto break1;
+        if bi = length(s) then goto 100;
         if s[bi] = s[bi + 1] then
         begin
          delete(s, bi, 1);
          err := 44;
         end;
       end;
-    break1:
-      machine.symbols := SYMBOLSET[1] + SYMBOLSET[2] + s;
+100: { set and write to console }
+      machine.symbols := SYMBOLSET[1] + SYMBOLSET[2] + SYMBOLSET[3] + s;
       { warning messages }
       if length(p1) > 40 then writemsg(45, true);
       if err > 0 then writemsg(err, true);

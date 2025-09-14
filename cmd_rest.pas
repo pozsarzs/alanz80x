@@ -24,11 +24,11 @@ begin
     for bi := 0 to 5 do
       tapes[bi].position := 1;
     { registers }
-    for bi := 0 to 7 do
+    for bi := 0 to 9 do
      case bi of
-       0: registers[bi].value := ord(SYMBOLSET[1]);
-       6: registers[bi].value := 0;
-       7: registers[bi].value := ord(SYMBOLSET[1]);
+           0: registers[bi].value := ord(SYMBOLSET[1]);
+           6: registers[bi].value := 0;
+        7..9: registers[bi].value := ord(SYMBOLSET[1]);
      else
        registers[bi].value := tapes[bi].position;
      end;

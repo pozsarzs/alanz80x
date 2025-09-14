@@ -70,4 +70,3 @@ begin
   writemsg(message, true);
   halt(exitcode);
 end;
-

@@ -57,7 +57,7 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 | ~ commands          |number of symbols - 2                                |
 | ~ interrupts        |number of symbols - 2                                |
 | ~ registers         |1 general                                            |
-|                     |6 status                                             |
+|                     |8 status                                             |
 |                     |1 special ('bottomless')                             |
 | ~ state set         |up to 128 states                                     |
 | ~ symbol set        |up to 40 characters (2 mandatory and 38 optional)    |
@@ -128,7 +128,7 @@ Left/right moves must be specified for all registers and tapes, but for some the
 The finite set of registers and the symbol chains on them are as follows:
 
 $$
-R = \\{ r_0, \dots, r_7 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
+R = \\{ r_0, \dots, r_9 \\} \text{ and } w(t_n) \in S^*, \text{ where the: }
 $$
 
 - r<sub>0</sub>: Accumulator (ACC) - char type,
@@ -138,7 +138,9 @@ $$
 - r<sub>4</sub>: t<sub>4</sub> Tape Position (4TP) - integer type,
 - r<sub>5</sub>: Stack Tape Position (STP) - integer type,
 - r<sub>6</sub>: Program Step Counter (PSC) - integer type,
-- r<sub>7</sub>: Bottomless register (BLR) - char type,
+- r<sub>7</sub>: Bottomless Register (BLR) - char type,
+- r<sub>8</sub>: Command Vector Register (CVR) - char type,
+- r<sub>9</sub>: Interrupt Vector Register (IVR) - char type,
 - w: Symbol chain in the register.
 
 All register value are stored as string. Reading and writing is done in the same way as with tape. The bottomless register swallows the symbol written into it and always returns '_' when read.
@@ -154,8 +156,8 @@ $$
 
 - q<sub>0</sub>, is the default initial state,
 - q<sub>1</sub>-q<sub>124</sub> are the free space,
-- q<sub>125</sub> is command vectors,
-- q<sub>126</sub> interrupt vectors,
+- q<sub>125</sub> is the command vector area,
+- q<sub>126</sub> is the interrupt vector area,
 - q<sub>127</sub> is the mandatory final state.
 
 
@@ -169,10 +171,12 @@ $$
 
 - s<sub>0</sub> is the mandatory blank character (_),
 - s<sub>1</sub> is the mandatory end character (#),
-- s<sub>2</sub>-s<sub>39</sub> are optional symbols.
+- s<sub>2</sub> is the mandatory command character (@),
+- s<sub>3</sub>-s<sub>40</sub> are optional symbols.
 
-The set must have at least two elements. To use registers, decimal numbers must also be included in the symbol set. Default symbol set is '_#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-'.
+The set must have at least three elements. To use registers, decimal numbers must also be included in the symbol set. Default symbol set is '_#@.-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.
 
+The tape files store data in human-readable form. Their content is updated with every change in status.
 
 ### Tape set
 
@@ -213,14 +217,14 @@ Notes:
 - d<sub>j</sub> and d<sub>k</sub> cannot be 'S' at the same time,
 - q<sub>i</sub> is the actual state, q<sub>i</sub> $\in$ Q,
 - q<sub>m</sub> is the next state, q<sub>m</sub> $\in$ Q,
-- r<sub>j</sub> is the register from which the machine reads a symbol, r<sub>j</sub> $\in$ C,
-- r<sub>k</sub> is the the register to which the machine writes a symbol, r<sub>j</sub> $\in$ C,
-- r<sub>m</sub> is the next register from which the machine reads a symbol, t<sub>m</sub> $\in$ C,
+- r<sub>j</sub> is the register from which the machine reads a symbol, r<sub>j</sub> $\in$ R,
+- r<sub>k</sub> is the the register to which the machine writes a symbol, r<sub>j</sub> $\in$ R,
+- r<sub>m</sub> is the next register from which the machine reads a symbol, t<sub>m</sub> $\in$ R,
 - s<sub>j</sub> is the actual symbol read from the data carrier, s<sub>j</sub> $\in$ S,
 - s<sub>k</sub> is the symbol to be written to the data carrier, s<sub>k</sub> $\in$ S,
-- t<sub>j</sub> is the tape from which the machine reads a symbol, t<sub>j</sub> $\in$ C,
-- t<sub>k</sub> is the tape to which the machine writes a symbol, t<sub>j</sub> $\in$ C,
-- t<sub>m</sub> is the next tape from which the machine reads a symbol, t<sub>m</sub> $\in$ C.
+- t<sub>j</sub> is the tape from which the machine reads a symbol, t<sub>j</sub> $\in$ T,
+- t<sub>k</sub> is the tape to which the machine writes a symbol, t<sub>j</sub> $\in$ T,
+- t<sub>m</sub> is the next tape from which the machine reads a symbol, t<sub>m</sub> $\in$ T.
 
 
 ## Structure of files used by programs
@@ -234,7 +238,7 @@ This file type is used to load the Turing machine's (base) program, define initi
 |`; comment`                |comment                       |         |         |
 |`PROG BEGIN`               |begin of program              |mandatory|mandatory|
 |`NAME progname`            |program name                  |mandatory|mandatory|
-|`SYMB _#0123456789`        |set of symbols                |mandatory|mandatory|
+|`SYMB _#@...`              |set of symbols                |mandatory|mandatory|
 |`STAT 3`                   |number of states              |mandatory|   N/A   |
 |`CARD BEGIN`               |begin of the card section     |mandatory|mandatory|
 |`     STnnn ...`           |base program                  |mandatory|mandatory|
@@ -277,58 +281,11 @@ Note:
 - q<sub>m</sub> = 000, it is the final state.
 
 
-### Tapes
-
-The tape stores data in human-readable form. Their content is updated with every change in status.
-
-
 ## Example program
 
-### Program tape
+The example program increments and decrements the digits of the numbers on the data tape according to the instructions on the program tape.
 
-`@1_@1_#`
-
-### Data tape
-
-`12_54_#`
-
-### Base program card
-
-```
-; You can use this with AlanZ80X extended Turing machine implementation.
-; The program turns on tracing after starting, then start machine. The machine
-; reads the instructions from the program tape and the corresponding data from
-; the data tape. The machine write result to the result tape.
-
-PROG BEGIN
-NAME INC1
-DESC Increment the input number by 1 
-INTR OFF
-SYMB _@#0123456789
-CARD BEGIN
-;    ----- s0-------- s1-------- s2-------- s3-------- s4-------- s5-------- s6-------- s7-------- s8-------- s9-------- s10------- s11------- s12-------
-     ST000 R8_RST2000 T3_RRT1001 R8#RST2000 R80RST2000 R81RST2000 R82RST2000 R83RST2000 R84RST2000 R85RST2000 R86RST2000 R87RST2000 R88RST2000 R89RST2000
-     ST001 T3_SLT3002 R8@RST1001 R8@RST1001 T30RRT1001 T31RRT1001 T32RRT1001 T33RRT1001 T34RRT1001 T35RRT1001 T36RRT1001 T37RRT1001 T38RRT1001 T39RRT1001
-     ST002 T3_RST3010 T3@L5T3002 T3@L5T3002 T30L5T3002 T31L5T3002 T32L5T3002 T33L5T3002 T34L5T3002 T35L5T3002 T36L5T3002 T37L5T3002 T38L5T3002 T39L5T3002
-     ST010 T3_LST3011 R8@RST3010 R8#RST3010 T30RST3010 T31RST3011 T32RST3010 T33RST3010 T34RST3010 T35RST3010 T36RST3010 T37RST3010 T38RST3010 T39RST3010 
-     ST011 T3_LST2000 R8@RST3011 R8#RST3011 T31LST2000 T32LST2000 T33LST2000 T34LST2000 T35LST2000 T36LST2000 T37LST2000 T38LST2000 T39LST2000 T30LST2000
-     ST012 T31LST2000 R8@RST3012 R8#RST3012 T31LST3011 T32LST3011 T33LST3011 T34LST3011 T35LST3011 T36LST3011 T37LST3011 T38LST3011 T39LST3011 T30LST3011 
-     ST125 R8_RST2125 R8_RST2125 R70RST2127 R71RST1010 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125 R8_RST2125
-CARD END
-TAPE BEGIN
-     ECHO CON:
-     TAP1 LO data.tap
-     TAP2 LO program.tap
-     TAP3 SO result.tap
-     TAP4 NN temp.tap
-     STCK NN stack.tap
-TAPE END
-COMM BEGIN
-     TRACE ON
-     RUN
-COMM END
-PROG END
-```
+The program is represented by the files ns.t36 and the tapes are represented by the files ns_*.tap.
 
 
 ## Command line commands
@@ -346,7 +303,7 @@ The program can be controlled with the following command line commands.
 |  7|`load filename.t36`    |load t36 file                                     |
 |  8|`prog [from][to]`      |show program                                      |
 |  9|`quit`                 |exit the program                                  |
-| 10|`reg [0..7]`           |show register content                             |
+| 10|`reg [0..9]`           |show register content                             |
 | 11|`reset`                |reset program (cold reset)                        |
 | 12|`restore`              |restore machine to original state (warm reset)    |
 | 13|`run`                  |run machine                                       |

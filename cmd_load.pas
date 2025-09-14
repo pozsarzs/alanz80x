@@ -33,18 +33,18 @@ const
   LBEGIN =        'BEGIN';
   LEND =          'END';
 label
-  error;
+  800;
 
-{ bit   stat_segment        stat_mandatory
+{ bit      stat_segment     stat_mandatory
   ----------------------------------------
-  D0    'PROG BEGIN' found  'NAME' found
-  D1    'PROG END' found    'DESC' found
-  D2    'CARD BEGIN' found  'SYMB' found
-  D3    'CARD END' found    'TAP1' found
-  D4    'TAPE BEGIN' found  'TAP2' found
-  D5    'TAPE END' found    'TAP3' found
-  D6    'COMM BEGIN' found  'TAP4' found
-  D7    'COMM END' found    'STCK' found               }
+  D0    'PROG BEGIN' found    'NAME' found
+  D1    'PROG END' found      'DESC' found
+  D2    'CARD BEGIN' found    'SYMB' found
+  D3    'CARD END' found      'TAP1' found
+  D4    'TAPE BEGIN' found    'TAP2' found
+  D5    'TAPE END' found      'TAP3' found
+  D6    'COMM BEGIN' found    'TAP4' found
+  D7    'COMM END' found      'STCK' found }
 
   { SET ERROR CODE AND WRITE ERROR MESSAGE }
   procedure errmsg(b: byte);
@@ -80,7 +80,7 @@ begin
   begin
     assign(t36file, p1);
     {$I-}
-      reset(t36file);
+    reset(t36file);
     {$I+}
     if ioresult <> 0 then err := 47 else
     begin
@@ -90,7 +90,7 @@ begin
       comline := 0;
       repeat
         readln(t36file, s);
-        line := line + 1;
+        line := succ(line);
         { - remove space and tabulator from start of line }
         while (s[1] = #32) or (s[1] = #9) do delete(s, 1, 1);
         { - remove space and tabulator from end of line }
@@ -102,12 +102,12 @@ begin
         begin
           sss := s;
           { search segment }
-          seg := 255;
+          seg := MAXBYTE;
           for bi := 0 to 3 do
             if s[1] + s[2] + s[3] + s[4] = LSEGMENTS[bi] then seg := bi;
           { - remove space and tabulator after label }
           while (s[5] = #32) or (s[5] = #9) do delete(s, 5, 1);
-          if seg < 255 then
+          if seg < MAXBYTE then
           begin
             { - segment is valid }
             case seg of
@@ -150,10 +150,10 @@ begin
             end;
           end;
           { search label }
-          lab := 255;
+          lab := MAXBYTE;
           for bi := 0 to 8 do
             if s[1] + s[2] + s[3] + s[4] = LLABELS[bi] then lab := bi;
-          if lab < 255 then
+          if lab < MAXBYTE then
           begin
             { - label is valid }
             case lab of
@@ -237,7 +237,7 @@ begin
                    { - error messages }
                    if ec > 0 then err := 1 else
                      if (i > 0) or (i < 5) then err := 2;
-                   if err > 0 then goto error else flag_it := i;
+                   if err > 0 then goto 800 else flag_it := i;
                  end;
             end;
           end;
@@ -254,7 +254,7 @@ begin
             { - check value }
             if ec > 0 then err := 58 else
               if qi > 126 then err := 59;
-            if err > 0 then goto error;
+            if err > 0 then goto 800;
             delete(ss, 1, 5);
             bi := 0;
             while (length(ss) >= (bi * 10 + 10)) and (bi < 127) do
@@ -265,43 +265,43 @@ begin
               if ec > 0 then err := 111 else
                 if ss[bi * 10 + 1] = DC[1] then tprec.trk := i else
                   if ss[bi * 10 + 1] = DC[2] then tprec.trk := i + 6 else err := 110;
-              if err > 0 then goto error;
+              if err > 0 then goto 800;
               { sj }
               tprec.sj := bi + 1;
               { sk }
-              tprec.sk := 255;
+              tprec.sk := MAXBYTE;
               for bj := 1 to length(machine.symbols) do
                 if ss[bi * 10 + 3] = machine.symbols[bj] then tprec.sk := bj;
               { - check value }
-              if tprec.sk = 255 then err := 64;
-              if err > 0 then goto error;
+              if tprec.sk = MAXBYTE then err := 64;
+              if err > 0 then goto 800;
               { dj }
-              tprec.dj := 255;
+              tprec.dj := MAXBYTE;
               for bj := 1 to 3 do
                 if ss[bi * 10 + 4] = HMD[bj] then tprec.dj := bj - 1;
               { - check value }
-              if tprec.dj = 255 then err := 60;
-              if err > 0 then goto error;
+              if tprec.dj = MAXBYTE then err := 60;
+              if err > 0 then goto 800;
               { dk }
-              tprec.dk := 255;
+              tprec.dk := MAXBYTE;
               for bj := 1 to 3 do
                 if ss[bi * 10 + 5] = HMD[bj] then tprec.dk := bj - 1;
               { - check value }
-              if tprec.dk = 255 then err := 60;
-              if err > 0 then goto error;
+              if tprec.dk = MAXBYTE then err := 60;
+              if err > 0 then goto 800;
               { trm }
               err := 0;
               val(ss[bi * 10 + 7], i, ec);
               if ec > 0 then err := 113 else
                 if ss[bi * 10 + 6] = DC[1] then tprec.trm := i else
                   if ss[bi * 10 + 6] = DC[2] then tprec.trm := i + 6 else err := 112;
-              if err > 0 then goto error;
+              if err > 0 then goto 800;
               { qm }
               val(ss[bi * 10 + 8] + ss[bi * 10 + 9] + ss[bi * 10 + 10], i, ec);
               { - check value }
               if ec > 0 then err := 61 else
                 if (i < 0) or (i > 127) then err := 62;
-              if err > 0 then goto error;
+              if err > 0 then goto 800;
               tprec.qm := i;
               { store one tuple to the memory } 
               tpblpack(qi, bi);
@@ -320,10 +320,9 @@ begin
               flag_runt36cmd := true;
             end;
         end;
-      until (eof(t36file)) or (line = 255);
-    error:
+      until (eof(t36file)) or (line = MAXBYTE);
+     800: { error messages }
       close(t36file);
-      { error messages }
       { - bad or missing values }
       if err > 0 then writemsg(err, true);
       { - missing mandatory tags }

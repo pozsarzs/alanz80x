@@ -14,11 +14,8 @@
 
 program alanz80x;
 
-{ TYPES, VARIABLES AND CONSTANTS }
+{ TYPES, VARIABLES, CONSTANTS, LABELS }
 {$I declare.pas }
-
-label
-  quitprog;
 
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);
@@ -26,26 +23,26 @@ var
   bi: byte;                                            { initial signal number }
   p:  integer;                                             { position in array }
 label
-  lf;
+  900;
 begin
   bi := 0;
   for p := 0 to sizeof(MESSAGES) - 1 do
   begin
-    if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
+    if MESSAGES[p] = MESSAGES[0] then bi := succ(bi);
     if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
-    if (bi > count) or (bi = 255) then goto lf;
+    if (bi > count) or (bi = MAXBYTE) then goto 900;
   end;
- lf:
+ 900: { return }
   if linefeed then writeln;
 end;
 
 { LOAD MESSAGES FROM FILE }
 function loadmsg(filename: TFilename): boolean;
 var
-  s: string[255];
   bi: byte;
   f: text;                                                    { message file }
   i: integer;
+  s: string[255];
 begin
   for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
   i := 0;
@@ -58,15 +55,14 @@ begin
     repeat
       readln(f, s);
       for bi := 1 to length(s) do
-      begin
         if (s[bi] <> #10) and (s[bi] <> #13) and (s[bi] <> #39) then
         begin
           messages[i] := s[bi];
-          i := i + 1;
+          i := succ(i);
           messages[i] := messages[0];
         end;
-      end;
-    until eof(f) or (i = sizeof(messages) - 1);
+    until eof(f) or (i = sizeof(messages) - 1) or (i = MAXINT);
+    { check buffer free space }
     { writeln('Message buffer: ', i, '/', sizeof(messages), 'Byte'); }
     close(f);
     loadmsg := true;
@@ -74,8 +70,8 @@ begin
 end;
 
 { OS INDEPENDENT FUNCTION }
-{ I _cpm.pas}
-{$I _dos.pas}
+{ I _cpm.pas} { CP/M on Z80 }
+{$I _dos.pas} { DOS on i86 }
 
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; digit: byte): TFiveDigit;
@@ -83,10 +79,7 @@ var
   result: TFiveDigit;
 begin
   str(value:0, result);
-  while length(result) < digit do
-  begin
-   result := '0' + result; 
-   end;
+  while length(result) < digit do result := '0' + result; 
   addzero := result;
 end;
 
@@ -129,6 +122,7 @@ begin
     trm := (po1^ and $07) * 2 + (po2^ and $80) div 128;
     qm := po2^ and $7f;
   end;
+  { check unpack }
   { writeln('Memory -> variable tprec (only 4 tuples):');
     if bj < 4 then
       with tprec do
@@ -165,6 +159,7 @@ begin
     po1^ := ((trm and $0e) div 2) + (decdir(dj, dk) * 8) + ((sk and $03) * 64);
     po2^ := (qm and $7f) + ((trm and $01) * 128);
   end;
+  { check pack }
   { writeln('Variable tprec -> memory (only 4 tuples):');
     if bj < 4 then
       with tprec do
@@ -191,16 +186,16 @@ procedure syncregs;
 var
   bi, bj: byte;
 begin
-  for bi := 0 to 5 do
+  for bi := 1 to 5 do
     machine.registers[bi].value := machine.tapes[bi].position;
-  for bi := 0 to 7 do
+  for bi := 0 to 9 do
   begin
-    if (bi = 0) or (bi = 7)
-    then machine.registers[bi].data := chr(machine.registers[bi].value)
-    else str(machine.registers[bi].value, machine.registers[bi].data);
-  machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[2];
-  for bj := length(machine.registers[bi].data) + 1 to 6 do
-    machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[1];
+    if (bi = 0) or ((bi >= 7) and (bi <= 9))
+      then machine.registers[bi].data := chr(machine.registers[bi].value)
+      else str(machine.registers[bi].value, machine.registers[bi].data);
+    machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[2];
+    for bj := length(machine.registers[bi].data) + 1 to 6 do
+      machine.registers[bi].data :=  machine.registers[bi].data + SYMBOLSET[1];
   end;
 end;
 
@@ -210,10 +205,10 @@ end;
 function parsingcommand(command: TCommand): boolean;
 var
   bi, bj: byte;
-  s:      string[255];
   o:      boolean;
+  s:      string[255];
 label
-  break1, break2, break3, break4;
+  200, 210, 220, 230;
 
 { procedures and function in overlay file }
 {$i cmd_echo.pas}
@@ -244,14 +239,14 @@ begin
     while (command[length(command)] = #32) or (command[length(command)] = #9) do
       delete(command, length(command), 1);
     { - remove extra space and tab from line }
-    for bi := 1 to 255 do
+    for bi := 1 to MAXBYTE do
     begin
-      if bi = length(command) then goto break1;
+      if bi = length(command) then goto 200;
       if command[bi] <> #32 then o := false;
       if (command[bi] = #32) and o then command[bi] :='@';
       if command[bi] = #32 then o := true;
     end;
-  break1:
+   200: { end of commandn string }
     s := '';
     for bi := 1 to length(command) do
       if command[bi] <> '@' then s := s + command[bi];
@@ -261,16 +256,16 @@ begin
       splitted[bi] := '';
     for bj := 1 to length(command) do
       if (command[bj] = #32) and (command[bj - 1] <> #92)
-        then goto break2
+        then goto 210
         else splitted[0] := splitted[0] + command[bj];
-  break2:
+   210: { found '\ ' characters }
     for bi:= 1 to 7 do
     begin
       for bj := bj + 1 to length(command) do
         if (command[bj] = #32) and (command[bj - 1] <> #92)
-          then goto break3
+          then goto 220
           else splitted[bi] := splitted[bi] + command[bj];
-    break3:
+   220: { found '\ ' characters }
     end;
     { parse command }
     o := false;
@@ -280,9 +275,9 @@ begin
         if splitted[0] = COMMANDS[bi] then
         begin
           o := true;
-          goto break4;
+          goto 230;
         end;
-    break4:
+     230: { found a valid command }
       if o then
       begin
         case bi of
@@ -336,11 +331,11 @@ begin
     begin
       for bi := 0 to comline - 1  do
         if (length(t36com[bi]) > 0) and (t36com[bi][1] <> #0) then
-          if parsingcommand(t36com[bi]) then goto quitprog;
+          if parsingcommand(t36com[bi]) then goto 900;
       flag_runt36cmd := false;
     end;
   until q = true;
- quitprog:
+ 900: { end of program }
   freemem(machine.tuples, TPBLCOUNT * TPBLSIZE);
   quit(0, 0);
 end.

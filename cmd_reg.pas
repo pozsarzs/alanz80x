@@ -20,14 +20,17 @@ var
   ip1:    integer;                                        { function parameter }
 const
   P1MIN = 0;                                               { valid range of p1 }
-  P1MAX = 7;
+  P1MAX = 9;
 
   { WRITE SELECTED REGISTER CONTENT AND PERMISSION }
   procedure writeregrec(n: byte);
   begin
-    if n = 7
-      then writemsg(39, false)
-      else writemsg(n + 97, false);
+    case n of
+         7: writemsg(39, false);
+      8..9: writemsg(n + 115, false);
+    else
+      writemsg(n + 97, false);
+    end;
     write('   ');
     case machine.registers[n].permission of
       0: write(PRM[1]+PRM[3]);

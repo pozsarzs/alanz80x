@@ -46,7 +46,7 @@ begin
       writemsg(76, true);
       for bi := ip1 to ip2 do
       begin
-        write(addzero(bi, 3), ': ');                                   { qi }
+        write(addzero(bi, 3), ': ');                                      { qi }
         for bj := 0 to SYMCOUNT - 1 do
         begin
           { read from memory and decode }
@@ -69,7 +69,7 @@ begin
             if trm > 5                                                   { trm }
               then write(DC[2], trm - 6)
               else write(DC[1], trm);
-            write(addzero(qm, 3),' ');                                 { qm }
+            write(addzero(qm, 3),' ');                                    { qm }
           end;
         end;
         writeln;

@@ -24,7 +24,7 @@ begin
   flag_it := 2;
   flag_runt36cmd := false;
   flag_qb := 127;
-  flag_sl := 32767;
+  flag_sl := MAXINT;
   flag_trace := false;
   { reset variables related to Turing machine }
   progdesc := '';
@@ -69,12 +69,12 @@ begin
       tapes[bi].position := 1;
     end;
     { registers }
-    for bi := 0 to 7 do
+    for bi := 0 to 9 do
     begin
       case bi of
-        0: registers[bi].value := ord(SYMBOLSET[1]);
-        6: registers[bi].value := 0;
-        7: registers[bi].value := ord(SYMBOLSET[1]);
+           0: registers[bi].value := ord(SYMBOLSET[1]);
+           6: registers[bi].value := 0;
+        7..9: registers[bi].value := ord(SYMBOLSET[1]);
       else
         registers[bi].value := tapes[bi].position;
       end;
