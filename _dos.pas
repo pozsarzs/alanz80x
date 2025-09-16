@@ -23,7 +23,7 @@ var
 begin
   regs.AX := $0800;
   msdos(regs);
-  keyread := char(regs.ax and $00ff);
+  keyread := char(regs.AX and $00ff);
 end;
 
 { DETECT KEYPRESS }
@@ -37,7 +37,7 @@ var
 begin
   regs.AX := $0b00;
   msdos(regs);
-  if (regs.ax and $00ff) = $ff
+  if (regs.AX and $00ff) = $ff
     then keypress := true
     else keypress := false;
 end;

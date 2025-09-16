@@ -15,7 +15,7 @@
 type
   { GENERAL TYPES }
   PByte =           ^byte;
-  TCommand =        string[255];
+  TStr255 =         string[255];
   TFilename =       string[12];
   TFiveDigit =      string[5];
   TRegContent =     string[6];
@@ -35,7 +35,7 @@ type
   end;
   TTapes =          record                                         { TAPE TYPE }
     accessmode:     byte;                                    { file permission }
-    data:           string[255];                                { tape content }
+    data:           TStr255;                                    { tape content }
     filename:       TFilename;                           { file or device name }
     position:       byte;                                      { head position }
   end;
@@ -61,7 +61,7 @@ type
 var
   bi:               byte;
   comline:          byte;               { number of line in t36 command buffer }
-  command:          TCommand;                           { command line content }
+  command:          TStr255;                            { command line content }
   flag_echo:        boolean;                { tape echo to standard out device }
   flag_intr:        boolean;                     { interrupt request detecting }
   flag_runmode:     boolean;                { run mode (0/1: normal/interrupt) }
@@ -76,7 +76,7 @@ var
   progname:         string[8];                               { name of program }
   q:                boolean;                                      { allow exit }
   splitted:         array[0..7] of TSplitted;               { splitted command }
-  t36com:           array[0..15] of TCommand;        { t36 file command buffer }
+  t36com:           array[0..15] of TStr255;         { t36 file command buffer }
   tprec:            TTPRecently;                         { recently read tuple }
 const
   AM:               string[3] = 'LSO';
@@ -93,7 +93,7 @@ const
   HINT =            'Type ''help [command]'' for more information.';
   HMD:              string[3] = 'LSR';
   MAXBYTE =         255;
-  MAXINT =          32767;
+  MAXINT =          32767;  
   MSGERR =          'Cannot load message file: ';
   MSGFILE =         'alanz80x.msg';
   PRM:              string[3] = 'RWO';

@@ -28,7 +28,7 @@ begin
   bi := 0;
   for p := 0 to sizeof(MESSAGES) - 1 do
   begin
-    if MESSAGES[p] = MESSAGES[0] then bi := succ(bi);
+    if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
     if (bi = count) and (MESSAGES[p] <> MESSAGES[0]) then write(MESSAGES[p]);
     if (bi > count) or (bi = MAXBYTE) then goto 900;
   end;
@@ -40,9 +40,9 @@ end;
 function loadmsg(filename: TFilename): boolean;
 var
   bi: byte;
-  f: text;                                                    { message file }
+  f: text;                                                      { message file }
   i: integer;
-  s: string[255];
+  s: TStr255;
 begin
   for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
   i := 0;
@@ -58,7 +58,7 @@ begin
         if (s[bi] <> #10) and (s[bi] <> #13) and (s[bi] <> #39) then
         begin
           messages[i] := s[bi];
-          i := succ(i);
+          i := i + 1;
           messages[i] := messages[0];
         end;
     until eof(f) or (i = sizeof(messages) - 1) or (i = MAXINT);
@@ -202,11 +202,11 @@ end;
 {$i cmd_rese.pas}
 
 { PARSING COMMANDS }
-function parsingcommand(command: TCommand): boolean;
+function parsingcommand(command: TStr255): boolean;
 var
   bi, bj: byte;
   o:      boolean;
-  s:      string[255];
+  s:      TStr255;
 label
   200, 210, 220, 230;
 
@@ -246,7 +246,7 @@ begin
       if (command[bi] = #32) and o then command[bi] :='@';
       if command[bi] = #32 then o := true;
     end;
-   200: { end of commandn string }
+   200: { end of command string }
     s := '';
     for bi := 1 to length(command) do
       if command[bi] <> '@' then s := s + command[bi];

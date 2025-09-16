@@ -14,17 +14,21 @@
 
 { COMMAND 'load' }
 overlay procedure cmd_load(p1: TSplitted);
+type
+  TLongline =     array[1..1024] of char;                     { long line type }
 var
   bi, bj:         byte;
   err:            byte;                                           { error code }
-  ec, i:          integer;
+  ec, i, j:       integer;
   lab, seg:       byte;
   line:           byte;
+  longline:       TLongline;                                     { line buffer }
   qi:             integer;
-  s, ss, sss:     string[255];
+  s, ss:          TStr255;
   stat_mandatory: byte;                      { status byte of mandatory labels }
   stat_segment:   byte;                      { status byte of program segments }
-  t36file:        text;
+  t36file:        file of byte;
+  llsize:         integer;
 const
   LSEGMENTS:      array[0..3] of string[4] = ('PROG', 'CARD', 'TAPE', 'COMM');
   LLABELS:        array[0..9] of string[4] = ('NAME', 'DESC', 'SYMB', 'ECHO',
@@ -33,7 +37,7 @@ const
   LBEGIN =        'BEGIN';
   LEND =          'END';
 label
-  800;
+  200, 800;
 
 { bit      stat_segment     stat_mandatory
   ----------------------------------------
@@ -45,6 +49,57 @@ label
   D5    'TAPE END' found      'TAP3' found
   D6    'COMM BEGIN' found    'TAP4' found
   D7    'COMM END' found      'STCK' found }
+
+  { RETURN WITH PART OF STRING }
+  function strcopy(s: TStr255; from, count: byte): TStr255;
+  begin
+    strcopy := '';
+    if (from < 1) or (from > length(s))
+      then strcopy := ''
+      else
+        if (from + count - 1) > length(s)
+          then strcopy := copy(s, from, length(s) - from + 1)
+          else strcopy := copy(s, from, count);
+  end;
+
+  { RETURN WITH PART OF LONGLINE }
+  function lstrcopy(ll: TLongline; from, count: byte): TStr255;
+  var
+    i: integer;
+    s: TStr255;
+  begin
+    s := '';
+    if (from < 1) or (from > sizeof(ll))
+      then s := ''
+      else
+        for i := from to from + count - 1 do
+          if i <= sizeof(ll)
+            then s := s + ll[i];
+
+    lstrcopy := s;
+  end;
+
+  { LENGTH OF THE LONGLINE }
+  function llength(var ll: TLongline): integer;
+  var
+    i: integer;
+  begin
+    llength := 0;
+    for i := 1 to sizeof(ll) do
+      if ll[i] <> #0 then llength := i;
+  end;
+
+  { DELETE FROM LONGLINE }
+  procedure ldelete(var ll: TLongline; from, count: integer);
+  var
+    i, j: integer;
+  begin
+    for i := 1 to count do
+    begin
+      for j := from to sizeof(ll) - 1 do ll[j] := ll[j + 1];
+      ll[sizeof(ll)] := #0;
+    end;
+  end;
 
   { SET ERROR CODE AND WRITE ERROR MESSAGE }
   procedure errmsg(b: byte);
@@ -75,6 +130,7 @@ begin
   err := 0;
   stat_mandatory := 0;
   stat_segment := 0;
+  llsize := sizeof(longline);
   { check parameters }
   if length(p1) = 0 then err := 33 else
   begin
@@ -89,22 +145,41 @@ begin
       line := 0;
       comline := 0;
       repeat
-        readln(t36file, s);
-        line := succ(line);
+        { read a long line from t36 file }
+        for j := 1 to llsize do longline[j] := #0;
+        j := 1;
+        repeat
+          read(t36file, bi);
+          if (bi <> 10) and (bi <> 13) then
+          begin
+            longline[j] := char(bi);
+            j := j + 1;
+          end;
+        until (bi = 10) or (bi = 13) or (j = llsize);
+        line := line + 1;
         { - remove space and tabulator from start of line }
-        while (s[1] = #32) or (s[1] = #9) do delete(s, 1, 1);
+        while (longline[1] = #32) or (longline[1] = #9) do
+          ldelete(longline, 1, 1);
         { - remove space and tabulator from end of line }
-        while (s[length(s)] = #32) or (s[1] = #9) do delete(s, length(s), 1);
-        { - convert to uppercase and truncate to 40 }
-        for bi := 1 to length(s) do s[bi] := upcase(s[bi]);
+        for i := llsize downto 1 do
+          if (longline[i] <> #0) then
+            if (longline[i] = #32) or (longline[i] = #9)
+              then longline[i] := #0
+              else goto 200;
+      200: { found an other character }
+        for i := 1 to llsize do longline[i] := upcase(longline[i]);
+        { copy 1-255 characters from variable 'longline' to 's' }
+        { for simplicity, we only use the longline variable where necessary }
+        s := '';
+        for i := 1 to MAXBYTE do
+          if longline[i] <> #0 then s := s + longline[i];
         { - check comment sign }
         if (s[1] <> COMMENT) and (length(s) > 0) then
         begin
-          sss := s;
           { search segment }
           seg := MAXBYTE;
           for bi := 0 to 3 do
-            if s[1] + s[2] + s[3] + s[4] = LSEGMENTS[bi] then seg := bi;
+            if strcopy(s, 1, 4) = LSEGMENTS[bi] then seg := bi;
           { - remove space and tabulator after label }
           while (s[5] = #32) or (s[5] = #9) do delete(s, 5, 1);
           if seg < MAXBYTE then
@@ -114,37 +189,37 @@ begin
               0: { PROG found }
                  begin
                    { - PROG BEGIN found }
-                   if s[5] + s[6] + s[7] + s[8] + s[9] = LBEGIN
+                   if strcopy(s, 5, 5) = LBEGIN
                      then stat_segment := stat_segment or $01;
                    { - PROG END found }
-                   if s[5] + s[6] + s[7] = LEND
+                   if strcopy(s, 5, 3) = LEND
                      then stat_segment := stat_segment or $02;
                  end;
               1: { CARD found }
                  begin
                    { - CARD BEGIN found }
-                   if s[5] + s[6] + s[7] + s[8] + s[9] = LBEGIN
+                   if strcopy(s, 5, 5) = LBEGIN
                      then stat_segment := stat_segment or $04;
                    { - CARD END found }
-                   if s[5] + s[6] + s[7] = LEND
+                   if strcopy(s, 5, 3) = LEND
                      then stat_segment := stat_segment or $08;
                  end;
               2: { TAPE found }
                  begin
                    { - TAPE BEGIN found }
-                   if s[5] + s[6] + s[7] + s[8] + s[9] = LBEGIN
+                   if strcopy(s, 5, 5) = LBEGIN
                      then stat_segment := stat_segment or $10;
                    { - TAPE END found }
-                   if s[5] + s[6] + s[7] = LEND
+                   if strcopy(s, 5, 3) = LEND
                      then stat_segment := stat_segment or $20;
                  end;
               3: { COMM found }
                  begin
                    { - COMM BEGIN found }
-                   if s[5] + s[6] + s[7] + s[8] + s[9] = LBEGIN
+                   if strcopy(s, 5, 5) = LBEGIN
                      then stat_segment := stat_segment or $40;
                    { - COMM END found }
-                   if s[5] + s[6] + s[7] = LEND
+                   if strcopy(s, 5, 3) = LEND
                      then stat_segment := stat_segment or $80;
                  end;
             end;
@@ -152,7 +227,7 @@ begin
           { search label }
           lab := MAXBYTE;
           for bi := 0 to 8 do
-            if s[1] + s[2] + s[3] + s[4] = LLABELS[bi] then lab := bi;
+            if strcopy(s, 1, 4) = LLABELS[bi] then lab := bi;
           if lab < MAXBYTE then
           begin
             { - label is valid }
@@ -241,63 +316,82 @@ begin
                  end;
             end;
           end;
+          { load command line commands }
+          if (stat_segment and $41 = $41) then
+            if (s <> LSEGMENTS[3] + LBEGIN) and
+               (s <> LSEGMENTS[3] + LEND) and
+               (s <> LSEGMENTS[0] + LEND) then
+            begin
+              t36com[comline] := '';
+              for i := 1 to MAXBYTE do
+                if longline[i] <> #0
+                  then t36com[comline] := t36com[comline] + longline[i];
+              if comline < 15 then comline := comline + 1;
+              { set flag }
+              flag_runt36cmd := true;
+            end;
           { load program }
-          if (s[1] + s[2] = 'ST') and (stat_segment = $05) then
+          if (longline[1] + longline[2] = 'ST') and (stat_segment = $05) then
           begin
             { STnnn found in the opened segment PROG and CARD }
             { - remove all spaces and tabulators }
-            ss := '';
-            for bi := 1 to length(s) do
-              if (s[bi] <> #32) and (s[bi] <> #9) then ss := ss + s[bi];
+            i := 1;
+            repeat
+              if (longline[i] = #32) or (longline[i] = #9) then
+              begin
+                for j := i to llsize - 1 do longline[j] := longline[j + 1];
+                longline[llsize] := #0;
+              end else i := i + 1;
+            until i = llsize;
             { qi }
-            val(ss[3] + ss[4]+ ss[5], qi, ec);
+            val(lstrcopy(longline, 3, 3), qi, ec);
             { - check value }
             if ec > 0 then err := 58 else
               if qi > 126 then err := 59;
             if err > 0 then goto 800;
-            delete(ss, 1, 5);
+            ldelete(longline, 1, 5);
             bi := 0;
-            while (length(ss) >= (bi * 10 + 10)) and (bi < 127) do
+            while (llength(longline) >= (bi * 10 + 10)) and (bi < 127) do
             begin
               { trk }
               err := 0;
-              val(ss[bi * 10 + 2], i, ec);
+              val(longline[bi * 10 + 2], i, ec);
               if ec > 0 then err := 111 else
-                if ss[bi * 10 + 1] = DC[1] then tprec.trk := i else
-                  if ss[bi * 10 + 1] = DC[2] then tprec.trk := i + 6 else err := 110;
+                if longline[bi * 10 + 1] = DC[1] then tprec.trk := i else
+                  if longline[bi * 10 + 1] = DC[2] then tprec.trk := i + 6 else err := 110;
               if err > 0 then goto 800;
               { sj }
               tprec.sj := bi + 1;
               { sk }
               tprec.sk := MAXBYTE;
               for bj := 1 to length(machine.symbols) do
-                if ss[bi * 10 + 3] = machine.symbols[bj] then tprec.sk := bj;
+                if longline[bi * 10 + 3] = machine.symbols[bj] then tprec.sk := bj;
               { - check value }
               if tprec.sk = MAXBYTE then err := 64;
               if err > 0 then goto 800;
               { dj }
               tprec.dj := MAXBYTE;
               for bj := 1 to 3 do
-                if ss[bi * 10 + 4] = HMD[bj] then tprec.dj := bj - 1;
+                if longline[bi * 10 + 4] = HMD[bj] then tprec.dj := bj - 1;
               { - check value }
               if tprec.dj = MAXBYTE then err := 60;
               if err > 0 then goto 800;
               { dk }
               tprec.dk := MAXBYTE;
               for bj := 1 to 3 do
-                if ss[bi * 10 + 5] = HMD[bj] then tprec.dk := bj - 1;
+                if longline[bi * 10 + 5] = HMD[bj] then tprec.dk := bj - 1;
               { - check value }
               if tprec.dk = MAXBYTE then err := 60;
               if err > 0 then goto 800;
               { trm }
               err := 0;
-              val(ss[bi * 10 + 7], i, ec);
+              val(longline[bi * 10 + 7], i, ec);
               if ec > 0 then err := 113 else
-                if ss[bi * 10 + 6] = DC[1] then tprec.trm := i else
-                  if ss[bi * 10 + 6] = DC[2] then tprec.trm := i + 6 else err := 112;
+                if longline[bi * 10 + 6] = DC[1] then tprec.trm := i else
+                  if longline[bi * 10 + 6] = DC[2] then tprec.trm := i + 6 else err := 112;
               if err > 0 then goto 800;
               { qm }
-              val(ss[bi * 10 + 8] + ss[bi * 10 + 9] + ss[bi * 10 + 10], i, ec);
+              val(longline[bi * 10 + 8] + longline[bi * 10 + 9] + longline[bi * 10 + 10], i, ec);
               { - check value }
               if ec > 0 then err := 61 else
                 if (i < 0) or (i > 127) then err := 62;
@@ -308,17 +402,7 @@ begin
               bi := bi + 1;
             end;
           end;
-          { load command line commands }
-          if (stat_segment and $41 = $41) then
-            if (s <> LSEGMENTS[3] + LBEGIN) and
-               (s <> LSEGMENTS[3] + LEND) and
-               (s <> LSEGMENTS[0] + LEND) then
-            begin
-              t36com[comline] := sss;
-              comline := comline + 1;
-              { set flag }
-              flag_runt36cmd := true;
-            end;
+          
         end;
       until (eof(t36file)) or (line = MAXBYTE);
      800: { error messages }

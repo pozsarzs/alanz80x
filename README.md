@@ -54,8 +54,8 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 | ~ extras            |breakpoint, tracking                                 |
 | ~ example programs  |1                                                    |
 |state machine        |                                                     | 
-| ~ commands          |number of symbols - 2                                |
-| ~ interrupts        |number of symbols - 2                                |
+| ~ commands          |number of symbols - 3                                |
+| ~ interrupts        |number of symbols - 3                                |
 | ~ registers         |1 general                                            |
 |                     |8 status                                             |
 |                     |1 special ('bottomless')                             |
@@ -72,8 +72,11 @@ Copyright (C) 2025 Pozsár Zsolt <pozsarzs@gmail.com>
 Startup screen  
 ![CLI-1](startup.png)
 
-Example #1  
+Number Shift #1  
 ![CLI-2](example1.png)
+
+Number Shift #2  
+![CLI-2](example2.png)
 
 
 ## The mathematical model of the machine
@@ -261,10 +264,11 @@ This file type is used to load the Turing machine's (base) program, define initi
 
 Note:  
 - This file type has limited use with the previous version of the Turing machine, the table provides guidance.
-- If the first and second symbols specified in the CONF section is not '_#', then they will be inserted.
+- If the starting symbols specified in the CONF section is not '_#@', then they will be inserted.
 - The default value of the INIT option in TAPE section is 2 (tape t<sub>2</sub>).
-- The 9-tuples must be specified in the following form:
+- The line length of the t36 file is maximum 1024 characters.
 - Tape access modes: LO/LS/SO/NN Load only/Load and save/Save only/None.
+- The 9-tuples must be specified in the following form:
 
  `ST000 R7_RST2000 ...`, where the:  
 

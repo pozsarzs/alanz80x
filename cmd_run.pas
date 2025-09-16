@@ -267,11 +267,11 @@ begin
           with machine do
           begin
             { - detecting }
-            int := 255;
+            int := MAXBYTE;
             if keypress then c := keyread;
             for bi := 3 to length(symbols) do
               if c = symbols[bi] then int := bi;
-            if int <> 255 then
+            if int <> MAXBYTE then
             begin
               { - save machine context }
               with savedcontext do
