@@ -296,22 +296,22 @@ The program is represented by the files ns.t36 and the tapes are represented by 
 
 The program can be controlled with the following command line commands.
 
-|   |command                |description                                       |
-|--:|-----------------------|--------------------------------------------------|
-|  1|`break [state\|-]`     |set, get and reset breakpoint state (qb)          |
-|  2|`echo [on\|off]`       |turn tape echo to standard output on and off      |
-|  3|`help [command]`       |help with using the program                       |
-|  4|`info`                 |show all information about this machine           |
-|  5|`intr [on\|off]`       |turn interrupt detection on and off               |
-|  6|`limit [steps\|-]`     |set, get and reset number of steps                |
-|  7|`load filename.t36`    |load t36 file                                     |
-|  8|`prog [from][to]`      |show program                                      |
-|  9|`quit`                 |exit the program                                  |
-| 10|`reg [0..9]`           |show register content                             |
-| 11|`reset`                |reset program (cold reset)                        |
-| 12|`restore`              |restore machine to original state (warm reset)    |
-| 13|`run`                  |run machine                                       |
-| 14|`step`                 |run machine step-by-step                          |
-| 15|`symbol [symbols\|-]`  |set, get and reset symbol set (S)                 |
-| 16|`tape [0..5][filename]`|show tape content or assign file or device to tape|
-| 17|`trace [on\|off]`      |turn tracking on and off                          |
+|   |command                 |description                                       |
+|--:|------------------------|--------------------------------------------------|
+|  1|`break [state\|-]`      |set, get and reset breakpoint state (qb)             |
+|  2|`echo [on\|off]`        |turn tape echo to standard output on and off         |
+|  3|`help [command]`        |show command syntax                                  |
+|  4|`info`                  |show all information about this machine              |
+|  5|`intr [on\|off]`        |turn interrupt detection on and off                  |
+|  6|`limit [steps\|-]`      |set, get and reset number of steps [1..32766]        |
+|  7|`load filename.t36`     |load t36 file                                        |
+|  8|`prog [from][to]`       |show program                                         |
+|  9|`quit`                  |exit the program                                     |
+| 10|`reg [index]`           |show register content [0..9]                         |
+| 11|`reset`                 |reset program (cold reset)                           |
+| 12|`restore`               |restore machine to original state (warm reset)       |
+| 13|`run`                   |run machine                                          |
+| 14|`step`                  |run machine step-by-step                             |
+| 15|`symbol [symbols\|-]`   |set, get and reset symbol set (S)                    |
+| 16|`tape [index][filename]`|show content or assign file or device to tape  [1..5]|
+| 17|`trace [on\|off]`       |turn tracking on and off                             |

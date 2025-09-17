@@ -246,21 +246,27 @@ begin
         { - check program set limit}
         if machine.registers[6].value = flag_sl then
         begin
+          if not flag_trace then writeln;
           writemsg(83, true);
-          goto 200;
+          writemsg(88, true);
+          c := keyread;
+          if c = #27 then goto 200;
         end;
         { - check breakpoint }
         if (flag_qb < 127) and (tprec.aqi = flag_qb) then
         begin
+          if not flag_trace then writeln;
           writemsg(89, true);
           writemsg(88, true);
           c := keyread;
+          if c = #27 then goto 200;
         end;
         { - step-by-step running mode }
         if p1 then
         begin
           writemsg(88, true);
           c := keyread;
+          if c = #27 then goto 200;
         end;
         { IRQ }
         if flag_intr then
