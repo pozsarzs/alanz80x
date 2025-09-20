@@ -71,7 +71,8 @@ var
   flag_sl:          integer;                              { program step limit }
   flag_trace:       boolean;                                        { tracking }
   machine:          TTuring;               { Turing machine base configuration }
-  messages:         array[0..4095] of char;  { messages from alanz80x.msg file }
+  messages:         array[0..1024] of char;  { messages from alanz80x.msg file }
+  msgfst, msglst:   byte;              { first and last message line in buffer }
   progdesc:         string[64];                       { description of program }
   progname:         string[8];                               { name of program }
   q:                boolean;                                      { allow exit }
@@ -93,7 +94,7 @@ const
   HINT =            'Type ''help [command]'' for more information.';
   HMD:              string[3] = 'LSR';
   MAXBYTE =         255;
-  MAXINT =          32767;  
+  MAXINT =          32767;
   MSGERR =          'Cannot load message file: ';
   MSGFILE =         'alanz80x.msg';
   PRM:              string[3] = 'RWO';
@@ -101,8 +102,9 @@ const
   STCOUNT =         127;                            { maximal number of states }
   SYMBOLSET:        string[40] = '_#@.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   SYMCOUNT =        40;                          { maximal number of symbolums }
-  TAPELENGTH =      255;                           { length of the tapes t1-t6 } 
+  TAPELENGTH =      255;                           { length of the tapes t1-t6 }
   TPBLCOUNT =       5080;                      { maximal number of tuple block }
   TPBLSIZE  =       3;                             { byte allocated by a tuple }
 label
   900;
+  

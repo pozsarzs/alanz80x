@@ -13,9 +13,50 @@
   FOR A PARTICULAR PURPOSE. }
 
 program alanz80x;
+{SX- $U+}
 
 { TYPES, VARIABLES, CONSTANTS, LABELS }
 {$I declare.pas }
+
+{ LOAD MESSAGES FROM FILE }
+function loadmsg(filename: TFilename; count: integer): boolean;
+var
+  bi: byte;
+  f: text;                                                      { message file }
+  i, j: integer;
+  s: TStr255;
+begin
+  fillchar(messages, sizeof(messages), ' ');
+  i := 0;
+  j := 1;
+  assign(f, filename);
+  {$I-}
+  reset(f);
+  {$I+}
+  if ioresult <> 0 then begin write('x') ;loadmsg := false end else
+  begin
+    repeat
+      readln(f, s);
+      if j >= count then
+        for bi := 1 to length(s) do
+          if (i < sizeof(messages) - 1) and (i < MAXINT) then
+          begin
+            msglst := j;
+            if (s[bi] <> #10) and (s[bi] <> #13) and (s[bi] <> #39) then
+            begin
+              messages[i] := s[bi];
+              i := i + 1;
+              messages[i] := messages[0];
+            end;
+          end;
+      j := j + 1;
+    until eof(f);
+    msgfst := count;
+    msglst := msglst;
+    close(f);
+    loadmsg := true;
+  end;
+end;
 
 { WRITE A MESSAGE TO SCREEN }
 procedure writemsg(count: byte; linefeed: boolean);
@@ -25,7 +66,13 @@ var
 label
   900;
 begin
-  bi := 0;
+  if (count < msgfst) or (count > msglst) then
+    if not loadmsg(MSGFILE, count) then
+    begin
+      writeln(MSGERR, MSGFILE);
+      goto 900;
+    end;
+  bi := msgfst - 1 ;
   for p := 0 to sizeof(MESSAGES) - 1 do
   begin
     if MESSAGES[p] = MESSAGES[0] then bi := bi + 1;
@@ -34,39 +81,6 @@ begin
   end;
  900: { return }
   if linefeed then writeln;
-end;
-
-{ LOAD MESSAGES FROM FILE }
-function loadmsg(filename: TFilename): boolean;
-var
-  bi: byte;
-  f: text;                                                      { message file }
-  i: integer;
-  s: TStr255;
-begin
-  for i := 0 to sizeof(messages) - 1 do messages[i] := ' ';
-  i := 0;
-  assign(f, filename);
-  {$I-}
-  reset(f);
-  {$I+}
-  if ioresult <> 0 then loadmsg := false else
-  begin
-    repeat
-      readln(f, s);
-      for bi := 1 to length(s) do
-        if (s[bi] <> #10) and (s[bi] <> #13) and (s[bi] <> #39) then
-        begin
-          messages[i] := s[bi];
-          i := i + 1;
-          messages[i] := messages[0];
-        end;
-    until eof(f) or (i = sizeof(messages) - 1) or (i = MAXINT);
-    { check buffer free space }
-    { writeln('Message buffer: ', i, '/', sizeof(messages), 'Byte'); }
-    close(f);
-    loadmsg := true;
-  end;
 end;
 
 { OS INDEPENDENT FUNCTION }
@@ -79,7 +93,7 @@ var
   result: TFiveDigit;
 begin
   str(value:0, result);
-  while length(result) < digit do result := '0' + result; 
+  while length(result) < digit do result := '0' + result;
   addzero := result;
 end;
 
@@ -181,7 +195,7 @@ begin
   parcomp := (e = 0);
 end;
 
-{ SYNCRONIZE REGISTER CONTENTS (VALUE -> DATA) } 
+{ SYNCRONIZE REGISTER CONTENTS (VALUE -> DATA) }
 procedure syncregs;
 var
   bi, bj: byte;
@@ -311,7 +325,7 @@ begin
   for bi := 1 to length(HEADER2) do write('-');
   writeln;
   { load messages }
-  if not loadmsg(MSGFILE) then
+  if not loadmsg(MSGFILE, 1) then
   begin
     writeln(MSGERR, MSGFILE);
     quit(1, 0);

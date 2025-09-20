@@ -67,6 +67,6 @@ end;
 { QUIT PROCEDURE WITH MESSAGE }
 procedure quit(message, exitcode: byte);
 begin
-  writemsg(message, true);
+  if message > 0 then writemsg(message, true);
   halt(exitcode);
 end;

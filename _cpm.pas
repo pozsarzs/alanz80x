@@ -12,11 +12,20 @@
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. }
 
-{ WAIT FOR A KEY }
-procedure waitforkey;
+{ READ A KEY FROM STANDARD INPUT }
+function keyread: char;
 begin
-  bdos(1);
-  writeln;
+  if bdos($0b, 0) = $ff
+    then keyread := chr(bdos($01, 0))
+    else keyread := '';
+end;
+
+{ DETECT KEYPRESS }
+function keypress: boolean;
+begin
+  if bdos($0b, 0) = $ff
+    then keypress := true
+    else keypress := false;
 end;
 
 { CALCULATE TUPLE BLOCK ADDRESS FROM ARRAY INDEXES AND BYTE COUNT }
@@ -42,6 +51,6 @@ end;
 { QUIT PROCEDURE WITH MESSAGE }
 procedure quit(message, exitcode: byte);
 begin
-  writemsg(message, true);
+  if message > 0 then writemsg(message, true);
   halt;
 end;

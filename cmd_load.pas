@@ -15,9 +15,12 @@
 { COMMAND 'load' }
 overlay procedure cmd_load(p1: TSplitted);
 type
-  TLongline =     array[1..1024] of char;                     { long line type }
+  TLongline =     array[1..512] of char;                     { long line type }
 var
   bi, bj:         byte;
+  rdbuf:          array[1..128] of byte;
+  rdbufcnt:       integer;
+  rdbufpos:       integer;
   err:            byte;                                           { error code }
   ec, i, j:       integer;
   lab, seg:       byte;
@@ -27,7 +30,7 @@ var
   s, ss:          TStr255;
   stat_mandatory: byte;                      { status byte of mandatory labels }
   stat_segment:   byte;                      { status byte of program segments }
-  t36file:        file of byte;
+  t36file:        file;
   llsize:         integer;
 const
   LSEGMENTS:      array[0..3] of string[4] = ('PROG', 'CARD', 'TAPE', 'COMM');
@@ -126,6 +129,21 @@ label
     end;
   end;
 
+  { READ FILE IN 128 BYTE BLOCKS }
+  procedure readbyte(var b: byte);
+  var
+    x: byte;
+  begin
+    if rdbufpos > rdbufcnt then
+    begin
+      blockread(t36file, rdbuf, 1, rdbufcnt);
+      rdbufcnt := 128;
+      rdbufpos := 1;
+    end;
+    b := rdbuf[rdbufpos];
+    rdbufpos := rdbufpos + 1;
+  end;
+
 begin
   err := 0;
   stat_mandatory := 0;
@@ -134,6 +152,8 @@ begin
   { check parameters }
   if length(p1) = 0 then err := 33 else
   begin
+    rdbufpos := 1;
+    rdbufcnt := 0;
     assign(t36file, p1);
     {$I-}
     reset(t36file);
@@ -144,12 +164,12 @@ begin
       { read text file content }
       line := 0;
       comline := 0;
+      { read a long line from t36 file }
       repeat
-        { read a long line from t36 file }
-        for j := 1 to llsize do longline[j] := #0;
+        fillchar(longline, sizeof(longline), #0);
         j := 1;
         repeat
-          read(t36file, bi);
+          readbyte(bi);
           if (bi <> 10) and (bi <> 13) then
           begin
             longline[j] := char(bi);
@@ -258,7 +278,7 @@ begin
                    machine.symbols := SYMBOLSET[1] +  SYMBOLSET[2];
                    for bi := 5 to length(s) do
                      if (s[bi] <> SYMBOLSET[1]) and (s[bi] <> SYMBOLSET[2])
-                       then machine.symbols := machine.symbols + s[bi];               
+                       then machine.symbols := machine.symbols + s[bi];
                  end;
               3: { ECHO found }
                  if stat_segment = $1d then
@@ -397,12 +417,11 @@ begin
                 if (i < 0) or (i > 127) then err := 62;
               if err > 0 then goto 800;
               tprec.qm := i;
-              { store one tuple to the memory } 
+              { store one tuple to the memory }
               tpblpack(qi, bi);
               bi := bi + 1;
             end;
           end;
-          
         end;
       until (eof(t36file)) or (line = MAXBYTE);
      800: { error messages }
@@ -411,7 +430,7 @@ begin
       if err > 0 then writemsg(err, true);
       { - missing mandatory tags }
       if (stat_segment and $01) <> $01 then errmsg(65);
-      if (stat_segment and $02) <> $02 then errmsg(66);
+      {if (stat_segment and $02) <> $02 then errmsg(66);}
       if (stat_segment and $04) <> $04 then errmsg(67);
       if (stat_segment and $08) <> $08 then errmsg(68);
       if (stat_mandatory and $01) <> $01 then errmsg(71);
@@ -425,8 +444,8 @@ begin
       { - missing optional END tags }
       if (stat_segment and $10) = $10 then
         if (stat_segment and $20) <> $20 then errmsg(69);
-      if (stat_segment and $40) = $40 then
-        if (stat_segment and $80) <> $80 then errmsg(70);
+      {if (stat_segment and $40) = $40 then
+        if (stat_segment and $80) <> $80 then errmsg(70);}
       if err > 0 then cmd_reset(false);
     end;
   end;
