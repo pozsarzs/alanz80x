@@ -21,6 +21,7 @@ var
   rdbuf:          array[1..128] of byte;
   rdbufcnt:       integer;
   rdbufpos:       integer;
+  rdbufstate:     integer;
   err:            byte;                                           { error code }
   ec, i, j:       integer;
   lab, seg:       byte;
@@ -131,12 +132,10 @@ label
 
   { READ FILE IN 128 BYTE BLOCKS }
   procedure readbyte(var b: byte);
-  var
-    x: byte;
   begin
     if rdbufpos > rdbufcnt then
     begin
-      blockread(t36file, rdbuf, 1, rdbufcnt);
+      blockread(t36file, rdbuf, 1, rdbufstate);
       rdbufcnt := 128;
       rdbufpos := 1;
     end;
@@ -170,7 +169,7 @@ begin
         j := 1;
         repeat
           readbyte(bi);
-          if (bi <> 10) and (bi <> 13) then
+          if rdbufstate = 1 then if (bi <> 10) and (bi <> 13) then
           begin
             longline[j] := char(bi);
             j := j + 1;
@@ -423,14 +422,14 @@ begin
             end;
           end;
         end;
-      until (eof(t36file)) or (line = MAXBYTE);
+      until (rdbufstate = 0) or (line = MAXBYTE);
      800: { error messages }
       close(t36file);
       { - bad or missing values }
       if err > 0 then writemsg(err, true);
       { - missing mandatory tags }
       if (stat_segment and $01) <> $01 then errmsg(65);
-      {if (stat_segment and $02) <> $02 then errmsg(66);}
+      if (stat_segment and $02) <> $02 then errmsg(66);
       if (stat_segment and $04) <> $04 then errmsg(67);
       if (stat_segment and $08) <> $08 then errmsg(68);
       if (stat_mandatory and $01) <> $01 then errmsg(71);
@@ -444,8 +443,8 @@ begin
       { - missing optional END tags }
       if (stat_segment and $10) = $10 then
         if (stat_segment and $20) <> $20 then errmsg(69);
-      {if (stat_segment and $40) = $40 then
-        if (stat_segment and $80) <> $80 then errmsg(70);}
+      if (stat_segment and $40) = $40 then
+        if (stat_segment and $80) <> $80 then errmsg(70);
       if err > 0 then cmd_reset(false);
     end;
   end;

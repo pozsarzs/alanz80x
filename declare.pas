@@ -107,4 +107,3 @@ const
   TPBLSIZE  =       3;                             { byte allocated by a tuple }
 label
   900;
-  

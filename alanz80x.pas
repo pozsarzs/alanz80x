@@ -84,8 +84,8 @@ begin
 end;
 
 { OS INDEPENDENT FUNCTION }
-{ I _cpm.pas} { CP/M on Z80 }
-{$I _dos.pas} { DOS on i86 }
+{$I _cpm.pas} { CP/M on Z80 }
+{ I _dos.pas} { DOS on i86 }
 
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; digit: byte): TFiveDigit;
