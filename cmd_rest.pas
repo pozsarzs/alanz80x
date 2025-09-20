@@ -22,7 +22,10 @@ begin
   begin
     { tapes }
     for bi := 0 to 5 do
+    begin
       tapes[bi].position := 1;
+      if bi > 0 then fillchar(tapes[bi].data, sizeof(tapes[bi].data),SYMBOLSET[1]); 
+    end;
     { registers }
     for bi := 0 to 9 do
      case bi of

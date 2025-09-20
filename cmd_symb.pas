@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'symbol' }
-procedure cmd_symbol(p1: TSplitted);
+overlay procedure cmd_symbol(p1: TSplitted);
 var
   c:      char;
   bi, bj: byte;

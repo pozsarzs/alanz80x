@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'reg' }
-procedure cmd_reg(p1: TSplitted);
+overlay procedure cmd_reg(p1: TSplitted);
 var
   bi:     byte;
   err:    byte;                                                   { error code }

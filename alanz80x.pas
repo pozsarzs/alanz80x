@@ -33,7 +33,7 @@ begin
   {$I-}
   reset(f);
   {$I+}
-  if ioresult <> 0 then begin write('x') ;loadmsg := false end else
+  if ioresult <> 0 then loadmsg := false else
   begin
     repeat
       readln(f, s);
@@ -84,8 +84,8 @@ begin
 end;
 
 { OS INDEPENDENT FUNCTION }
-{$I _cpm.pas} { CP/M on Z80 }
-{ I _dos.pas} { DOS on i86 }
+{ I _cpm.pas} { CP/M on Z80 }
+{$I _dos.pas} { DOS on i86 }
 
 { INSERT ZERO BEFORE NUMBER }
 function addzero(value: integer; digit: byte): TFiveDigit;

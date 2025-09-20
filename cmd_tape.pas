@@ -13,7 +13,7 @@
   FOR A PARTICULAR PURPOSE. }
 
 { COMMAND 'tape' }
-procedure cmd_tape(p1, p2: TSplitted);
+overlay procedure cmd_tape(p1, p2: TSplitted);
 var
   bi:     byte;
   dn:     string[3];

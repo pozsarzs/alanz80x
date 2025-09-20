@@ -97,6 +97,8 @@ begin
   if length(progname) = 0 then err := 46 else
   begin
     writemsg(90, true);
+    for bj := 1 to 5 do
+      fillchar(machine.tapes[bj].data, sizeof(machine.tapes[bj].data), SYMBOLSET[1]);  
     { load all tapes }
     if loadalltapes then
     begin
